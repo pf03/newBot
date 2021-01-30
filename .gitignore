@@ -1,0 +1,6 @@
+.stack-work/
+config.json
+bot/src/tasks.txt
+data.json
+bot/src/ParseExample.txt
+log.txt
