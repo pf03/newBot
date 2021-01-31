@@ -4,6 +4,7 @@ import Test.QuickCheck
 import Control.Exception (evaluate)
 import Logic
 import Types 
+import Control.Monad.State.Lazy
 
 main :: IO ()
 main = hspec testToMessageCommand
@@ -23,18 +24,30 @@ testToMessageCommand :: Spec
 testToMessageCommand = do
     describe "Logic.toMessageCommand" $ do 
       it "returns help command" $ do
-        map toMessageCommand testHelp `shouldBeAllEqual` Right Help
+        map toMessageCommand testHelp `allShouldBe` Right Help
       it "returns repeat command" $ do
-        map toMessageCommand testRepeat `shouldBeAllEqual` Right Repeat
+        map toMessageCommand testRepeat `allShouldBe` Right Repeat
       it "returns start command" $ do
-        map toMessageCommand testStart `shouldBeAllEqual` Right Start
+        map toMessageCommand testStart `allShouldBe` Right Start
       it "returns button command" $ do
-        map toMessageCommand testButton `shouldBeAll` map (Right . Button ) resultButton
+        map toMessageCommand testButton `eachShouldBe` map (Right . Button) resultButton
       it "returns unknown command" $ do
-        map toMessageCommand testUnknown `shouldBeAll` map (Right . Unknown ) resultUnknown
+        map toMessageCommand testUnknown `eachShouldBe` map (Right . Unknown) resultUnknown
         --map toMessageCommand testUnknown `shouldBe` map (Right . Unknown ) resultUnknown
       it "returns message" $ do
-        map toMessageCommand testMessages `shouldBeAll` map Left testMessages
+        map toMessageCommand testMessages `eachShouldBe` map Left testMessages
+
+--toMessageCommand
+testTextAnswer :: Spec
+testTextAnswer = do
+    describe "Logic.textAnswer" $ do 
+      it "returns something1" $ do
+        textAnswerCase `evalStateShouldBe` (textAnswerResult `withInitialState` someState) 
+      it "returns something2" $ do
+        textAnswerCases `allEvalStatesShouldBe` (textAnswerResult `withInitialState` someState) 
+      it "returns something3" $ do
+        textAnswerCases `eachEvalStateShouldBe` (textAnswerResults `withInitialState` someState) 
+
 
 testMessages = [
   "", " ", "foo", "кириллица", "  kj mkl kl ", " ?/sd", "sd /sd", "a/ssdf", "s8/*-*/*-4",
@@ -66,20 +79,61 @@ testButton = ["/1", "/2", "/3", "/4", "/5",
 resultButton :: [Int]
 resultButton = concat $ replicate 3 [1..5]
 
---может такое уже есть, хз
-shouldBeAll :: (HasCallStack, Show a, Eq a) => [a] -> [a] -> Expectation
-shouldBeAll [] [] = return ()
-shouldBeAll (x:xs) (y:ys) = do
-  x `shouldBe` y
-  shouldBeAll xs ys
-shouldBeAll _ _ = error "lists of tests and answers must have equal lengths"
+--ALL of cases SHOULD BE eqaul to one result
+allShouldBe :: (HasCallStack, Show a, Eq a) => [a] -> a -> Expectation
+allShouldBe cases result = eachShouldBe cases (replicate (length cases) result)
 
-shouldBeAllEqual :: (HasCallStack, Show a, Eq a) => [a] -> a -> Expectation
-shouldBeAllEqual [] y = return ()
-shouldBeAllEqual (x:xs) y = do
-  x `shouldBe` y
-  shouldBeAllEqual xs y
+--EACH of cases SHOULD BE eqaul to each of results
+eachShouldBe :: (HasCallStack, Show a, Eq a) => [a] -> [a] -> Expectation
+eachShouldBe cases results = bimapM_ shouldBe cases results
 
+
+--Проверить, изменяется ли State в этих функциях!!! 
+--bimapM_ нельзя использовать в этих функциях, т. к. он не учитывает эффект State
+--ALL EVAL STATES of cases SHOULD BE eqaul to one result
+allEvalStatesShouldBe :: (HasCallStack, Show a, Eq a) => [State s a] -> (a, s) -> Expectation
+allEvalStatesShouldBe states (result, initialState) = eachEvalStateShouldBe states (replicate (length states) result, initialState)
+
+--EACH EVAL STATE of cases SHOULD BE eqaul to each of results
+eachEvalStateShouldBe :: (HasCallStack, Show a, Eq a) => [State s a] -> ([a], s) -> Expectation
+eachEvalStateShouldBe [] ([], _) = return () 
+eachEvalStateShouldBe (s:ss) (r:rs, initialState) = do
+  let (a, modifiedState) = runState s initialState
+  a `shouldBe` r
+  eachEvalStateShouldBe ss (rs, modifiedState)
+eachEvalStateShouldBe _ _ = error "lists of tests and answers must have equal lengths"
+
+--EVAL STATE of case SHOULD BE equal to result WITH INITIAL STATE
+evalStateShouldBe :: (HasCallStack, Show a, Eq a) => State s a -> (a, s) -> Expectation
+evalStateShouldBe state (result, initialState) = eachEvalStateShouldBe [state] ([result], initialState)
+
+textAnswerCases :: [State S Message]
+textAnswerCases = undefined
+
+textAnswerCase :: State S Message
+textAnswerCase = undefined
+
+textAnswerResults :: [Message]
+textAnswerResults = undefined
+
+textAnswerResult :: Message
+textAnswerResult = undefined
+
+
+someState :: S
+someState = undefined
+
+
+
+withInitialState = (,)
+
+--this is not equal to base Data.Bifoldable.bimapM_
+bimapM_ :: Monad m => (a -> b -> m c) -> [a] -> [b] -> m ()
+bimapM_ f [] [] = return ()
+bimapM_ f (x:xs) (y:ys) = do
+  f x y
+  bimapM_ f xs ys
+bimapM_ _ _ _ = error "list args of bimapM_ must have equal lengths"
 
 
 -- simpleProperties = do
