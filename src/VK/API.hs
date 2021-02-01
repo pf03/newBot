@@ -60,9 +60,7 @@ _queryAttachment attachment =
         Item itemName ownerId objectId accessKey -> Left $ template "{3}{0}_{1}_{2}" [show ownerId, show objectId, accessKey, itemName]
         --думаю, если не отправляет, то как то связано с правами доступа, возможно он пытается отправить файл не собственнику, и перепроверить все id, которые он отправляет
 
-safeTail :: [a] -> [a]
-safeTail [] = []
-safeTail x = tail x
+
 
 roman = 37096463
 kesha = 611508530

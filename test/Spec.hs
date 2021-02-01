@@ -5,9 +5,173 @@ import Control.Exception (evaluate)
 import Logic
 import Types 
 import Control.Monad.State.Lazy
+import Lib
+import Common
+import qualified Data.Map.Internal as M
+import Prelude hiding (repeat)
 
 main :: IO ()
-main = hspec testToMessageCommand
+main = do 
+  hspec testToMessageCommand
+  hspec testTextAnswer
+
+
+-----------------------------toMessageCommand---------------------------------------------
+testToMessageCommand :: Spec
+testToMessageCommand = do
+    describe "Logic.toMessageCommand" $ do 
+      it "returns message" $ do
+        map toMessageCommand messages `eachShouldBe` map Left messages
+      it "returns help command" $ do
+        helpCases `allShouldBe` Right Help
+      it "returns start command" $ do
+        startCases `allShouldBe` Right Start
+      it "returns repeat command" $ do
+        repeatCases `allShouldBe` Right Repeat
+      it "returns button command" $ do
+        buttonCases `eachShouldBe` buttonResults
+      it "returns unknown command" $ do
+        unknownCases `eachShouldBe` unknownResults
+        --map toMessageCommand testUnknown `shouldBe` map (Right . Unknown ) resultUnknown
+
+
+messages = 
+  ["", " ", "foo", "кириллица", "  kj mkl kl ", " ?/sd", "sd /sd", "a/ssdf", "s8/*-*/*-4",
+    "repeat",  
+    "/ repeat", 
+    " / repeat", 
+    "/ repeat ", 
+    " / repeat ", 
+    "   / repeat       ", 
+    " /    repeat ", 
+    "/ re p e at ",
+    "/ vasya"]
+
+helpCases = map toMessageCommand
+  ["/help", " /help", "/help ", "         /help   "]
+
+startCases = map toMessageCommand
+  ["/start", " /start", "/start ", "         /start   "]
+
+repeatCases = map toMessageCommand
+  ["/repeat", " /repeat", "/repeat ", "         /repeat   "]
+
+buttonCases = map toMessageCommand 
+  ["/1", "/2", "/3", "/4", "/5",
+    " /1", " /2", " /3", " /4", " /5",
+    " /1 ", " /2 ", " /3 ", " /4 ", " /5 "]
+
+buttonResults = map (Right . Button) $ concat $ replicate 3 [1..5]
+
+--наши команды не имеют никаких параметров, поэтому команды с параметрами относим к неизвестнымю Возможно следует отказаться от lowerCase
+unknownCases = map toMessageCommand
+  ["/unk", " /unk", "/unk ", "         /unk   ", 
+    "/other", "/withparams 1 2 3", "/a", "/6" ,"/0", "/3 1", "/repeat 3", "/help 3",  "/Repeat", "/REPEAT", "//repeat"]
+
+unknownResults = map (Right . Unknown)
+  ["unk", "unk", "unk", "unk",
+    "other", "withparams", "a", "6", "0", "3", "repeat", "help", "Repeat", "REPEAT", "/repeat"]
+
+
+-------------------------------textAnswer-------------------------------------------------------------
+testTextAnswer :: Spec
+testTextAnswer = do
+    describe "Logic.textAnswer" $ do 
+      it "returns something1" $ do
+        textAnswerCase `evalStateShouldBe` (textAnswerResult `withInitialState` someState) 
+      -- it "returns something2" $ do
+      --   textAnswerCases `allEvalStatesShouldBe` (textAnswerResult `withInitialState` someState) 
+      it "have dialog with user" $ do
+        textAnswerCases `eachEvalStateShouldBe` (textAnswerResults `withInitialState` someState) 
+
+
+-- textAnswerCases :: [State S Message]
+-- textAnswerCases = map (textAnswer someChatId) [
+--     Left "hello bot" `to` "hello bot",
+--     Right Repeat,
+--     Right $ Button 3,
+--     Left "How do you do?",
+--     Right Help, 
+--     Right Start,
+--     Right Repeat,
+--     Right $ Button 5,
+--     Left  "5",
+--     Right $ Unknown "someCommand",
+--     Left "good bye"
+--   ]
+
+
+--query - answer to bot
+textAnswerTuples :: [(Either Message Command, Message)]
+textAnswerTuples =  [
+    Left "hello bot" `to` "hello bot",
+    Right Repeat `to` "someRepeatText",
+    Right (Button 3) `to` "someButtonText",
+    Left "How do you do?" `to` "How do you do? How do you do? How do you do?",
+    Right Help `to` "someHelpText", 
+    Right Start `to` "someHelpText",
+    Right Repeat `to` "someRepeatText",
+    Right (Button 5) `to` "someButtonText",
+    Left  "5" `to` "5 5 5 5 5",
+    Right (Unknown "someCommand") `to` "someUnknownText",
+    Left "good bye" `to` "good bye good bye good bye good bye good bye"
+  ]
+
+textAnswerCases :: [State S Message]
+textAnswerCases = map (textAnswer someChatId . fst) textAnswerTuples
+
+textAnswerResults :: [Message]
+textAnswerResults = map snd textAnswerTuples
+to = (,)
+
+textAnswerCase :: State S Message
+textAnswerCase = textAnswer someChatId $ Left "hello bot" 
+
+
+--такие варианты можно сразу в тест
+textAnswerErrorCase1 :: State S Message
+textAnswerErrorCase1 = textAnswer someChatId $ Right $ Button 6 
+textAnswerErrorCase :: State S Message
+textAnswerErrorCase = textAnswer someChatId $ Right $ Button 0 
+
+
+
+textAnswerResult :: Message
+textAnswerResult = "hello bot"
+
+someState :: S
+someState = S {
+  app = notUsed "app",
+  configApp = someConfigApp,
+  configText = someConfigText,
+  configLog = notUsed "configLog",
+  logSettings = notUsed "logSettings"
+}
+
+someConfigText = ConfigText{
+  help = "someHelpText", 
+  repeat = "someRepeatText", 
+  unknown = "someUnknownText", 
+  button = "someButtonText"
+}
+
+someConfigApp = ConfigApp {
+  name = "someAppName",
+  host = "someAppHost",
+  token = "someAppToken",
+  updateId = 666666,
+  updateIdFromFile = False,
+  repeatNumber = M.empty,
+  groupId = 999999,
+  version = "someAppVersion"
+}
+
+someChatId = 666
+
+--не знаю, как сделать по другому, чтобы не определять ненужные сущности
+notUsed :: String -> a
+notUsed field = error $ template "Field {0} should not be used in S" [field]
+
   -- hspec $ do
   -- describe "Logic.testingFunction" $ do
   --   it "returns the first element of a list" $ do
@@ -18,123 +182,6 @@ main = hspec testToMessageCommand
 
   --   it "throws an exception if used with an empty list" $ do
   --     evaluate (testingFunction []) `shouldThrow` anyException
-
---toMessageCommand
-testToMessageCommand :: Spec
-testToMessageCommand = do
-    describe "Logic.toMessageCommand" $ do 
-      it "returns help command" $ do
-        map toMessageCommand testHelp `allShouldBe` Right Help
-      it "returns repeat command" $ do
-        map toMessageCommand testRepeat `allShouldBe` Right Repeat
-      it "returns start command" $ do
-        map toMessageCommand testStart `allShouldBe` Right Start
-      it "returns button command" $ do
-        map toMessageCommand testButton `eachShouldBe` map (Right . Button) resultButton
-      it "returns unknown command" $ do
-        map toMessageCommand testUnknown `eachShouldBe` map (Right . Unknown) resultUnknown
-        --map toMessageCommand testUnknown `shouldBe` map (Right . Unknown ) resultUnknown
-      it "returns message" $ do
-        map toMessageCommand testMessages `eachShouldBe` map Left testMessages
-
---toMessageCommand
-testTextAnswer :: Spec
-testTextAnswer = do
-    describe "Logic.textAnswer" $ do 
-      it "returns something1" $ do
-        textAnswerCase `evalStateShouldBe` (textAnswerResult `withInitialState` someState) 
-      it "returns something2" $ do
-        textAnswerCases `allEvalStatesShouldBe` (textAnswerResult `withInitialState` someState) 
-      it "returns something3" $ do
-        textAnswerCases `eachEvalStateShouldBe` (textAnswerResults `withInitialState` someState) 
-
-
-testMessages = [
-  "", " ", "foo", "кириллица", "  kj mkl kl ", " ?/sd", "sd /sd", "a/ssdf", "s8/*-*/*-4",
-  "repeat",  
-  "/ repeat", 
-  " / repeat", 
-  "/ repeat ", 
-  " / repeat ", 
-  "   / repeat       ", 
-  " /    repeat ", 
-  "/ re p e at ",
-  "/ vasya"
-  ]
-
-testHelp = ["/help", " /help", "/help ", "         /help   "]
-testRepeat = ["/repeat", " /repeat", "/repeat ", "         /repeat   "]
-testStart = ["/start", " /start", "/start ", "         /start   "]
---наши команды не имеют никаких параметров, поэтому команды с параметрами относим к неизвестнымю Возможно следует отказаться от lowerCase
-testUnknown = ["/unk", " /unk", "/unk ", "         /unk   ", 
-    "/other", "/withparams 1 2 3", "/a", "/6" ,"/0", "/3 1", "/repeat 3", "/help 3",  "/Repeat", "/REPEAT", "//repeat"
-  ]
-resultUnknown = ["unk", "unk", "unk", "unk",
-    "other", "withparams", "a", "6", "0", "3", "repeat", "help", "Repeat", "REPEAT", "/repeat"]
-
-testButton = ["/1", "/2", "/3", "/4", "/5",
-    " /1", " /2", " /3", " /4", " /5",
-    " /1 ", " /2 ", " /3 ", " /4 ", " /5 "
-  ]
-resultButton :: [Int]
-resultButton = concat $ replicate 3 [1..5]
-
---ALL of cases SHOULD BE eqaul to one result
-allShouldBe :: (HasCallStack, Show a, Eq a) => [a] -> a -> Expectation
-allShouldBe cases result = eachShouldBe cases (replicate (length cases) result)
-
---EACH of cases SHOULD BE eqaul to each of results
-eachShouldBe :: (HasCallStack, Show a, Eq a) => [a] -> [a] -> Expectation
-eachShouldBe cases results = bimapM_ shouldBe cases results
-
-
---Проверить, изменяется ли State в этих функциях!!! 
---bimapM_ нельзя использовать в этих функциях, т. к. он не учитывает эффект State
---ALL EVAL STATES of cases SHOULD BE eqaul to one result
-allEvalStatesShouldBe :: (HasCallStack, Show a, Eq a) => [State s a] -> (a, s) -> Expectation
-allEvalStatesShouldBe states (result, initialState) = eachEvalStateShouldBe states (replicate (length states) result, initialState)
-
---EACH EVAL STATE of cases SHOULD BE eqaul to each of results
-eachEvalStateShouldBe :: (HasCallStack, Show a, Eq a) => [State s a] -> ([a], s) -> Expectation
-eachEvalStateShouldBe [] ([], _) = return () 
-eachEvalStateShouldBe (s:ss) (r:rs, initialState) = do
-  let (a, modifiedState) = runState s initialState
-  a `shouldBe` r
-  eachEvalStateShouldBe ss (rs, modifiedState)
-eachEvalStateShouldBe _ _ = error "lists of tests and answers must have equal lengths"
-
---EVAL STATE of case SHOULD BE equal to result WITH INITIAL STATE
-evalStateShouldBe :: (HasCallStack, Show a, Eq a) => State s a -> (a, s) -> Expectation
-evalStateShouldBe state (result, initialState) = eachEvalStateShouldBe [state] ([result], initialState)
-
-textAnswerCases :: [State S Message]
-textAnswerCases = undefined
-
-textAnswerCase :: State S Message
-textAnswerCase = undefined
-
-textAnswerResults :: [Message]
-textAnswerResults = undefined
-
-textAnswerResult :: Message
-textAnswerResult = undefined
-
-
-someState :: S
-someState = undefined
-
-
-
-withInitialState = (,)
-
---this is not equal to base Data.Bifoldable.bimapM_
-bimapM_ :: Monad m => (a -> b -> m c) -> [a] -> [b] -> m ()
-bimapM_ f [] [] = return ()
-bimapM_ f (x:xs) (y:ys) = do
-  f x y
-  bimapM_ f xs ys
-bimapM_ _ _ _ = error "list args of bimapM_ must have equal lengths"
-
 
 -- simpleProperties = do
 --   it "lastDigit [x] == x `mod` 10" $

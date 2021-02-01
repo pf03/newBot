@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 440dcb3fcbf208e83677bd5e1d734e6f7a74cf622411c8f9d44a9dcb8a06e4a4
+-- hash: fe2e382ca2e5efd2943ee46b507f34bccd15065e30283028aef55eb88caed1cc
 
 name:           bot
 version:        0.1.0.0
@@ -101,6 +101,7 @@ test-suite bot-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Lib
       Paths_bot
   hs-source-dirs:
       test

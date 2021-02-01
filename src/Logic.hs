@@ -138,7 +138,7 @@ answerMessageCommand cid emc = do
         _ -> return []
     case emc of
         Right (Button n) -> do
-            setRepeatNumber cid n
+            --setRepeatNumber cid n --для тестов переместил в textAnswer
             return (True, text, labels)
         _ -> return (False , text, labels)
 
@@ -150,12 +150,15 @@ textAnswer cid emc = do
         Left message -> do
             case mrn of 
                 Nothing -> return message
-                Just n -> return  . concat . replicate n $ (message ++ " ")
+                Just n -> return  . safeInit . concat . replicate n $ (message ++ " ")
         Right Help -> return helpText
         Right Start -> return helpText --это начальное сообщение боту
         Right Repeat -> return $ template repeatText [show mrn]
-        Right (Button n) -> return $ template buttonText [show mrn, show n]
+        Right (Button n) -> do
+            setRepeatNumber cid n --для тестов переместил в textAnswer
+            return $ template buttonText [show mrn, show n]
         Right (Unknown com) -> return $ template unknownText [com]
+
 
 testingFunction = head
 

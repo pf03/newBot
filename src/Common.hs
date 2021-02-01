@@ -35,3 +35,11 @@ replace t s str = let strs = splitOn t str in
 
 -- test = template "Hello {0}, {1}, {0}, {1}," ["Petya", "Vasya"]
 -- t1 = replace "{0}" "Vasya" "Hello {0}, {1}, {0}, {1}," 
+
+safeTail :: [a] -> [a]
+safeTail [] = []
+safeTail x = tail x
+
+safeInit :: [a] -> [a]
+safeInit [] = []
+safeInit x = init x
