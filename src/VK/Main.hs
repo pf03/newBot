@@ -8,12 +8,9 @@ import Types hiding (repeat)--100
 import VK.Types --99
 import Transformer --20
 import qualified VK.Query as Query --11
-import API --10
-import Parse --50
-import VK.Parse --49
+import qualified Request --10
+import qualified VK.Parse as Parse --49
 import Config --40
-import Data.Aeson
-import Logic --30
 import VK.Logic  --31
 import Log
 import Class
@@ -45,11 +42,11 @@ _getInit = do
     ConfigApp _name _host token _updateId _  _repeatNumber groupId version <- gets configApp
     let api = API Groups GetLongPollServer 
     Log.sendT
-    json <- apiRequest api (Query.getLongPollServer token groupId version) False 
+    json <- Request.api api (Query.getLongPollServer token groupId version) False 
     Log.receiveT
-    o <- toT $ getObject json
+    o <- toT $ Parse.getObject json
     Log.receiveDataT "object" o
-    init@(Init _server _key _ts) <- toT $ parseInit o 
+    init@(Init _server _key _ts) <- toT $ Parse.init o 
     Log.receiveDataT"init" init
     return init
 
@@ -62,17 +59,17 @@ _getUpdates init@(Init server key ts) = do
     --let newInit = init
     let query = Query.longPoll init 25
     (host, path) <- toT $ parseServer server
-    let request = buildRequest host path query
+    let request = Request.build host path query
     Log.sendT
-    json <- toT $ sendRequest request True   --непосредственно long polling
+    json <- toT $ Request.send request True   --непосредственно long polling
     Log.receiveT
-    o <- toT $ getObject json
+    o <- toT $ Parse.getObject json
     Log.receiveDataT "object" o
-    muid <- toT $ parseUpdateId o
+    muid <- toT $ Parse.updateId o
     let newInit = init {ts = fromMaybe ts muid}
     --let newInit = init
     Log.receiveDataT "updateId" muid
-    updates <- toT $ parseChatMessages o
+    updates <- toT $ Parse.updates o
     Log.receiveDataT "updates" updates
     -- ifJust uid $ do
     --     modify $ setUpdateId $ fromJust uid
@@ -88,9 +85,9 @@ _sendMessage update@(cid, en) btns = do
     printT btns
     query <- toT $ Query.sendMessage token version update btns
     Log.receiveDataT "query" query
-    json <- apiRequest (API Messages Send) query False 
+    json <- Request.api (API Messages Send) query False 
     Log.receiveT
-    o <- toT $ getObject json
+    o <- toT $ Parse.getObject json
     Log.receiveDataT "object" o
     --undefined    
 
@@ -125,9 +122,9 @@ _testRequest = do
     Log.sendT
     let query = Query.test token version
     Log.receiveDataT "query" query
-    json <- apiRequest (API Messages Send) query False 
+    json <- Request.api (API Messages Send) query False 
     Log.receiveT 
-    o <- toT $ getObject json
+    o <- toT $ Parse.getObject json
     Log.receiveDataT "object" o
 
 req = runT _testRequest

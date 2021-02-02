@@ -19,7 +19,7 @@ import Types
 import qualified Data.ByteString.Char8 as BC
 --import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString.Lazy.Char8 as LC
-----------------------------------Transformer--------------------------------------------
+----------------------------------ToTransformer--------------------------------------------
 --подъем до основного трасформера
 class ToTransformer m where 
     toT :: m a -> T a
@@ -71,28 +71,5 @@ instance Convert Value where
 instance Convert Object where 
      convert = convert . encode 
 
--- instance ToJSON a => Convert a where 
---      convert =  BC.pack . LC.unpack . encode 
-
--- Object !Object	 
--- Array !Array	 
--- String !Text	 
--- Number !Scientific	 
--- Bool !Bool	 
--- Null
-
-
-
 jc :: Convert a => a -> Maybe BC.ByteString
 jc = Just . convert
-
-
-
---this is for getters and setters
--- class MonadS m where
---     getS :: m S 
---     setS :: S -> m ()
-
--- instance MonadState S m => MonadS m where
---     getS = get
---     setS = put

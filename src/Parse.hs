@@ -38,8 +38,8 @@ eDecode :: FromJSON a => LC.ByteString -> Except E a
 eDecode = except . typeError ParseError . eitherDecode
 
 
-parseJSONo :: FromJSON a => Object -> Parser a
-parseJSONo = parseJSON . Object
+_parseJSONo :: FromJSON a => Object -> Parser a
+_parseJSONo = parseJSON . Object
 
 --выход из монады Parser
 _parseE :: (Object -> Parser a) -> Object -> Except E a

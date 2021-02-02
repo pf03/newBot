@@ -2,7 +2,7 @@
 import Test.Hspec
 import Test.QuickCheck
 import Control.Exception (evaluate)
-import Logic
+import qualified Logic
 import Types 
 import Control.Monad.State.Lazy
 import Lib
@@ -16,12 +16,12 @@ main = do
   hspec testTextAnswer
 
 
------------------------------toMessageCommand---------------------------------------------
+-----------------------------Logic.toMessageCommand---------------------------------------------
 testToMessageCommand :: Spec
 testToMessageCommand = do
     describe "Logic.toMessageCommand" $ do 
       it "returns message" $ do
-        map toMessageCommand messages `eachShouldBe` map Left messages
+        map Logic.toMessageCommand messages `eachShouldBe` map Left messages
       it "returns help command" $ do
         helpCases `allShouldBe` Right Help
       it "returns start command" $ do
@@ -45,16 +45,16 @@ messages =
     "/ re p e at ",
     "/ vasya"]
 
-helpCases = map toMessageCommand
+helpCases = map Logic.toMessageCommand
   ["/help", " /help", "/help ", "         /help   "]
 
-startCases = map toMessageCommand
+startCases = map Logic.toMessageCommand
   ["/start", " /start", "/start ", "         /start   "]
 
-repeatCases = map toMessageCommand
+repeatCases = map Logic.toMessageCommand
   ["/repeat", " /repeat", "/repeat ", "         /repeat   "]
 
-buttonCases = map toMessageCommand 
+buttonCases = map Logic.toMessageCommand 
   ["/1", "/2", "/3", "/4", "/5",
     " /1", " /2", " /3", " /4", " /5",
     " /1 ", " /2 ", " /3 ", " /4 ", " /5 "]
@@ -62,7 +62,7 @@ buttonCases = map toMessageCommand
 buttonResults = map (Right . Button) $ concat $ replicate 3 [1..5]
 
 --наши команды не имеют никаких параметров, поэтому команды с параметрами относим к неизвестнымю Возможно следует отказаться от lowerCase
-unknownCases = map toMessageCommand
+unknownCases = map Logic.toMessageCommand
   ["/unk", " /unk", "/unk ", "         /unk   ", 
     "/other", "/withparams 1 2 3" ,"/0", "/3 1", "/repeat 3", "/help 3",  "/Repeat", "/REPEAT", "//repeat",
     "/repeat 3", "/6", "/0", "/help 5 3",
@@ -78,13 +78,12 @@ unknownResults = map (Right . Unknown)
     "3 /repeat", "0 /repeat", "33 /repeat", "6 /repeat"
   ]
 
--------------------------------textAnswer-------------------------------------------------------------
+-------------------------------Logic.textAnswer-------------------------------------------------------------
 testTextAnswer :: Spec
 testTextAnswer = do
     describe "Logic.textAnswer" $ do 
       it "have dialog with user" $ do
         textAnswerCases `eachEvalStateShouldBe` (textAnswerResults `withInitialState` someState) 
-
 
 --query - answer to bot
 textAnswerTuples :: [(Either Message Command, Message)]
@@ -103,14 +102,14 @@ textAnswerTuples =  [
   ]
 
 textAnswerCases :: [State S Message]
-textAnswerCases = map (textAnswer someChatId . fst) textAnswerTuples
+textAnswerCases = map (Logic.textAnswer someChatId . fst) textAnswerTuples
 
 textAnswerResults :: [Message]
 textAnswerResults = map snd textAnswerTuples
 to = (,)
 
 textAnswerCase :: State S Message
-textAnswerCase = textAnswer someChatId $ Left "hello bot" 
+textAnswerCase = Logic.textAnswer someChatId $ Left "hello bot" 
 
 textAnswerResult :: Message
 textAnswerResult = "hello bot"

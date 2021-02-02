@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 --importPriority = 49
-module VK.Parse where
+module VK.Parse (module Parse, VK.Parse.init, VK.Parse.updateId, updates, keyboard, contentUrl, contentMessage) where
 
 --import qualified Data.ByteString as B
 --import qualified Data.ByteString.Char8 as BC
@@ -32,17 +32,17 @@ import Logic
 
 ------------------External functions---------------------------
 
-parseInit :: Object -> Except  E Init
-parseInit = _parseE _parseAuth
+init :: Object -> Except  E Init
+init = _parseE _parseInit
 
-parseUpdateId :: Object -> Except E (Maybe UpdateId)
-parseUpdateId = _parseE _parseUpdateId
+updateId :: Object -> Except E (Maybe UpdateId)
+updateId = _parseE _parseUpdateId
 
--- parseChatMessage :: Object -> Except  E Update
--- parseChatMessage = _parseE _parseChatMessage
+-- chatMessage :: Object -> Except  E Update
+-- chatMessage = _parseE _parseChatMessage
 
-parseChatMessages :: Object -> Except  E [Update]
-parseChatMessages = _parseE _parseChatMessages
+updates :: Object -> Except  E [Update]
+updates = _parseE _parseUpdates
 
 --------------------Internal functions--------------------------
 _parseUpdateId :: Object -> Parser (Maybe UpdateId)
@@ -56,19 +56,44 @@ _parseUpdateId o = do
                 Left e -> fail (e ++ ": " ++ str)
                 Right uid -> return $ Just uid 
 
-_parseAuth :: Object -> Parser Init
-_parseAuth o = do
+_parseInit :: Object -> Parser Init
+_parseInit o = do
     response <- o.:"response" 
-    parseJSONo response
+    _parseJSONo response
 
-_parseChatMessages :: Object -> Parser [Update]
-_parseChatMessages = _withArraymItem "updates" _parseChatMessage
+_parseUpdates :: Object -> Parser [Update]
+_parseUpdates = _withArraymItem "updates" _parseUpdate
 
-_parseSticker :: Object -> Parser Attachment
-_parseSticker o = do
-    sticker <- o.:"sticker"
-    stickerId <- sticker.: "id"
-    return . Sticker $ stickerId
+_parseUpdate :: Object -> Parser (Maybe Update)
+_parseUpdate o = do
+    _type <- o.:"type" :: Parser String 
+    case _type of 
+        "message_new" -> do 
+            object <-  o.: "object"
+            userId <- object .: "user_id"::Parser UserId
+            text <- object .: "body"
+            let emc = toMessageCommand text
+            --attachments <- object .: "attachments"
+            mattachments <-_mwithArrayItem "attachments" _parseAttachment object
+            let attachments = fromMaybe [] mattachments 
+            return $ Just (userId, Entity emc attachments)
+        _ -> return Nothing
+
+_parseAttachment :: Object -> Parser Attachment
+_parseAttachment o = do
+    _type <- o .: "type"::Parser String 
+    case _type of
+        "sticker" -> _parseSticker o
+        -- "photo" -> _parsePhoto o
+        -- "video" -> _parseVideo o
+        "audio" -> _parseAudio o
+        "photo" -> _parseAttachmentItem "photo" o
+        "video" -> _parseAttachmentItem "video" o
+        "doc" -> _parseAttachmentItem "doc" o
+        "wall" -> _parseWall o
+        "link" -> _parseLink o
+        --str -> _getConstructor str <$> _parseAttachmentItem str o
+        _ -> undefined
 
 _parseAttachmentItem :: String -> Object -> Parser Attachment
 _parseAttachmentItem str o = do
@@ -77,6 +102,12 @@ _parseAttachmentItem str o = do
     ownerId <- item.:"owner_id"
     accessKey <- item.:"access_key"
     return $ Item str ownerId itemId accessKey
+
+_parseSticker :: Object -> Parser Attachment
+_parseSticker o = do
+    sticker <- o.:"sticker"
+    stickerId <- sticker.: "id"
+    return . Sticker $ stickerId
 
 _parseAudio :: Object -> Parser Attachment
 _parseAudio o = do
@@ -100,38 +131,8 @@ _parseLink o = do
     url <- item.: "url"
     return $ Link url
 
-_parseAttachment :: Object -> Parser Attachment
-_parseAttachment o = do
-    _type <- o .: "type"::Parser String 
-    case _type of
-        "sticker" -> _parseSticker o
-        -- "photo" -> _parsePhoto o
-        -- "video" -> _parseVideo o
-        "audio" -> _parseAudio o
-        "photo" -> _parseAttachmentItem "photo" o
-        "video" -> _parseAttachmentItem "video" o
-        "doc" -> _parseAttachmentItem "doc" o
-        "wall" -> _parseWall o
-        "link" -> _parseLink o
-        --str -> _getConstructor str <$> _parseAttachmentItem str o
-
-        _ -> undefined
 
 
-_parseChatMessage :: Object -> Parser (Maybe Update)
-_parseChatMessage o = do
-    _type <- o.:"type" :: Parser String 
-    case _type of 
-        "message_new" -> do 
-            object <-  o.: "object"
-            userId <- object .: "user_id"::Parser UserId
-            text <- object .: "body"
-            let emc = toMessageCommand text
-            --attachments <- object .: "attachments"
-            mattachments <-_mwithArrayItem "attachments" _parseAttachment object
-            let attachments = fromMaybe [] mattachments 
-            return $ Just (userId, Entity emc attachments)
-        _ -> return Nothing
 
 
 ------------------------SEND----------------------------------------

@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 --{-# LANGUAGE TypeApplications #-}
 --importPriority = 49
-module Telegram.Parse where
+module Telegram.Parse (module Parse, Telegram.Parse.updateId, updates, keyboard, pollOptions) where
 --import qualified Data.ByteString as B
 --import qualified Data.ByteString.Char8 as BC
 --import qualified Data.ByteString.Lazy as L
@@ -34,8 +34,8 @@ import Control.Applicative
 
 
 ------------------External functions------------------------
-parseUpdateId :: Object -> Except E (Maybe UpdateId)
-parseUpdateId o = do
+updateId :: Object -> Except E (Maybe UpdateId)
+updateId o = do
   ids <- _parseE _parseUpdateIds o
   case ids of
     [] -> return Nothing --throwError $ ParseError "Обновления не обнаружены"
@@ -44,8 +44,8 @@ parseUpdateId o = do
 -- parseChatMessage :: Object -> Except  E Update
 -- parseChatMessage = _parseE _parseChatMessage
 
-parseChatMessages :: Object -> Except  E [Update]
-parseChatMessages = _parseE _parseChatMessages
+updates :: Object -> Except  E [Update]
+updates = _parseE _parseUpdates
 
 --------------------Internal functions--------------------------
 
@@ -54,16 +54,16 @@ _parseUpdateIds = _withArrayItem "result" (.: "update_id")
 
 _parseChatLastMessage :: Object -> Parser Update
 _parseChatLastMessage o = do
-  cm <- _parseChatMessages o
+  cm <- _parseUpdates o
   case cm of
     [] -> fail "No message to reply"
     x:xs -> return $ last xs
 
-_parseChatMessages :: Object -> Parser [Update]
-_parseChatMessages = _withArraymItem "result" _parseChatMessage
+_parseUpdates :: Object -> Parser [Update]
+_parseUpdates = _withArraymItem "result" _parseUpdate
 
-_parseChatMessage :: OResultItem -> Parser (Maybe Update)
-_parseChatMessage o = do
+_parseUpdate :: OResultItem -> Parser (Maybe Update)
+_parseUpdate o = do
       mmessage <- o.:?"message"  --если сообщения нет, то игнорируем такое обновление, это например редактирование сообщения или голос в опросе
       case mmessage of 
         Nothing -> return Nothing

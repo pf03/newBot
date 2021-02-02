@@ -4,8 +4,8 @@ module VK.Query (getLongPollServer, longPoll, sendMessage, test) where
 import qualified App --60
 import Types --100
 import VK.Types --99
-import VK.Parse --49
-import Parse
+import qualified VK.Parse as Encode (keyboard, contentUrl, contentMessage) --49
+import Parse ( (<:>), (<:?>) )
 import Error
 import Logic
 import Common
@@ -30,7 +30,7 @@ sendMessage token version (cid, Entity emc attachments) btns = do
         Left message -> do
             let qDefault = _queryDefault token cid version
             let qMessage =  "message" <:> message
-            let qButtons = if null btns then [] else "keyboard" <:> keyboard btns 
+            let qButtons = if null btns then [] else "keyboard" <:> Encode.keyboard btns 
             let qAttachments = _queryAttachments attachments
             return $ qDefault ++ qMessage ++ qButtons ++ qAttachments
 
@@ -54,7 +54,7 @@ _queryAttachment :: Attachment -> Either String QueryItem  --Either String Query
 _queryAttachment attachment = 
     case attachment of
         Sticker stikerId -> Right ("sticker_id", jc stikerId)
-        Link url -> Right ("content_source", jc $ contentUrl url)
+        Link url -> Right ("content_source", jc $ Encode.contentUrl url)
         --Link url -> Right ("content_source", App.jc $ contentMessage mgroup mgroup 100 )
         Audio ownerId objectId  -> Left $ template "audio{0}_{1}" [show ownerId, show objectId]
         Wall ownerId objectId  -> Left $ template "wall{0}_{1}" [show ownerId, show objectId]

@@ -1,17 +1,14 @@
-
 --importPriority = 30
-module Logic where 
+module Logic  where 
 --import Data.List 
 import qualified Data.Map.Internal as M
-
-import Config --40
 import Types --hiding (Config(..)) --100
 --import Data.List
 import Control.Monad.Reader
 import Prelude hiding (repeat)
 import qualified App  --60
 import Common
-import State
+import qualified State as S
 import Control.Monad.State.Lazy
 
 toMessageCommand :: String -> Either Message Command
@@ -67,8 +64,8 @@ answerMessageCommand cid emc = do
 
 textAnswer :: ChatId -> Either Message Command -> State S Message 
 textAnswer cid emc = do 
-    ConfigText helpText repeatText unknownText buttonText <- getConfigText
-    mrn <- getmRepeatNumber cid
+    ConfigText helpText repeatText unknownText buttonText <- S.getConfigText
+    mrn <- S.getmRepeatNumber cid
     case emc of
         Left message -> do
             case mrn of 
@@ -78,7 +75,7 @@ textAnswer cid emc = do
         Right Start -> return helpText 
         Right Repeat -> return $ template repeatText [show mrn]
         Right (Button n) -> do
-            setRepeatNumber cid n
+            S.setRepeatNumber cid n
             return $ template buttonText [show mrn, show n]
         Right (Unknown com) -> return $ template unknownText [com]
 

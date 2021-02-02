@@ -13,11 +13,9 @@ import Control.Concurrent
 import qualified Telegram.Main as Telegram  --1
 import qualified VK.Main as VK --1
 import qualified App --60
+import qualified Logic
 -- import Error 
 -- import Parse --( getObject, getValue, parseChatMessage )
-import Config --( readConfig ) --40
--- import API --( querySendMessage, sendRequest, API(SendMessage, GetUpdates) )
-import Logic --hiding (Env(..)) --30
 import Types hiding (S(..))--100
 import qualified VK.Types --(Pointer) как то нужно ограничить, чтобы ничего больше не импортировать --99
 import qualified Telegram.Types --(Pointer) как то нужно ограничить, чтобы ничего больше не импортировать --99
@@ -26,7 +24,6 @@ import qualified Log
 import Common
 import Class
 import qualified State as S
-
 import Control.Monad.State.Lazy
 import System.Console.ANSI
 import Data.Maybe
@@ -75,7 +72,7 @@ longPolling pointer init = do
 --отвечаем всем пользователям
 calcSendMesages :: (App.Main _pointer _init update) => [update] -> T ()
 calcSendMesages = mapM_ $ \update -> do 
-  (stateChanged, answer, btns) <- toT $ answer update
+  (stateChanged, answer, btns) <- toT $ Logic.answer update
   --обновляем конфиг
   when stateChanged $ do
       putStrLnT "Обновляем конфиг..."

@@ -9,10 +9,9 @@ module Telegram.Main where
 import Types --100
 import Telegram.Types --99
 import Transformer --20
-import API --10
-import Telegram.API  --11
+import qualified Request --10
+import qualified Telegram.Query as Query  --11
 import Telegram.Logic --31
-import Parse --50
 import Config --40
 import Logic --30
 import Color
@@ -21,12 +20,9 @@ import qualified Log
 import Common
 import Class
 import qualified State as S
-
-
 import System.Console.ANSI
 
---только специфические для Telegram функции 
-import Telegram.Parse
+import qualified Telegram.Parse as Parse
 
 --внешние модули
 import Control.Monad.State.Lazy
@@ -67,13 +63,13 @@ _getUpdates :: Maybe UpdateId -> T ([Update], Maybe UpdateId)
 _getUpdates muid = do
     Log.setSettings (Cyan, True, template "_getUpdates, muid = {0}" [show muid]) 
     Log.sendT
-    response <- apiRequest GetUpdates (queryGetUpdates (fmap (+1) muid) 25) True 
+    response <- Request.api GetUpdates (Query.getUpdates (fmap (+1) muid) 25) True 
     Log.receiveT
-    o <- toT $ getObject response
+    o <- toT $ Parse.getObject response
     Log.receiveDataT "object -- convert" o
-    mnewuid <- toT $ parseUpdateId o
+    mnewuid <- toT $ Parse.updateId o
     Log.receiveDataT "mnewuid" mnewuid
-    us <- toT $ parseChatMessages o
+    us <- toT $ Parse.updates o
     Log.receiveDataT "update" us
     return (us, mnewuid <|> muid)
 
@@ -82,12 +78,11 @@ _sendMessage :: Update -> [Label] -> T ()
 _sendMessage update@(cid, en) btns = do
     Log.setSettings (Yellow, True, "sendMessage") 
     Log.sendT
-    --printT en
-    (api, query) <- toT $ querySendMessage update btns
+    (api, query) <- toT $ Query.sendMessage update btns
     Log.receiveDataT "(api, query)" (api, query) 
-    json <- apiRequest api query False
+    json <- Request.api api query False
     Log.receiveT
-    o <- toT $ getObject json
+    o <- toT $ Parse.getObject json
     Log.receiveDataT "object" o
 
 --сброс сообщений, которые мы не можем распарсить
@@ -96,10 +91,10 @@ reset = do
     uid <- S.getUpdateId
     Log.setSettings (Cyan, True, template "reset, uid = {0}" [show uid]) 
     Log.sendT
-    response <- apiRequest GetUpdates (queryGetUpdates (Just uid) 0) True 
+    json <- Request.api GetUpdates (Query.getUpdates (Just uid) 0) True 
     Log.receiveT
-    o <- toT $ getObject response 
-    mnewuid <- toT $ parseUpdateId o
+    o <- toT $ Parse.getObject json 
+    mnewuid <- toT $ Parse.updateId o
     undefined
     --   ifJust mnewuid do
     --     let newuid = fromJust mnewuid + 1
