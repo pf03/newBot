@@ -14,6 +14,7 @@ import Data.Aeson.Types
 import Data.Aeson
 
 import Types
+--import qualified Log cyclic import
 
 --import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as BC
@@ -73,3 +74,4 @@ instance Convert Object where
 
 jc :: Convert a => a -> Maybe BC.ByteString
 jc = Just . convert
+

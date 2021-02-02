@@ -67,11 +67,7 @@ saveST = do
     --let bc = encodeConfig v config
     toT $ saveS s
 
-instance Log.MonadLog T where 
-  getSettings = S.getLogSettings
-  setSettings = S.setLogSettings
-  --resetLogSettings = modify $ \s -> s {Log.Settings = defaultLogSettings } --Log.hs
-  getConfig = S.getLogConfig
+
 
 testLog :: IO()
 testLog = runT $ do
@@ -85,3 +81,10 @@ testLog = runT $ do
     Log.colorTextT Green Debug $ "Green color scheme " ++ klichko
     Log.colorTextT Yellow Debug $ "Yellow color scheme " ++ klichko
         where klichko = "Есть очень много по этому поводу точек зрения. Я четко придерживаюсь и четко понимаю, что те проявления, если вы уже так ребром ставите вопрос, что якобы мы"
+
+---------------------------------------MonadLog-------------------------------------------------------
+instance Log.MonadLog T where 
+  getSettings = S.getLogSettings
+  setSettings = S.setLogSettings
+  --resetLogSettings = modify $ \s -> s {Log.Settings = defaultLogSettings } --Log.hs
+  getConfig = S.getLogConfig

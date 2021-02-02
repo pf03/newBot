@@ -3,7 +3,7 @@
 module VK.Types where
 
 import qualified App --60 направление импорта!!!! перенести в VK.App
-import Data.Char
+
 import Types  --100
 import Data.Aeson
 import GHC.Generics
@@ -12,17 +12,6 @@ data API =  API APIGroup APIName
 
 data APIGroup = Groups | Messages deriving Show
 data APIName = GetLongPollServer | Send deriving Show
-
-instance App.API API where
-    apiName (API apiGroup apiName) =  let 
-        (g:gs) = show apiGroup;
-        (n:ns) = show apiName in 
-        (toLower g:gs)++ "." ++ (toLower n:ns)
-
-    --getPath :: Config -> API -> Path
-    --getPath config@(Config _ configApp _) api = "/method/" ++ App.apiName api
-    --getPath :: Token -> API -> Path
-    getPath token api = "/method/" ++ App.apiName api
 
 --------------------------------Parse && Logic----------------------------------------------------------
 

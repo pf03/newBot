@@ -11,7 +11,6 @@ import Telegram.Types --99
 import Transformer --20
 import qualified Request --10
 import qualified Telegram.Query as Query  --11
-import Telegram.Logic --31
 import Config --40
 import Logic --30
 import Color
@@ -21,6 +20,7 @@ import Common
 import Class
 import qualified State as S
 import System.Console.ANSI
+import Telegram.App --31
 
 import qualified Telegram.Parse as Parse
 

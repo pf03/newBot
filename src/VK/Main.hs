@@ -11,11 +11,11 @@ import qualified VK.Query as Query --11
 import qualified Request --10
 import qualified VK.Parse as Parse --49
 import Config --40
-import VK.Logic  --31
 import Log
 import Class
 import qualified App --60
 import Common
+import VK.App --31
 
 import Control.Monad.State.Lazy
 import Control.Monad.Except

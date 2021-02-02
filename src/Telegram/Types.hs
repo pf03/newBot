@@ -1,7 +1,7 @@
 --importPriority = 99.5
 module Telegram.Types where
 import qualified App
-import Data.Char
+
 import Types  --100 
 
     ------------------------------------API-----------------------------------------------------------------
@@ -10,17 +10,8 @@ import Types  --100
 data API =  GetUpdates | SendMessage | SendSticker | SendAnimation | SendPhoto | SendVideo |SendDocument| SendPoll | SendContact | SendLocation
     | CopyMessage | ForwardMessage  deriving Show
 
-instance App.API API where
-    apiName api = let 
-        (x:xs) = show api 
-        in (toLower x):xs
-    --getPath :: Config -> API -> Path
-    --getPath config@(Config _ configApp _) api = "/bot"++ token configApp ++"/" ++ App.apiName api
-    --getPath :: Config -> Token -> Path
-    getPath token api = "/bot"++ token ++"/" ++ App.apiName api
 
---newtype Init = Init {getInit :: UpdateId}  --можно использовать сразу UpdateId без лишних оберток
---type StickerId = Int
+
 
 data Entity = Message Message 
     | Command Command 
