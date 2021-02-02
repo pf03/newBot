@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: fe2e382ca2e5efd2943ee46b507f34bccd15065e30283028aef55eb88caed1cc
+-- hash: 6e83f2261a15903c02a6681212082d0a5efcebf56a9cec61762d33b079daf818
 
 name:           bot
 version:        0.1.0.0
@@ -30,7 +30,7 @@ library
       API
       App
       Class
-      Colors
+      Color
       Common
       Config
       Error
@@ -38,6 +38,7 @@ library
       Logic
       Main
       Parse
+      State
       Telegram.API
       Telegram.App
       Telegram.Logic
@@ -47,11 +48,11 @@ library
       Test
       Transformer
       Types
-      VK.API
       VK.App
       VK.Logic
       VK.Main
       VK.Parse
+      VK.Query
       VK.Types
   other-modules:
       Paths_bot

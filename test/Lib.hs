@@ -4,6 +4,8 @@ import Test.QuickCheck
 import Control.Exception (evaluate)
 import Control.Monad.State.Lazy
 
+----------------------------------Mutiple cases-------------------------------------------------
+
 --ALL of cases SHOULD BE eqaul to one result
 allShouldBe :: (HasCallStack, Show a, Eq a) => [a] -> a -> Expectation
 allShouldBe cases result = eachShouldBe cases (replicate (length cases) result)
@@ -12,9 +14,9 @@ allShouldBe cases result = eachShouldBe cases (replicate (length cases) result)
 eachShouldBe :: (HasCallStack, Show a, Eq a) => [a] -> [a] -> Expectation
 eachShouldBe cases results = bimapM_ shouldBe cases results
 
+----------------------------------State cases-------------------------------------------------
 
---Проверить, изменяется ли State в этих функциях!!! 
---bimapM_ нельзя использовать в этих функциях, т. к. он не учитывает эффект State
+--can't use bimapM_ in this functions, because they do not consider State effect
 --ALL EVAL STATES of cases SHOULD BE eqaul to one result WITH INITIAL STATE
 allEvalStatesShouldBe :: (HasCallStack, Show a, Eq a) => [State s a] -> (a, s) -> Expectation
 allEvalStatesShouldBe states (result, initialState) = eachEvalStateShouldBe states (replicate (length states) result, initialState)

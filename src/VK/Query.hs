@@ -1,6 +1,6 @@
 --{-# LANGUAGE BangPatterns #-}
 --importPriority = 11
-module VK.API where
+module VK.Query (getLongPollServer, longPoll, sendMessage, test) where
 import qualified App --60
 import Types --100
 import VK.Types --99
@@ -12,18 +12,18 @@ import Common
 import Class
 import Data.Either
 
-
 import Network.HTTP.Simple
 import Control.Monad.Trans.Except
 
-queryGetLongPollServer :: Token  -> GroupId -> Version -> Query 
-queryGetLongPollServer token groupId version = "group_id" <:> groupId ++ "access_token" <:> token ++ "v" <:> version
+--------------------------------------------External------------------------------------------------------------------
+getLongPollServer :: Token  -> GroupId -> Version -> Query 
+getLongPollServer token groupId version = "group_id" <:> groupId ++ "access_token" <:> token ++ "v" <:> version
 
-queryLongPoll :: Init -> TimeOut -> Query
-queryLongPoll init timeout = "act" <:> ("a_check" :: String) ++ "key" <:> key init ++ "ts" <:> ts init ++ "wait" <:> timeout
+longPoll :: Init -> TimeOut -> Query
+longPoll init timeout = "act" <:> ("a_check" :: String) ++ "key" <:> key init ++ "ts" <:> ts init ++ "wait" <:> timeout
 
-querySendMessage1 :: Token -> Version -> Update -> [Label] -> Except E Query 
-querySendMessage1 token version (cid, Entity emc attachments) btns = do
+sendMessage :: Token -> Version -> Update -> [Label] -> Except E Query 
+sendMessage token version (cid, Entity emc attachments) btns = do
     case emc of 
         Right command -> throwE $ QueryError "Невозможно послать команду пользователю"
         -- Message m -> do
@@ -34,6 +34,7 @@ querySendMessage1 token version (cid, Entity emc attachments) btns = do
             let qAttachments = _queryAttachments attachments
             return $ qDefault ++ qMessage ++ qButtons ++ qAttachments
 
+--------------------------------------------Internal------------------------------------------------------------------
 _queryDefault :: Token -> UserId -> Version -> Query 
 _queryDefault token userId version = "peer_id" <:> userId ++ "access_token" <:> token ++ "v" <:> version 
 
@@ -61,14 +62,14 @@ _queryAttachment attachment =
         --думаю, если не отправляет, то как то связано с правами доступа, возможно он пытается отправить файл не собственнику, и перепроверить все id, которые он отправляет
 
 
-
+--------------------------------------------Test------------------------------------------------------------------------
 roman = 37096463
 kesha = 611508530
 group = 201551107
 mgroup = -group
 
-testQuery :: Token -> Version -> Query
-testQuery token version = q ++ qDefault ++ qMessage where 
+test :: Token -> Version -> Query
+test token version = q ++ qDefault ++ qMessage where 
     cid = roman
     qDefault = _queryDefault token cid version
     qMessage = _queryMessage "link"
@@ -90,5 +91,3 @@ url3= "https://vk.com/albums37096463?z=photo37096463_456239075%2Fphotos37096463"
 
 --roman-group-bot
 testWall1  = Wall mgroup 11
-
-

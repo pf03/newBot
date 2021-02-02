@@ -26,9 +26,7 @@ import Network.HTTP.Simple
 import Data.Maybe
 import Class
 
---import Config 
------------------Common functions-----------------------
-
+-----------------From JSON------------------------------
 
 getObject :: LC.ByteString -> Except E Object
 getObject = except . typeError ParseError . eitherDecode 
@@ -43,38 +41,9 @@ eDecode = except . typeError ParseError . eitherDecode
 parseJSONo :: FromJSON a => Object -> Parser a
 parseJSONo = parseJSON . Object
 
-parseConfig :: Object -> Except  E Config
-parseConfig = undefined
-    --_parseE _parseConfig
-
 --выход из монады Parser
 _parseE :: (Object -> Parser a) -> Object -> Except E a
 _parseE f = except . typeError ParseError . parseEither f
-
---Функции _someFunction изспользуются только для парсинга. Функции someFunction экспортируются в другие модули
---_parseConfig1 :: Object -> Parser Config
---_parseConfig1 o = do 
---    _appV <- o.: "app"
---    app <- parseJSON _appV
---    configTextO <- o .: "text"
---    configText <- parseJSONo configTextO
---    configApps <- _withArrayItem "apps"  parseJSONo o
---    let configAppList = filter (\ac -> name ac == show app) configApps 
---    case configAppList of
---        [configApp] -> return Config {app = app, configApp = configApp, configText = configText}
---        [] -> fail "Не найдено приложение в файле конфигурации"
---        _ -> fail "Найдено более одного приложения в файле конфигурации"
---
---_parseConfig :: Object -> Parser Config
---_parseConfig o = do 
---    app <- o.: "app"
---    configText <- o .: "text"
---    configApps <- _withArrayItem "apps"  parseJSONo o
---    let configAppList = filter (\ac -> name ac == show app) configApps 
---    case configAppList of
---        [configApp] -> return Config {..}
---        [] -> fail "Не найдено приложение в файле конфигурации"
---        _ -> fail "Найдено более одного приложения в файле конфигурации"
 
 --обертка для работы с опциональным полем 
 _mwithItem :: Key -> (Object -> Parser  a) -> Object -> Parser (Maybe a)
@@ -104,6 +73,8 @@ _withArraymItem k f o = do
     ma <- _withArrayItem k f o
     return $ fmap fromJust . filter isJust $ ma
 
+----------------------------------------To JSON-------------------------------------
+
 (<:>) :: Convert a => String -> a -> Query
 (<:>) key value = [(convert key, jc value)]
 infixr 7 <:>
@@ -113,5 +84,3 @@ infixr 7 <:>
   Nothing -> []
   Just value -> [(convert key, jc value)]
 infixr 7 <:?>
-
-v = String "привет"

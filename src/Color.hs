@@ -1,4 +1,4 @@
-module Colors where 
+module Color where 
 --этот модуль должен импортироваться только модулем Log
 
 import System.Console.ANSI

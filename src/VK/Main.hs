@@ -7,7 +7,7 @@ module VK.Main where
 import Types hiding (repeat)--100 
 import VK.Types --99
 import Transformer --20
-import VK.API --11
+import qualified VK.Query as Query --11
 import API --10
 import Parse --50
 import VK.Parse --49
@@ -41,39 +41,39 @@ instance App.Main Pointer Init Update  where
 --вызывается либо в начале, либо когда произошла ошибка
 _getInit :: T Init
 _getInit = do
-    setLogSettings (Blue, True, "getInit") 
+    Log.setSettings (Blue, True, "getInit") 
     ConfigApp _name _host token _updateId _  _repeatNumber groupId version <- gets configApp
     let api = API Groups GetLongPollServer 
-    logSendT
-    json <- apiRequest api (queryGetLongPollServer token groupId version) False 
-    logReceiveT
+    Log.sendT
+    json <- apiRequest api (Query.getLongPollServer token groupId version) False 
+    Log.receiveT
     o <- toT $ getObject json
-    logReceiveDataT "object" o
+    Log.receiveDataT "object" o
     init@(Init _server _key _ts) <- toT $ parseInit o 
-    logReceiveDataT"init" init
+    Log.receiveDataT"init" init
     return init
 
 
 --в дальнейшем возможно переделать, чтобы не сохранять config каждый цикл, а только в конце работы бота, поэтому мы его пердаем в getUpdates
 _getUpdates :: Init -> T ([Update], Init)
 _getUpdates init@(Init server key ts) = do
-    setLogSettings (Cyan, False, "getUpdates") 
+    Log.setSettings (Cyan, False, "getUpdates") 
     --let newInit = init {ts=updateId}
     --let newInit = init
-    let query = queryLongPoll init 25
+    let query = Query.longPoll init 25
     (host, path) <- toT $ parseServer server
     let request = buildRequest host path query
-    logSendT
+    Log.sendT
     json <- toT $ sendRequest request True   --непосредственно long polling
-    logReceiveT
+    Log.receiveT
     o <- toT $ getObject json
-    logReceiveDataT "object" o
+    Log.receiveDataT "object" o
     muid <- toT $ parseUpdateId o
     let newInit = init {ts = fromMaybe ts muid}
     --let newInit = init
-    logReceiveDataT "updateId" muid
+    Log.receiveDataT "updateId" muid
     updates <- toT $ parseChatMessages o
-    logReceiveDataT "updates" updates
+    Log.receiveDataT "updates" updates
     -- ifJust uid $ do
     --     modify $ setUpdateId $ fromJust uid
     --     saveConfigT
@@ -82,16 +82,16 @@ _getUpdates init@(Init server key ts) = do
 _sendMessage :: Update -> [Label] -> T ()
 _sendMessage update@(cid, en) btns = do
     --undefined
-    setLogSettings (Yellow, True, "sendMessage") 
+    Log.setSettings (Yellow, True, "sendMessage") 
     ConfigApp _name _host token _updateId _ _repeatNumber _groupId version <- gets configApp
-    logSendT
+    Log.sendT
     printT btns
-    query <- toT $ querySendMessage1 token version update btns
-    logReceiveDataT "query" query
+    query <- toT $ Query.sendMessage token version update btns
+    Log.receiveDataT "query" query
     json <- apiRequest (API Messages Send) query False 
-    logReceiveT
+    Log.receiveT
     o <- toT $ getObject json
-    logReceiveDataT "object" o
+    Log.receiveDataT "object" o
     --undefined    
 
  --"https://lp.vk.com/wh777777777" -> "lp.vk.com" "/wh777777777"
@@ -121,14 +121,14 @@ upd = runT _getAllUpdates
 _testRequest::T()
 _testRequest = do
     ConfigApp _name _host token _updateId _ _repeatNumber _groupId version <- gets configApp
-    setLogSettings (Yellow, True, "testRequest") 
-    logSendT
-    let query = testQuery token version
-    logReceiveDataT "query" query
+    Log.setSettings (Yellow, True, "testRequest") 
+    Log.sendT
+    let query = Query.test token version
+    Log.receiveDataT "query" query
     json <- apiRequest (API Messages Send) query False 
-    logReceiveT 
+    Log.receiveT 
     o <- toT $ getObject json
-    logReceiveDataT "object" o
+    Log.receiveDataT "object" o
 
 req = runT _testRequest
 

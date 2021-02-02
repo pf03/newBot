@@ -86,9 +86,13 @@ instance Convert Object where
 jc :: Convert a => a -> Maybe BC.ByteString
 jc = Just . convert
 
-class MonadIO m => MonadLog m where
-  getLogSettings :: m LogSettings
-  setLogSettings :: LogSettings -> m()
-  --resetLogSettings :: m ()
-  --resetLogSettings = setLogSettings defaultLogSettings  перенес в Log.hs как свободную функцию
-  getLogConfig :: m ConfigLog
+
+
+--this is for getters and setters
+-- class MonadS m where
+--     getS :: m S 
+--     setS :: S -> m ()
+
+-- instance MonadState S m => MonadS m where
+--     getS = get
+--     setS = put

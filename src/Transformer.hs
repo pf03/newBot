@@ -8,6 +8,7 @@ import Control.Monad.Except
 import Control.Monad.Trans.Except
 import Control.Monad.Reader
 import Data.Maybe
+import qualified State as S
 import App
 
 import System.Console.ANSI
@@ -22,7 +23,7 @@ import Types  --100
 -- import Parse
 import Logic  --30
 import Error
-import Log
+import qualified Log
 import Class
 
 
@@ -44,19 +45,19 @@ runT m = do
     es <- runExceptT readS
     case es of 
         Left e -> do
-            let dlc = defaultLogConfig
-            logText dlc settings Error "Ошибка считывания конфига: "
-            logError dlc settings e
+            let dlc = Log.defaultConfig
+            Log.text dlc settings Error "Ошибка считывания конфига: "
+            Log.error dlc settings e
         Right s -> do 
             let cl = configLog s
             ea <- runExceptT $ runStateT (toT m) s
             case ea  of
                 Left e -> do 
-                    logText cl settings Error "Ошибка приложения: "
-                    logError cl settings e
+                    Log.text cl settings Error "Ошибка приложения: "
+                    Log.error cl settings e
                 Right a -> do 
-                    logText cl settings Info "Результат: "
-                    logData cl settings Data $ fst a
+                    Log.text cl settings Info "Результат: "
+                    Log.ldata cl settings Data $ fst a
 
 
 saveST :: T()
@@ -66,21 +67,21 @@ saveST = do
     --let bc = encodeConfig v config
     toT $ saveS s
 
-instance MonadLog T where 
-  getLogSettings = gets logSettings
-  setLogSettings ls = modify $ \s -> s {logSettings = ls}
-  --resetLogSettings = modify $ \s -> s {logSettings = defaultLogSettings } --Log.hs
-  getLogConfig = gets configLog
+instance Log.MonadLog T where 
+  getSettings = S.getLogSettings
+  setSettings = S.setLogSettings
+  --resetLogSettings = modify $ \s -> s {Log.Settings = defaultLogSettings } --Log.hs
+  getConfig = S.getLogConfig
 
 testLog :: IO()
 testLog = runT $ do
-    logDataT Debug $ "Debug data value " ++ show [1..10]  :: T()
-    logDataT Info $ "Info data value " ++ show [1..10] 
-    logDataT Error $ "Error data value " ++ show [1..10] 
-    logDataT Data $ "Data data value " ++ show [1..10] 
-    logDataT Warning  $ "Warning data value " ++ show [1..10] 
-    logColorTextT Blue Debug $"Blue color scheme " ++ klichko
-    logColorTextT Cyan Debug $ "Cyan color scheme " ++ klichko
-    logColorTextT Green Debug $ "Green color scheme " ++ klichko
-    logColorTextT Yellow Debug $ "Yellow color scheme " ++ klichko
+    Log.dataT Debug $ "Debug data value " ++ show [1..10]  :: T()
+    Log.dataT Info $ "Info data value " ++ show [1..10] 
+    Log.dataT Error $ "Error data value " ++ show [1..10] 
+    Log.dataT Data $ "Data data value " ++ show [1..10] 
+    Log.dataT Warning  $ "Warning data value " ++ show [1..10] 
+    Log.colorTextT Blue Debug $"Blue color scheme " ++ klichko
+    Log.colorTextT Cyan Debug $ "Cyan color scheme " ++ klichko
+    Log.colorTextT Green Debug $ "Green color scheme " ++ klichko
+    Log.colorTextT Yellow Debug $ "Yellow color scheme " ++ klichko
         where klichko = "Есть очень много по этому поводу точек зрения. Я четко придерживаюсь и четко понимаю, что те проявления, если вы уже так ребром ставите вопрос, что якобы мы"

@@ -1,5 +1,5 @@
 --importPriority = 40
-module Config --(readConfig, Config, host, token ) 
+module Config 
 where
 
 --наши модули
@@ -9,7 +9,7 @@ import Parse --50
 import Types --100
 --import Transformer 
 --import App
-import Log
+import qualified Log
 import Class
 import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString.Lazy.Char8 as LC
@@ -33,7 +33,7 @@ readConfig = do
 readS :: ExceptT E IO S
 readS = do
     config <- readConfig
-    let s = getS config
+    let s = toS config
     --print config
     return s
 
@@ -42,7 +42,7 @@ readS = do
 saveS :: S -> ExceptT E IO ()
 saveS s = do
     config <- readConfig
-    let newConfig = setS config s
+    let newConfig = fromS config s
     ExceptT $ toEE (L.writeFile pathConfig (encode newConfig)) `catch` hW
 
 --readConfigValue :: ExceptT E IO Value
@@ -58,31 +58,16 @@ hR e
     | isDoesNotExistError e = throw $ ConfigError "Файл конфигурации не найден!"
     | otherwise = throw $ ConfigError "Ошибка чтения файла конфигурации"
 
---эту же функцию можно использовать для сохранения других данных
---saveConfig :: ToJSON a => a -> ExceptT E IO ()
---saveConfig config = ExceptT $ toEE (L.writeFile pathConfig (encode config)) `catch` hW
-
-
-
 hW :: IOException -> IO (EE ())
 hW e
     | isDoesNotExistError e = throw $ ConfigError "Файл конфигурации не найден!"
     | otherwise = throw $ ConfigError "Ошибка записи файла конфигурации"
 
---host :: String
---host="api.telegram.org"
---host="api.telegram.org"
 
--- setUpdateId :: UpdateId -> S -> S
--- setUpdateId newUid c = let newConfigApp = (configApp c) {updateId = newUid} in
---     c {configApp = newConfigApp}
-
---функции для работы с состоянием. Внутрення структура состояния скрывается за геттерами и сеттерами
---getters && setters lens like
 
 -------------------State <-> Config--------------------------------------
-getS :: Config -> S
-getS configFile = let 
+toS :: Config -> S
+toS configFile = let 
         configApps =  _apps configFile;
         configLog = _log configFile
         configApp = head $ filter (\ca -> show (_app configFile) == name ca) configApps in 
@@ -91,70 +76,16 @@ getS configFile = let
         configApp = configApp,
         configText = _text configFile,
         configLog = configLog,
-        logSettings = defaultLogSettings
+        logSettings = Log.defaultSettings
     }
 
-setS :: Config -> S -> Config
-setS configFile config = let 
+fromS :: Config -> S -> Config
+fromS configFile config = let 
         configApps =  _apps configFile;
         newConfigApps = [configApp config] <> filter (\ca -> name ca /= name (configApp config) ) configApps in
     configFile {_apps = newConfigApps}
 
--------------------Other-Simple--------------------------------------
--- getConfigApp :: S -> ConfigApp
--- getConfigApp = configApp --trivial
 
--- setConfigApp :: ConfigApp -> S -> S
--- setConfigApp ca s = s {configApp = ca}
-
--- getRepeatNumbers ::  S -> M.Map ChatId Int
--- getRepeatNumbers = repeatNumber . getConfigApp
-
--- setRepeatNumbers ::  M.Map ChatId Int -> S -> S
--- setRepeatNumbers rns s = setConfigApp (getConfigApp s) {repeatNumber = rns} s
-
--- getmRepeatNumber :: ChatId -> S -> Maybe Int
--- getmRepeatNumber cid = M.lookup cid . getRepeatNumbers
-
--- setRepeatNumber :: ChatId -> Int -> S -> S
--- setRepeatNumber cid rn s = setRepeatNumbers (M.insert cid rn (getRepeatNumbers s)) s
-
------------------------Other-State-------------------------------------------------------
-
-getConfigApp :: State S ConfigApp
-getConfigApp = gets configApp --trivial
--- getConfigAppT = toT getConfigAppT
-
-setConfigApp :: ConfigApp -> State S ()
-setConfigApp ca  = modify $ \s -> s {configApp = ca}
-
-getConfigText :: State S ConfigText
-getConfigText = gets configText --trivial
-
-getUpdateId :: State S UpdateId
-getUpdateId = updateId <$> getConfigApp
-
-setUpdateId :: UpdateId -> State S ()
-setUpdateId uid = do
-    ca <- getConfigApp
-    setConfigApp ca {updateId = uid}
--- setUpdateIdT = toT . setUpdateId
-
-getRepeatNumbers ::  State S (M.Map ChatId Int)
-getRepeatNumbers = repeatNumber <$> getConfigApp
-
-setRepeatNumbers ::  M.Map ChatId Int -> State S ()
-setRepeatNumbers rns = do
-    ca <- getConfigApp
-    setConfigApp ca {repeatNumber = rns}
-
-getmRepeatNumber :: ChatId -> State S (Maybe Int)
-getmRepeatNumber cid = M.lookup cid <$> getRepeatNumbers
-
-setRepeatNumber :: ChatId -> Int -> State S ()
-setRepeatNumber cid rn = do
-    rns <- getRepeatNumbers
-    setRepeatNumbers $ M.insert cid rn rns
 
 
 
