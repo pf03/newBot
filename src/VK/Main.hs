@@ -3,14 +3,13 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 --importPriority = 1
-module VK.Main where
+module VK.Main (App.Main, test, Pointer(..)) where
 import Types hiding (repeat)--100 
 import VK.Types --99
 import Transformer --20
 import qualified VK.Query as Query --11
 import qualified Request --10
 import qualified VK.Parse as Parse --49
-import Config --40
 import Log
 import Class
 import qualified App --60
@@ -23,7 +22,7 @@ import Control.Monad
 import Data.List.Split 
 import Data.Maybe
 
-import System.Console.ANSI
+import qualified System.Console.ANSI as Color (Color(..)) 
 
 --каждая функция должна соответствовать одному запросу и его обработке
 
@@ -38,7 +37,7 @@ instance App.Main Pointer Init Update  where
 --вызывается либо в начале, либо когда произошла ошибка
 _getInit :: T Init
 _getInit = do
-    Log.setSettings (Blue, True, "getInit") 
+    Log.setSettings (Color.Blue, True, "getInit") 
     ConfigApp _name _host token _updateId _  _repeatNumber groupId version <- gets configApp
     let api = API Groups GetLongPollServer 
     Log.sendT
@@ -54,7 +53,7 @@ _getInit = do
 --в дальнейшем возможно переделать, чтобы не сохранять config каждый цикл, а только в конце работы бота, поэтому мы его пердаем в getUpdates
 _getUpdates :: Init -> T ([Update], Init)
 _getUpdates init@(Init server key ts) = do
-    Log.setSettings (Cyan, False, "getUpdates") 
+    Log.setSettings (Color.Cyan, False, "getUpdates") 
     --let newInit = init {ts=updateId}
     --let newInit = init
     let query = Query.longPoll init 25
@@ -71,15 +70,12 @@ _getUpdates init@(Init server key ts) = do
     Log.receiveDataT "updateId" muid
     updates <- toT $ Parse.updates o
     Log.receiveDataT "updates" updates
-    -- ifJust uid $ do
-    --     modify $ setUpdateId $ fromJust uid
-    --     saveConfigT
     return (updates, newInit)
 
 _sendMessage :: Update -> [Label] -> T ()
 _sendMessage update@(cid, en) btns = do
     --undefined
-    Log.setSettings (Yellow, True, "sendMessage") 
+    Log.setSettings (Color.Yellow, True, "sendMessage") 
     ConfigApp _name _host token _updateId _ _repeatNumber _groupId version <- gets configApp
     Log.sendT
     printT btns
@@ -115,10 +111,10 @@ _getAllUpdates = do
 
 upd = runT _getAllUpdates
 
-_testRequest::T()
-_testRequest = do
+_test::T()
+_test = do
     ConfigApp _name _host token _updateId _ _repeatNumber _groupId version <- gets configApp
-    Log.setSettings (Yellow, True, "testRequest") 
+    Log.setSettings (Color.Yellow, True, "testRequest") 
     Log.sendT
     let query = Query.test token version
     Log.receiveDataT "query" query
@@ -127,6 +123,6 @@ _testRequest = do
     o <- toT $ Parse.getObject json
     Log.receiveDataT "object" o
 
-req = runT _testRequest
+test = runT _test
 
 

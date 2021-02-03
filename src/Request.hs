@@ -4,12 +4,8 @@
 module Request (build, send, api) where 
 
 --наши модули
-import Config --40
 import Error --70
-import Parse --50
-import Telegram.Parse --49
 import Types --100
-import Transformer --20
 
 import Control.Monad.Trans.Except
 import Control.Monad ( when )

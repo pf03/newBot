@@ -1,6 +1,18 @@
- module Common where
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE UndecidableInstances #-}
+module Common where
 import Control.Monad.IO.Class
 import Data.List.Split
+
+--import qualified Data.ByteString as B
+import qualified Data.ByteString.Char8 as BC
+--import qualified Data.ByteString.Lazy as L
+import qualified Data.ByteString.Lazy.Char8 as LC
+
+import Data.Aeson.Types
+import Data.Aeson
+import Data.Text.Encoding
+import Data.Text (pack)
 
 
 ----------------вспомогательные монадические функции -------------------------------------
@@ -43,3 +55,28 @@ safeTail x = tail x
 safeInit :: [a] -> [a]
 safeInit [] = []
 safeInit x = init x
+
+----------------------------------------Convert--------------------------------------------------
+class Convert a where
+    convert :: a -> BC.ByteString
+
+instance Convert String where
+    convert = encodeUtf8 . pack  --encodeUtf8 для корректной кодировки кирилицы
+
+instance Convert LC.ByteString where
+  convert = BC.pack . LC.unpack
+
+instance Convert Int where
+  convert = BC.pack . show
+
+instance Convert Float where
+  convert = BC.pack . show
+
+instance Convert Value where 
+     convert = convert . encode 
+
+instance Convert Object where 
+     convert = convert . encode 
+
+jc :: Convert a => a -> Maybe BC.ByteString
+jc = Just . convert

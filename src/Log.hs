@@ -28,7 +28,7 @@ import System.Console.ANSI
 import Control.Monad
 import Control.Monad.State.Lazy
 import App
-import Class
+import Common
 import Control.Applicative
 import Data.Maybe
 import Data.Aeson.Types hiding (Error)

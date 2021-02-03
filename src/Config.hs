@@ -4,11 +4,8 @@ where
 
 --наши модули
 import Error --70
-import Parse --50
---import Logic 
+import qualified Parse --50
 import Types --100
---import Transformer 
---import App
 import qualified Log
 import Class
 import qualified Data.ByteString.Lazy as L
@@ -26,7 +23,7 @@ import Control.Monad.State.Lazy
 readConfig :: ExceptT E IO Config
 readConfig = do
     bs <- ExceptT $ toEE (L.readFile pathConfig) `catch` hR
-    fileConfig <- toE $ eDecode bs
+    fileConfig <- toE $ Parse.eDecode bs
     --print fileConfig
     return fileConfig
 

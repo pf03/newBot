@@ -7,9 +7,7 @@ import VK.Types --99
 import qualified VK.Parse as Encode (keyboard, contentUrl, contentMessage) --49
 import Parse ( (<:>), (<:?>) )
 import Error
-import Logic
 import Common
-import Class
 import Data.Either
 
 import Network.HTTP.Simple

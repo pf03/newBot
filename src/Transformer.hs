@@ -21,7 +21,6 @@ import Config --40
 -- import Error
 import Types  --100
 -- import Parse
-import Logic  --30
 import Error
 import qualified Log
 import Class
@@ -83,8 +82,3 @@ testLog = runT $ do
         where klichko = "Есть очень много по этому поводу точек зрения. Я четко придерживаюсь и четко понимаю, что те проявления, если вы уже так ребром ставите вопрос, что якобы мы"
 
 ---------------------------------------MonadLog-------------------------------------------------------
-instance Log.MonadLog T where 
-  getSettings = S.getLogSettings
-  setSettings = S.setLogSettings
-  --resetLogSettings = modify $ \s -> s {Log.Settings = defaultLogSettings } --Log.hs
-  getConfig = S.getLogConfig

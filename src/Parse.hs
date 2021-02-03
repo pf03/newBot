@@ -25,6 +25,7 @@ import App  --60
 import Network.HTTP.Simple
 import Data.Maybe
 import Class
+import Common
 
 -----------------From JSON------------------------------
 
