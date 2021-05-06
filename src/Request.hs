@@ -4,7 +4,7 @@
 module Request (build, send, api) where 
 
 --наши модули
-import Error --70
+import Interface.Error as Error --70
 import Types --100
 
 import Control.Monad.Trans.Except

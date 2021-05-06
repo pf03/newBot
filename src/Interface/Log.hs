@@ -1,4 +1,4 @@
-module Log 
+module Interface.Log 
 -- (sendT,
 -- receiveT,
 -- receiveDataT,
@@ -40,86 +40,86 @@ import qualified Data.ByteString.Char8 as BC
 import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString.Lazy.Char8 as LC
 
-class MonadIO m => MonadLog m where
+class MonadIO m => MLog m where
   getSettings :: m LogSettings
   setSettings :: LogSettings -> m()
   --resetLogSettings :: m ()
-  --resetLogSettings = setLogSettings defaultLogSettings  перенес в Log.hs как свободную функцию
+  --resetLogSettings = setLogSettings defaultLogSettings  перенес в hs как свободную функцию
   getConfig :: m ConfigLog
 
-sendT :: MonadLog m => m ()
+sendT :: MLog m => m ()
 sendT = do
     fname <- getfnameT 
-    Log.textT Info $ template "Отправляем запрос {0}.................." [fname]
+    textT Info $ template "Отправляем запрос {0}.................." [fname]
 
-receiveT :: MonadLog m => m ()
+receiveT :: MLog m => m ()
 receiveT = do 
     fname <- getfnameT 
-    Log.textT Info $ template "Получили ответ {0}.................." [fname]
+    textT Info $ template "Получили ответ {0}.................." [fname]
 
-receiveDataT :: (MonadLog m, Show a) => String -> a -> m ()
+receiveDataT :: (MLog m, Show a) => String -> a -> m ()
 receiveDataT dataName dataValue = do
     fname <- getfnameT 
-    Log.textT Info $ template "Получили {1} в запросе {0}.................." [fname, dataName]
-    Log.dataT Data dataValue
+    textT Info $ template "Получили {1} в запросе {0}.................." [fname, dataName]
+    dataT Data dataValue
 
-receiveConvertDataT :: (MonadLog m, Show a, ToJSON a) => String -> a -> m ()
+receiveConvertDataT :: (MLog m, Show a, ToJSON a) => String -> a -> m ()
 receiveConvertDataT dataName dataValue = do
     fname <- getfnameT 
-    Log.textT Info $ template "Получили {1} в запросе {0}.................." [fname, dataName]
-    Log.convertDataT Data dataValue
+    textT Info $ template "Получили {1} в запросе {0}.................." [fname, dataName]
+    convertDataT Data dataValue
 
-errorT :: (MonadLog m, Show e) => e -> m ()
+errorT :: (MLog m, Show e) => e -> m ()
 errorT error = do
-    (config, settings) <- Log.getConfigSettings
-    liftIO $ Log.error config settings error
+    (config, settings) <- getConfigSettings
+    liftIO $ Interface.Log.error config settings error
 
 --всего лишь добавляем название функции для удобства отладки
-funcT :: MonadLog m => LogLevel -> String -> m ()
+funcT :: MLog m => LogLevel -> String -> m ()
 funcT level text = do
     fname <- getfnameT 
     textT level $ template "Функция {0}:" [fname]
 
-colorTextT :: MonadLog m => ColorScheme -> LogLevel -> String -> m ()
+colorTextT :: MLog m => ColorScheme -> LogLevel -> String -> m ()
 colorTextT colorScheme level text = do
-    Log.setSettings (colorScheme, True, "")
-    Log.textT level text
+    setSettings (colorScheme, True, "")
+    textT level text
 
-textT :: MonadLog m => LogLevel -> String -> m ()
+textT :: MLog m => LogLevel -> String -> m ()
 textT level text = do
-    (config, msettings) <- Log.getConfigSettings
-    liftIO $ Log.text config msettings level text
+    (config, msettings) <- getConfigSettings
+    liftIO $ Interface.Log.text config msettings level text
 
-dataT :: (MonadLog m, Show a) => LogLevel -> a -> m ()
+dataT :: (MLog m, Show a) => LogLevel -> a -> m ()
 dataT level dataValue = do
-    (config, settings) <- Log.getConfigSettings
-    liftIO $ Log.ldata config settings level dataValue
+    (config, settings) <- getConfigSettings
+    liftIO $ ldata config settings level dataValue
 
-convertDataT :: (MonadLog m, Show a, ToJSON a) => LogLevel -> a -> m ()
+convertDataT :: (MLog m, Show a, ToJSON a) => LogLevel -> a -> m ()
 convertDataT level dataValue = do
     (config, settings) <- getConfigSettings
-    liftIO $ Log.convertData config settings level dataValue
+    liftIO $ convertData config settings level dataValue
 
-getfnameT :: MonadLog m => m String 
-getfnameT = Log.getfname <$> Log.getSettings
+getfnameT :: MLog m => m String 
+getfnameT = getfname <$> getSettings
 
-getConfigSettings :: MonadLog m => m (ConfigLog, LogSettings) 
+getConfigSettings :: MLog m => m (ConfigLog, LogSettings) 
 getConfigSettings = do
-    config <- Log.getConfig 
-    settings <- Log.getSettings
+    config <- getConfig 
+    settings <- getSettings
     return (config, settings)
 
-resetSettings :: MonadLog m => m ()
-resetSettings = Log.setSettings Log.defaultSettings
+resetSettings :: MLog m => m ()
+resetSettings = setSettings defaultSettings
 
 
 --более низкоуровневые функции, если нету доступа к трансформеру, например в runT
 --Текст идет с цветовой схемой
 error :: (Show a) => ConfigLog -> LogSettings -> a -> IO()
 error config settings error = do
-    let fname = Log.getfname settings
-    Log.text config settings Error $ template "Получили ошибку в функции {0}!" [fname]
-    Log.ldata config settings Error error
+    let fname = getfname settings
+    text config settings Error $ template "Получили ошибку в функции {0}!" [fname]
+    ldata config settings Error error
 
 
 text :: ConfigLog -> LogSettings -> LogLevel -> String -> IO ()
@@ -127,16 +127,16 @@ text (ConfigLog color terminal file configLevel) (colorScheme, enable , _ ) leve
     if not $ level >= toEnum configLevel && enable then return () else do
         when (color && terminal) $ Color.setSchemeT colorScheme
         when terminal $ putStrLnT text
-        when file $ Log.file text
+        when file $ Interface.Log.file text
         when (color && terminal) Color.resetColorSchemeT 
 
 --Данные с цветом, зависяцим от LogLevel--logData не зависит от настроек цвета, только logText зависит
 ldata :: (Show a) => ConfigLog -> LogSettings -> LogLevel -> a -> IO ()
 ldata (ConfigLog color terminal file configLevel) (colorScheme, enable , _ ) level dataValue = do
     if not $ level >= toEnum configLevel && enable then return () else do
-        when (color && terminal) $ Color.setColorT $ Log.getColor level
+        when (color && terminal) $ Color.setColorT $ getColor level
         when terminal $ printT dataValue
-        when file $ Log.file $ show dataValue
+        when file $ Interface.Log.file $ show dataValue
         when (color && terminal) Color.resetColorSchemeT 
 -------------эти две функции объединить в одну----------------------------------------------------------------
 convertData :: (ToJSON a, Show a) => ConfigLog -> LogSettings -> LogLevel -> a -> IO ()
@@ -145,14 +145,14 @@ convertData (ConfigLog color terminal file configLevel) (colorScheme, enable , _
         when (color && terminal) $ Color.setColorT $ getColor level
         when terminal $ printT dataValue
         --when file $ logFile $ show dataValue
-        when file $ Log.file dataValue
+        when file $ Interface.Log.file dataValue
         when (color && terminal) Color.resetColorSchemeT 
 
 defaultSettings :: LogSettings
 defaultSettings = (Black, True, "")
 
 defaultConfig :: ConfigLog
-defaultConfig = ConfigLog {color = False, terminal = True, Types.file = False, level = 0}
+defaultConfig = ConfigLog {colorEnable = False, terminalEnable = True, fileEnable = False, minLevel = 0}
 
 file :: ToJSON a => a -> IO()
 file str = do 
@@ -172,3 +172,5 @@ getColor  Debug = Magenta
 getfname :: LogSettings -> String 
 -- getfname Nothing = "?"
 getfname (_ , _,fn) = fn
+
+

@@ -17,14 +17,38 @@ import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString.Lazy.Char8 as LC
 
 --наш проект
-import Config --40
+import qualified Config --40
 -- import Error
 import Types  --100
 -- import Parse
-import Error
-import qualified Log
+import Interface.Error
+import qualified Interface.Log as Log
+import  Interface.Cache as Cache
 import Class
 
+
+-----------------------------Instances-----------------------------------------
+instance Log.MLog T where
+  getSettings = getLogSettings
+  setSettings = setLogSettings
+  getConfig = getLogConfig
+--   setConfig = S.setLogConfig
+--   message = Log.messageIO
+
+instance MError T where
+    throw :: E -> T a
+    throw e  = lift $ throwE e
+
+    catch :: T a -> (E -> T a) -> T a
+    catch ta f  = StateT $ \s -> catchE (runStateT ta s) $ \e -> runStateT (f e) s
+
+instance MIOError T
+
+instance MCache T where
+    getCache = gets cache
+    setCache c = modify (\st -> st {cache = c})
+
+-- instance MT T
 
 
 --Пользователи ничего не должны знать о внутренней структуре нашего трансформера.
@@ -41,7 +65,7 @@ throwT e  = toT (throwE e::Except E a)
 runT :: (ToTransformer m, Show a) => m a -> IO()
 runT m = do 
     let settings = (Cyan, True, "runT")
-    es <- runExceptT readS
+    es <- runExceptT Config.readS
     case es of 
         Left e -> do
             let dlc = Log.defaultConfig
@@ -64,7 +88,8 @@ saveST = do
     --v <- toT readConfigValue 
     s <- get
     --let bc = encodeConfig v config
-    toT $ saveS s
+    toT $ Config.saveS s
+
 
 
 

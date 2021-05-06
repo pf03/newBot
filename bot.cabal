@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4f1ca1604f1e252b25aa492e62e401597477387cf8a0e4bfcb2b09e0e3b7b40e
+-- hash: 18944ced3afaf54ec532ea5e3516774571c45a5df6f35a9e7ff7e9e801a32b0c
 
 name:           bot
 version:        0.1.0.0
@@ -32,8 +32,9 @@ library
       Color
       Common
       Config
-      Error
-      Log
+      Interface.Cache
+      Interface.Error
+      Interface.Log
       Logic
       Parse
       Request

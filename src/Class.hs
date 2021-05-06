@@ -6,7 +6,7 @@ import Control.Monad.Trans.Except
 import Control.Monad.Except
 import Control.Monad.Reader
 import Control.Monad.State.Lazy
-import qualified Log
+import qualified Interface.Log as Log
 
 
 
@@ -47,7 +47,7 @@ instance ToTransformer (State S) where
         let a = evalState state s
         return a
 
-instance Log.MonadLog T where 
+instance Log.MLog T where 
   getSettings = S.getLogSettings
   setSettings = S.setLogSettings
   --resetLogSettings = modify $ \s -> s {Log.Settings = defaultLogSettings } --Log.hs

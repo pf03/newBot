@@ -18,7 +18,7 @@ import Control.Monad.Trans.Except
 import Data.Aeson
 
 --наши модули
-import Error  --70
+import Interface.Error as Error  --70
 import Data.Aeson.Types
 import Types  --100
 import App  --60

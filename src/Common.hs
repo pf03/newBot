@@ -14,6 +14,13 @@ import Data.Aeson
 import Data.Text.Encoding
 import Data.Text (pack)
 
+-----------------------------Types---------------------------------------------
+-- type FileName = String
+-- type PathInfo = [Text]
+-- type Path = String
+-- data Action = Check | Execute --flag
+type BS = BC.ByteString
+type LBS = LC.ByteString
 
 ----------------вспомогательные монадические функции -------------------------------------
 ifJust :: Monad m => Maybe a -> m () -> m () 

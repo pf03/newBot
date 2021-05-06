@@ -43,3 +43,7 @@ bimapM_ f (x:xs) (y:ys) = do
   f x y
   bimapM_ f xs ys
 bimapM_ _ _ _ = error "list args of bimapM_ must have equal lengths"
+
+
+
+

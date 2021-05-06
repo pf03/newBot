@@ -18,6 +18,36 @@ import System.Console.ANSI
 --Этот модуль содержит все типы в проекте, исключая специфические для каждого из приложений VK, Telegram
 --Специфические нужно разместить в VK.Types и Telegram.Types
 
+------errror
+-- data E = ParseError String | QueryError String | ConfigError String | DevError String
+
+-----------------------------Types---------------------------------------------
+data E = ParseError String
+    | QueryError String
+    -- | RequestError String
+    | ConfigError String
+    -- | DBError String
+    | IOError String
+    -- | AuthError String
+    -- | An error that should never occur when the program is written correctly
+    -- (for example, incorrect pattern matching)
+    | DevError String 
+    | SomeError String
+
+
+------------------Cache---------------
+data Cache = Cache {
+    app :: App,
+    configApp :: ConfigApp,
+    configText :: ConfigText,
+    changed :: Changed
+    -- configLog :: ConfigLog,
+    -- logSettings :: LogSettings
+} deriving (Show, Generic)
+type Changed = Bool
+----------------------------------------Transformer------------------------------------------------
+--основной трансформер, контейнер с одним параметром
+type T = StateT Cache (ExceptT E IO)
 --------------------------------------Main--------------------------------------------------------
 type TimeOut = Int  --таймаут для long polling
 
@@ -26,24 +56,15 @@ data App = VK | Telegram deriving (Show, Generic)
 instance FromJSON App
 instance ToJSON App
 
---------------------------------------Error--------------------------------------------------------
-data E = ParseError String | QueryError String | ConfigError String 
--- это надо убрать, раз мы пользуемся мондами Parser - Except - ExceptT
-type ES = Either String
-type EE = Either E
-
-----------------------------------------Transformer------------------------------------------------
---основной трансформер, контейнер с одним параметром
-type T = StateT S (ExceptT E IO)
-
 ------------------------------------Config---------------------------------------------------------
 
 --в случае разветвления логики сделать отдельный конфиг для каждого приложения
 --состояние приложения, используется в трансформере, Reader
 data S = S {
-    app :: App,
-    configApp :: ConfigApp,
-    configText :: ConfigText,
+    cache :: Cache,
+    -- app :: App,
+    -- configApp :: ConfigApp,
+    -- configText :: ConfigText,
     configLog :: ConfigLog,
     logSettings :: LogSettings
 } deriving (Show, Generic)
@@ -54,6 +75,21 @@ data Config = Config {
     _text :: ConfigText,
     _log :: ConfigLog
 } deriving (Show, Generic)
+
+--Log
+data LogLevel =  Debug | Data | Info | Warning | Error  deriving (Eq, Enum, Ord)
+type ColorScheme = Color
+type LogSettings = (ColorScheme, Bool, String)
+
+data ConfigLog = ConfigLog{
+    colorEnable :: Bool,
+    terminalEnable :: Bool,
+    fileEnable :: Bool,
+    minLevel :: Int  --уровень включения логов
+} deriving (Show, Generic)
+
+instance FromJSON ConfigLog
+instance ToJSON ConfigLog
 
 data ConfigApp = ConfigApp{
     name:: String,
@@ -74,12 +110,12 @@ data ConfigText = ConfigText{
     button :: String
 } deriving (Show, Generic)
 
-data ConfigLog = ConfigLog{
-    color :: Bool,
-    terminal :: Bool,
-    file :: Bool,
-    level :: Int  --уровень включения логов
-} deriving (Show, Generic)
+-- data ConfigLog = ConfigLog{
+--     enableColor :: Bool,
+--     enableTerminal :: Bool,
+--     enableFile :: Bool,
+--     minLevel :: Int  --уровень включения логов
+-- } deriving (Show, Generic)
 
 instance ToJSON Config where
     toJSON = genericToJSON defaultOptions {
@@ -93,8 +129,8 @@ instance FromJSON ConfigText
 instance ToJSON ConfigText
 instance FromJSON ConfigApp
 instance ToJSON ConfigApp
-instance FromJSON ConfigLog
-instance ToJSON ConfigLog
+--instance FromJSON ConfigLog --Log.Types
+--instance ToJSON ConfigLog
 
 --------------------------------Parse && Logic----------------------------------------------------------
 type Token = String
@@ -118,13 +154,11 @@ type StateChanged = Bool
 
 
 --Parse
-type OResultItem = Object
-type OMessageItem = Object
 
---Log
-data LogLevel =  Debug | Data | Info | Warning | Error  deriving (Eq, Enum, Ord)
-type ColorScheme = Color
-type LogSettings = (ColorScheme, Bool, String)
+-- --Log
+-- data LogLevel =  Debug | Data | Info | Warning | Error  deriving (Eq, Enum, Ord)
+-- type ColorScheme = Color
+-- type LogSettings = (ColorScheme, Bool, String)
 
 
 

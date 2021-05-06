@@ -16,7 +16,7 @@ import Data.Text (Text, pack)
 import GHC.Exts -- (fromList)
 
 --наши модули
-import Error --70
+import Interface.Error as Error --70
 import Types --100
 import Telegram.Types  --99
 import Parse  --50
@@ -28,6 +28,9 @@ import Control.Monad.Trans.Except
 import Data.Maybe
 import Control.Applicative
 
+-----------------------------Types---------------------------------------------
+type OResultItem = Object
+type OMessageItem = Object
 
 -----------------RECEIVE-----------------------------
 

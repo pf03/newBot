@@ -3,10 +3,10 @@ module Config
 where
 
 --наши модули
-import Error --70
+import qualified Interface.Error as Error
 import qualified Parse --50
 import Types --100
-import qualified Log
+import qualified Interface.Log as Log
 import Class
 import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString.Lazy.Char8 as LC
@@ -22,8 +22,8 @@ import Control.Monad.State.Lazy
 
 readConfig :: ExceptT E IO Config
 readConfig = do
-    bs <- ExceptT $ toEE (L.readFile pathConfig) `catch` hR
-    fileConfig <- toE $ Parse.eDecode bs
+    bs <- ExceptT $ Error.toEE (L.readFile pathConfig) `catch` hR
+    fileConfig <- Error.toE $ Parse.eDecode bs
     --print fileConfig
     return fileConfig
 
@@ -40,7 +40,7 @@ saveS :: S -> ExceptT E IO ()
 saveS s = do
     config <- readConfig
     let newConfig = fromS config s
-    ExceptT $ toEE (L.writeFile pathConfig (encode newConfig)) `catch` hW
+    ExceptT $ Error.toEE (L.writeFile pathConfig (encode newConfig)) `catch` hW
 
 --readConfigValue :: ExceptT E IO Value
 --readConfigValue = do
@@ -50,15 +50,15 @@ saveS s = do
 pathConfig :: FilePath
 pathConfig = "config.json"
 
-hR :: IOException -> IO (EE L.ByteString )
+hR :: IOException -> IO (Error.EE L.ByteString )
 hR e
-    | isDoesNotExistError e = throw $ ConfigError "Файл конфигурации не найден!"
-    | otherwise = throw $ ConfigError "Ошибка чтения файла конфигурации"
+    | isDoesNotExistError e = return $ Left  $ ConfigError "Файл конфигурации не найден!"
+    | otherwise = return $ Left  $ ConfigError "Ошибка чтения файла конфигурации"
 
-hW :: IOException -> IO (EE ())
+hW :: IOException -> IO (Error.EE ())
 hW e
-    | isDoesNotExistError e = throw $ ConfigError "Файл конфигурации не найден!"
-    | otherwise = throw $ ConfigError "Ошибка записи файла конфигурации"
+    | isDoesNotExistError e = return $ Left  $ ConfigError "Файл конфигурации не найден!"
+    | otherwise = return $ Left  $ ConfigError "Ошибка записи файла конфигурации"
 
 
 
