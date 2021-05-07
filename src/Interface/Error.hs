@@ -117,5 +117,5 @@ instance MError (ExceptT E IO) where
 instance MIOError (ExceptT E IO)
 
 -----------------------------Decode--------------------------------------------
-eDecode :: (MError m, FromJSON a) => LBS -> m a
-eDecode bs = catchEither (eitherDecode bs) ParseError
+-- eDecode :: (MError m, FromJSON a) => LBS -> m a
+-- eDecode bs = catchEither (eitherDecode bs) ParseError

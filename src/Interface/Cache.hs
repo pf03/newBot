@@ -1,6 +1,10 @@
 {-# LANGUAGE DeriveGeneric #-}
 module Interface.Cache where
 
+-- Our modules
+import Common.Misc
+
+-- Other modules
 import           GHC.Generics
 import Control.Monad.IO.Class
 import qualified Data.Map.Internal as M
@@ -44,8 +48,7 @@ instance ToJSON ConfigText
 
 type Token = String
 type Host = String
-type UpdateId = Int
-type ChatId = Int
+
 data App = VK | Telegram deriving (Show, Generic)
 instance FromJSON App
 instance ToJSON App

@@ -24,7 +24,15 @@ type Path = String
 type Message = String  
 type Label = String  
 data Command = Help | Repeat | Start | Unknown String| Button Int deriving (Show, Eq)  --возможные команды боту
-
+type UpdateId = Int
+type ChatId = Int
+type Key = String 
+type UserId = Int
+type IntId = Int 
+type StrId = String
+type FileId = String
+type Url = String
+type ItemName = String
 ----------------вспомогательные монадические функции -------------------------------------
 ifJust :: Monad m => Maybe a -> m () -> m () 
 ifJust ma m = case ma of 
