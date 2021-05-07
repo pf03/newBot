@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric #-}
 module Interface.Log 
 -- (sendT,
 -- receiveT,
@@ -21,24 +22,42 @@ module Interface.Log
 where 
 --importPriority = 25
 
-import Types
-import qualified Color
-import Common
+-- Our molules
+import qualified Common.Color as Color
+import Common.Misc
+
+-- Other modules
 import System.Console.ANSI
 import Control.Monad
 import Control.Monad.State.Lazy
-import App
-import Common
+-- import App
 import Control.Applicative
-import Data.Maybe
+-- import Data.Maybe
 import Data.Aeson.Types hiding (Error)
 import Data.Aeson hiding (Error)
 import Prelude hiding (error)
+import GHC.Generics
 
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as BC
 import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString.Lazy.Char8 as LC
+
+-----------------------------Types---------------------------------------------
+data LogLevel =  Debug | Data | Info | Warning | Error  deriving (Eq, Enum, Ord)
+type ColorScheme = Color
+type LogSettings = (ColorScheme, Bool, String)
+
+data ConfigLog = ConfigLog{
+    colorEnable :: Bool,
+    terminalEnable :: Bool,
+    fileEnable :: Bool,
+    minLevel :: Int  --уровень включения логов
+} deriving (Show, Generic)
+
+instance FromJSON ConfigLog
+instance ToJSON ConfigLog
+
 
 class MonadIO m => MLog m where
   getSettings :: m LogSettings

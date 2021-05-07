@@ -3,10 +3,22 @@
 {-# LANGUAGE FunctionalDependencies #-}
 
 --importPriority = 60
-module App where
+module Interface.App 
+-- (module Interface.App, --конфликты
+-- module Interface.Class
+-- )
+where
+
+-- Our modules
+import Interface.Class
+import Interface.Cache as Cache
+-- import Interface.Error as Error
+-- import Interface.Log as Log
+import Common.Misc
+
 --import Control.Monad.State.Lazy
 
-import Types  --100
+-- import Types  --100
 
 
 
@@ -17,11 +29,11 @@ import Types  --100
 --нужно быть осторожным, чтобы типы не были одинаковыми!!
 class (Update update) => Main pointer init update  | pointer -> init , init -> update, update -> pointer where 
   --общий интерфейс
-  getInit :: pointer -> T init
+  getInit :: MT m => pointer -> m init
   getUpdateId :: init -> UpdateId
   setUpdateId :: init -> UpdateId -> init
-  getUpdates:: init -> T ([update], init)
-  sendMessage:: update -> [Label] -> T ()
+  getUpdates:: MT m => init -> m ([update], init)
+  sendMessage:: MT m => update -> [Label] -> m ()
    --getEntity :: update -> Entity
    
 --универсальные функции для работы с обновлениями, типа линз

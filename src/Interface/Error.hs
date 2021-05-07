@@ -1,18 +1,31 @@
 {-# LANGUAGE FlexibleInstances #-}
 module Interface.Error where
 
--- import Control.Exception
+
+-- Our modules
+import Common.Misc
+
+-- Other modules
 import Control.Monad.Except
 import Control.Monad.Trans.Except ( catchE, except, throwE )
 import           Data.Aeson
-import Types  --100
-import Common
 
--- Other modules
+
+
 import qualified Control.Exception          as E
 
 -----------------------------Types---------------------------------------------
-
+data E = ParseError String
+    | QueryError String
+    -- | RequestError String
+    | ConfigError String
+    -- | DBError String
+    | IOError String
+    -- | AuthError String
+    -- | An error that should never occur when the program is written correctly
+    -- (for example, incorrect pattern matching)
+    | DevError String 
+    | SomeError String
 
 -- это надо убрать, раз мы пользуемся мондами Parser - Except - ExceptT
 type ES = Either String

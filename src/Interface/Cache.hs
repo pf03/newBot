@@ -1,15 +1,56 @@
 {-# LANGUAGE DeriveGeneric #-}
 module Interface.Cache where
 
-import Types
 import           GHC.Generics
 import Control.Monad.IO.Class
 import qualified Data.Map.Internal as M
+import Data.Aeson
 
+
+-----------------------------Types---------------------------------------------
+data Cache = Cache {
+    app :: App,
+    configApp :: ConfigApp,
+    configText :: ConfigText,
+    changed :: Changed
+    -- configLog :: ConfigLog,
+    -- logSettings :: LogSettings
+} deriving (Show, Generic)
+type Changed = Bool
+
+data ConfigApp = ConfigApp{
+    name:: String,
+    host :: Host,
+    token :: Token,
+    updateId :: UpdateId,
+    updateIdFromFile :: Bool,
+    repeatNumber :: M.Map ChatId Int,
+    groupId :: Int,
+    version :: String --API version
+
+} deriving (Show, Generic)
+
+instance FromJSON ConfigApp
+instance ToJSON ConfigApp
+
+data ConfigText = ConfigText{
+    help :: String, 
+    repeat :: String, 
+    unknown :: String, 
+    button :: String
+} deriving (Show, Generic)
+instance FromJSON ConfigText
+instance ToJSON ConfigText
+
+type Token = String
+type Host = String
+type UpdateId = Int
+type ChatId = Int
+data App = VK | Telegram deriving (Show, Generic)
+instance FromJSON App
+instance ToJSON App
 
 -----------------------------Class---------------------------------------------
-
-
 class Monad m => MCache m where
     getCache :: m Cache
     setCache :: Cache -> m ()
@@ -22,7 +63,7 @@ class (MCache m, MonadIO m) => MIOCache m where
     -- можно сюда еще добавить обработку ошибок и логгирование, тогда это уже трансформер.
     writeCache :: m () 
 
--- class MT
+
 
 getCacheChanged :: MCache m => m Changed 
 getCacheChanged = getsCache changed
@@ -53,6 +94,12 @@ getApp = getsCache app
 
 getConfigApp :: MCache m => m ConfigApp
 getConfigApp = getsCache configApp --trivial
+
+getHost :: MCache m => m Host
+getHost = host <$> getConfigApp
+
+getToken :: MCache m => m Host
+getToken = token <$> getConfigApp
 
 setConfigApp :: MCache m => ConfigApp -> m ()
 setConfigApp ca  = modifyCache $ \s -> s {configApp = ca}

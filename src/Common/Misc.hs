@@ -1,14 +1,13 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Common where
+module Common.Misc where
+
 import Control.Monad.IO.Class
 import Data.List.Split
-
 --import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as BC
 --import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString.Lazy.Char8 as LC
-
 import Data.Aeson.Types
 import Data.Aeson
 import Data.Text.Encoding
@@ -21,6 +20,10 @@ import Data.Text (pack)
 -- data Action = Check | Execute --flag
 type BS = BC.ByteString
 type LBS = LC.ByteString
+type Path = String
+type Message = String  
+type Label = String  
+data Command = Help | Repeat | Start | Unknown String| Button Int deriving (Show, Eq)  --возможные команды боту
 
 ----------------вспомогательные монадические функции -------------------------------------
 ifJust :: Monad m => Maybe a -> m () -> m () 
