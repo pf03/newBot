@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
-module Interface.Log 
+module Interface.MLog 
 -- (sendT,
 -- receiveT,
 -- receiveDataT,
@@ -91,7 +91,7 @@ receiveConvertDataT dataName dataValue = do
 errorT :: (MLog m, Show e) => e -> m ()
 errorT error = do
     (config, settings) <- getConfigSettings
-    liftIO $ Interface.Log.error config settings error
+    liftIO $ Interface.MLog.error config settings error
 
 --всего лишь добавляем название функции для удобства отладки
 funcT :: MLog m => LogLevel -> String -> m ()
@@ -107,7 +107,7 @@ colorTextT colorScheme level text = do
 textT :: MLog m => LogLevel -> String -> m ()
 textT level text = do
     (config, msettings) <- getConfigSettings
-    liftIO $ Interface.Log.text config msettings level text
+    liftIO $ Interface.MLog.text config msettings level text
 
 dataT :: (MLog m, Show a) => LogLevel -> a -> m ()
 dataT level dataValue = do
@@ -146,7 +146,7 @@ text (ConfigLog color terminal file configLevel) (colorScheme, enable , _ ) leve
     if not $ level >= toEnum configLevel && enable then return () else do
         when (color && terminal) $ Color.setSchemeT colorScheme
         when terminal $ putStrLnT text
-        when file $ Interface.Log.file text
+        when file $ Interface.MLog.file text
         when (color && terminal) Color.resetColorSchemeT 
 
 --Данные с цветом, зависяцим от LogLevel--logData не зависит от настроек цвета, только logText зависит
@@ -155,7 +155,7 @@ ldata (ConfigLog color terminal file configLevel) (colorScheme, enable , _ ) lev
     if not $ level >= toEnum configLevel && enable then return () else do
         when (color && terminal) $ Color.setColorT $ getColor level
         when terminal $ printT dataValue
-        when file $ Interface.Log.file $ show dataValue
+        when file $ Interface.MLog.file $ show dataValue
         when (color && terminal) Color.resetColorSchemeT 
 -------------эти две функции объединить в одну----------------------------------------------------------------
 convertData :: (ToJSON a, Show a) => ConfigLog -> LogSettings -> LogLevel -> a -> IO ()
@@ -164,7 +164,7 @@ convertData (ConfigLog color terminal file configLevel) (colorScheme, enable , _
         when (color && terminal) $ Color.setColorT $ getColor level
         when terminal $ printT dataValue
         --when file $ logFile $ show dataValue
-        when file $ Interface.Log.file dataValue
+        when file $ Interface.MLog.file dataValue
         when (color && terminal) Color.resetColorSchemeT 
 
 defaultSettings :: LogSettings

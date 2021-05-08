@@ -5,7 +5,7 @@
 module Logic.Parse where
 
 -- Our modules
-import Interface.Error as Error  --70
+import Interface.MError as Error  --70
 import Common.Misc
 
 -- Other modules

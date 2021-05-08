@@ -1,18 +1,21 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 --importPriority = 49
 module VK.Parse 
---(module Parse, VK.Parse.init, VK.Parse.updateId, updates, keyboard, contentUrl, contentMessage) 
+-- как бы дополняем модуль Parse общими функциями
+(module Logic.Parse, module VK.Parse)
+--VK.Parse.init, VK.Parse.updateId, updates, keyboard, contentUrl, contentMessage) 
 where
 
 -- Our modules
-import Interface.Error
+import Interface.MError
 import Common.Misc
 -- import Types --100
 -- import VK.Types --99
 import Logic.Parse --50
 import Logic.Logic as Logic
-import VK.App 
+import VK.Update 
 
 -- Other modules
 --import qualified Data.ByteString as B
@@ -29,9 +32,13 @@ import Control.Monad.Trans.Except
 import Data.Maybe
 import Control.Applicative
 import Text.Read
+import GHC.Generics
 
 
 -----------------------------Types---------------------------------------------
+data Init = Init {server :: String, key :: String, ts :: Int } deriving (Show, Generic) --orphan instance IBot
+instance FromJSON Init
+instance ToJSON Init
 
 
 -----------------------RECEIVE----------------------------------------

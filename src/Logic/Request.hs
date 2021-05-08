@@ -4,13 +4,13 @@
 module Logic.Request (build, send, api) where 
 
 -- Our modules
-import Interface.Error as Error --70
+import Interface.MError as Error --70
 -- import Types --100
 -- import App
 import Common.Misc
 -- import Class
-import Interface.Cache as Cache
-import Interface.App as App
+import Interface.MCache as Cache
+import Interface.Messenger.IAPI as API
 -- import Interface.Class
 
 -- Other modules
@@ -57,7 +57,7 @@ send request save = do
     Error.throw $ QueryError "Request failed with error"
 
 --высокоуровневая обертка, как оказалось для Telegram подходит отлично, а для VK не подходит, верней не подходит только для longPolling
-api :: (API api, MCache m, MIOError m) => api -> Query -> Bool -> m LBS
+api :: (IAPI api, MCache m, MIOError m) => api -> Query -> Bool -> m LBS
 api api query save = do
   --config@(Config _ configApp _) <- get
   host <- Cache.getHost

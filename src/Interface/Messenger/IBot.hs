@@ -3,15 +3,16 @@
 {-# LANGUAGE FunctionalDependencies #-}
 
 --importPriority = 60
-module Interface.App 
+module Interface.Messenger.IBot 
 -- (module Interface.App, --конфликты
 -- module Interface.Class
 -- )
 where
 
 -- Our modules
-import Interface.Class
-import Interface.Cache as Cache
+import Interface.MT
+-- import Interface.Cache as Cache
+import Interface.Messenger.IUpdate
 -- import Interface.Error as Error
 -- import Interface.Log as Log
 import Common.Misc
@@ -27,7 +28,7 @@ import Common.Misc
 
 --достаточно одного типа для определения полного экземпляра
 --нужно быть осторожным, чтобы типы не были одинаковыми!!
-class (Update update) => Main pointer init update  | pointer -> init , init -> update, update -> pointer where 
+class (IUpdate update) => IBot pointer init update  | pointer -> init , init -> update, update -> pointer where 
   --общий интерфейс
   getInit :: MT m => pointer -> m init
   getUpdateId :: init -> UpdateId
@@ -35,19 +36,8 @@ class (Update update) => Main pointer init update  | pointer -> init , init -> u
   getUpdates:: MT m => init -> m ([update], init)
   sendMessage:: MT m => update -> [Label] -> m ()
    --getEntity :: update -> Entity
-   
---универсальные функции для работы с обновлениями, типа линз
-class Update update where 
-  setMessage :: update -> Message -> update
-  getMessage :: update -> Maybe Message
-  getCommand :: update -> Maybe Command
-  getChatId :: update -> ChatId
 
---скорей нужно переименовать в ClassTypes или Common
 
-class API api where 
-  apiName :: api -> String 
-  getPath :: Token -> api -> Path
 
 
 

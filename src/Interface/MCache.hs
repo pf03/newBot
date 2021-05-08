@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
-module Interface.Cache where
+module Interface.MCache where
 
 -- Our modules
 import Common.Misc
@@ -49,7 +49,7 @@ instance ToJSON ConfigText
 type Token = String
 type Host = String
 
-data App = VK | Telegram deriving (Show, Generic)
+data App = VK | Telegram deriving (Show, Generic)  -- это нарушает универсальность!!! Убрать из кеша, либо абстрагироваться от названий, сделать просто строку!!
 instance FromJSON App
 instance ToJSON App
 

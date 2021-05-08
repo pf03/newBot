@@ -1,18 +1,37 @@
+{-# LANGUAGE DeriveGeneric #-}
 --{-# LANGUAGE BangPatterns #-}
 --importPriority = 11
-module VK.Query (getLongPollServer, longPoll, sendMessage, test) where
-import qualified App --60
-import Types --100
-import VK.Types --99
-import qualified VK.Parse as Encode (keyboard, contentUrl, contentMessage) --49
-import Parse ( (<:>), (<:?>) )
-import Error
-import Common
-import Data.Either
+module VK.Query 
+--(getLongPollServer, longPoll, sendMessage, test) 
+where
 
+-- Our modules
+import Logic.Parse ( (<:>), (<:?>) )
+import Interface.MError as Error
+import Interface.MCache as Cache
+import Common.Misc
+
+-- Other modules
+import  VK.Update as Update --60
+-- import Types --100
+-- import VK.Types --99
+import VK.Parse
+import qualified VK.Parse as Encode (keyboard, contentUrl, contentMessage) --49
+import Data.Either
 import Network.HTTP.Simple
 import Control.Monad.Trans.Except
+import GHC.Generics
+import Data.Aeson
 
+
+-----------------------------Types---------------------------------------------
+type Version = String 
+type TimeOut = Int   --таймаут для long polling
+-- data Init = Init {server :: String, key :: String, ts :: Int } deriving (Show, Generic)  --могут быть orchan instances для IBot
+-- instance FromJSON Init
+-- instance ToJSON Init
+
+--можно добавить сюда интерфейс MCache
 --------------------------------------------External------------------------------------------------------------------
 getLongPollServer :: Token  -> GroupId -> Version -> Query 
 getLongPollServer token groupId version = "group_id" <:> groupId ++ "access_token" <:> token ++ "v" <:> version
@@ -20,10 +39,10 @@ getLongPollServer token groupId version = "group_id" <:> groupId ++ "access_toke
 longPoll :: Init -> TimeOut -> Query
 longPoll init timeout = "act" <:> ("a_check" :: String) ++ "key" <:> key init ++ "ts" <:> ts init ++ "wait" <:> timeout
 
-sendMessage :: Token -> Version -> Update -> [Label] -> Except E Query 
+sendMessage :: MError m => Token -> Version -> Update -> [Label] -> m Query 
 sendMessage token version (cid, Entity emc attachments) btns = do
     case emc of 
-        Right command -> throwE $ QueryError "Невозможно послать команду пользователю"
+        Right command -> Error.throw $ QueryError "Невозможно послать команду пользователю"
         -- Message m -> do
         Left message -> do
             let qDefault = _queryDefault token cid version

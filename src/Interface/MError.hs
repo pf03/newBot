@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
-module Interface.Error where
+module Interface.MError where
 
 
 -- Our modules

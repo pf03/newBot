@@ -1,9 +1,10 @@
 module Logic.Logic  where 
 
 -- Our modules
-import qualified Interface.App as App
+import Interface.Messenger.IBot as Bot
+import qualified Interface.Messenger.IUpdate as Update
 import Common.Misc
-import Interface.Cache as Cache
+import Interface.MCache as Cache
 
 import qualified Data.Map.Internal as M
 import Control.Monad.Reader
@@ -28,16 +29,16 @@ toMessageCommand str = let
             '/':x:xs | x /=' ' -> Right . Unknown . unwords $ (x:xs):tail w
             x -> Left str
 
-answer :: (MCache m, App.Main _pointer _init update) => update -> m (Changed, update, [Label])  
+answer :: (MCache m, IBot _pointer _init update) => update -> m (Changed, update, [Label])  
 answer update = do
-    let mmessage = App.getMessage update
-    let mcommand = App.getCommand update
+    let mmessage = Update.getMessage update
+    let mcommand = Update.getCommand update
     let memc = maybeToEither mmessage mcommand
-    let cid = App.getChatId update
+    let cid = Update.getChatId update
     case memc of
         Just emc -> do
             (changed, newMessage, btns) <- answerMessageCommand cid emc
-            return (changed, App.setMessage update newMessage, btns)  --ответ на команду или сообщение
+            return (changed, Update.setMessage update newMessage, btns)  --ответ на команду или сообщение
         Nothing -> do
             return (False, update , []) --ответ по умолчанию
 
