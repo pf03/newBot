@@ -33,6 +33,7 @@ type StrId = String
 type FileId = String
 type Url = String
 type ItemName = String
+type TimeOut = Int   --таймаут для long polling
 ----------------вспомогательные монадические функции -------------------------------------
 ifJust :: Monad m => Maybe a -> m () -> m () 
 ifJust ma m = case ma of 

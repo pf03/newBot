@@ -70,42 +70,6 @@ pathConfig = "config.json"
 
 
 
--------------------State <-> Config--------------------------------------
--- это в другой модуль
--- readS :: ExceptT E IO S
--- readS = do
---     config <- readConfig
---     let s = toS config
---     --print config
---     return s
-
-
--- -- !!!!!!!!!!!!тут нужно переделать, чтобы не считывать каждый раз конфиг заново, а запоминать его!!!!!!!!!!!!!!
--- saveS :: MIOError m => S -> m ()
--- saveS s = do
---     config <- readConfig
---     let newConfig = fromS config s
---     ExceptT $ Error.toEE (L.writeFile pathConfig (encode newConfig)) `catch` hW
-
-
--- toS :: Config -> S
--- toS configFile = let 
---         configApps =  _apps configFile;
---         configLog = _log configFile
---         configApp = head $ filter (\ca -> show (_app configFile) == name ca) configApps in 
---     S {
---         app = _app configFile,
---         configApp = configApp,
---         configText = _text configFile,
---         configLog = configLog,
---         logSettings = Log.defaultSettings
---     }
-
--- fromS :: Config -> S -> Config
--- fromS configFile config = let 
---         configApps =  _apps configFile;
---         newConfigApps = [configApp config] <> filter (\ca -> name ca /= name (configApp config) ) configApps in
---     configFile {_apps = newConfigApps}
 
 
 

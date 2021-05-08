@@ -12,7 +12,7 @@ import Interface.MCache as Cache
 import Common.Misc
 
 -- Other modules
-import  VK.Update as Update --60
+import  VK.Update as Update
 -- import Types --100
 -- import VK.Types --99
 import VK.Parse
@@ -26,7 +26,7 @@ import Data.Aeson
 
 -----------------------------Types---------------------------------------------
 type Version = String 
-type TimeOut = Int   --таймаут для long polling
+
 -- data Init = Init {server :: String, key :: String, ts :: Int } deriving (Show, Generic)  --могут быть orchan instances для IBot
 -- instance FromJSON Init
 -- instance ToJSON Init
