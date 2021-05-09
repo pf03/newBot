@@ -42,14 +42,14 @@ instance IBot Pointer UpdateId Update where
 --------------------------------Internal functions----------------------------------------
 _getUpdateId :: MT m => m UpdateId
 _getUpdateId = do
-    Log.setSettings (Color.Blue, True, "_getUpdateId")
+    Log.setSettings Color.Blue True "_getUpdateId"
     updateIdFromFile <- Cache.getUpdateIdFromFile
     if updateIdFromFile
         then  return 0  --если updateId получаем из файла, то инициализация не нужна
         else do
-            Log.sendT
+            Log.send
             (_, muid) <- _getUpdates Nothing
-            Log.receiveT
+            Log.receive
             maybe _getUpdateId (return . (-) 1 ) muid --отнимаем единицу, чтобы второй запрос был с muid, а не muid+1
 
 --по умолчанию возвращается то же значение, что и было
@@ -57,41 +57,41 @@ _getUpdateId = do
 --поэтому она может использоваться и для инициализации, когда UpdateId нету, и для основной работы
 _getUpdates :: MT m => Maybe UpdateId -> m ([Update], Maybe UpdateId)
 _getUpdates muid = do
-    Log.setSettings (Color.Cyan, True, template "_getUpdates, muid = {0}" [show muid])
-    Log.sendT
+    Log.setSettings Color.Cyan True $ template "_getUpdates, muid = {0}" [show muid]
+    Log.send
     response <- Request.api GetUpdates (Query.getUpdates (fmap (+1) muid) 25) True
-    Log.receiveT
+    Log.receive
     o <- Parse.getObject response
-    Log.receiveDataT "object -- convert" o
+    Log.receiveData "object -- convert" o
     mnewuid <- Parse.updateId o
-    Log.receiveDataT "mnewuid" mnewuid
+    Log.receiveData "mnewuid" mnewuid
     us <- Parse.updates o
-    Log.receiveDataT "update" us
+    Log.receiveData "update" us
     return (us, mnewuid <|> muid)
 
 --отвечаем одному пользователю Update -> UserId
 _sendMessage :: MT m => Update -> [Label] -> m ()
 _sendMessage update@(cid, en) btns = do
-    Log.setSettings (Color.Yellow, True, "sendMessage")
-    Log.sendT
+    Log.setSettings Color.Yellow True "sendMessage"
+    Log.send
     (api, query) <- Query.sendMessage update btns
-    Log.receiveDataT "(api, query)" (api, query)
+    Log.receiveData "(api, query)" (api, query)
     json <- Request.api api query False
-    Log.receiveT
+    Log.receive
     o <- Parse.getObject json
-    Log.receiveDataT "object" o
+    Log.receiveData "object" o
 
 --сброс сообщений, которые мы не можем распарсить
 _reset :: MT m => m ()
 _reset = do
     uid <- Cache.getUpdateId
-    Log.setSettings (Color.Cyan, True, template "reset, uid = {0}" [show uid])
-    Log.sendT
+    Log.setSettings Color.Cyan True $ template "reset, uid = {0}" [show uid]
+    Log.send
     json <- Request.api GetUpdates (Query.getUpdates (Just uid) 0) True
-    Log.receiveT
+    Log.receive
     o <- Parse.getObject json
     mnewuid <- Parse.updateId o
-    Log.receiveDataT "mnewuid" mnewuid
+    Log.receiveData "mnewuid" mnewuid
 
 -- reset :: IO ()
 -- reset = runT reset

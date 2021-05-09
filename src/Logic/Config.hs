@@ -29,7 +29,7 @@ data Config = Config {
     _app :: App,
     _apps :: [ConfigApp],
     _text :: ConfigText,
-    _log :: ConfigLog
+    _log :: LogConfig
 } deriving (Show, Generic)
 
 instance ToJSON Config where

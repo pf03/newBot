@@ -23,27 +23,27 @@ import Control.Concurrent
 
 application :: (MT m, IBot pointer init _update) => pointer -> m () 
 application pointer = do 
-  Log.setSettings (Color.Blue, True, "application") 
+  Log.setSettings Color.Blue True "application"
   updateIdFromFile <- Cache.getUpdateIdFromFile
   init <- Bot.getInit pointer
   if updateIdFromFile
       then do
           updateId <- Cache.getUpdateId
-          Log.funcT Info $ template "Получили updateId из файла: {0}" [show updateId] 
+          Log.infoM $ template "Получили updateId из файла: {0}" [show updateId] 
           longPolling pointer (Bot.setUpdateId init updateId)  --updateId из запроса перезаписываем тем, что из файла
       else do
           longPolling pointer init
 
 longPolling :: (MT m, IBot pointer init update) => pointer -> init -> m () 
 longPolling pointer init = do 
-  Log.setSettings (Color.Cyan, True, "longPolling")
+  Log.setSettings Color.Cyan True "longPolling"
   (updates, newInit) <-  Bot.getUpdates init
   updateIdFromFile <- Cache.getUpdateIdFromFile
   when updateIdFromFile do 
       uid <- Cache.getUpdateId
       let newuid = Bot.getUpdateId newInit
       Cache.setUpdateId newuid
-      Log.funcT Info $ template "Обновляем updateId в файле с {0} на {1}" [show uid, show newuid]
+      Log.infoM $ template "Обновляем updateId в файле с {0} на {1}" [show uid, show newuid]
       --saveST --updateId из файла перезаписываем тем, что из запроса
       Cache.writeCache
   calcSendMesages updates

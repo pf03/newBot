@@ -1,67 +1,31 @@
 {-# LANGUAGE FlexibleInstances #-}
 module Interface.MError where
 
-
--- Our modules
-import Common.Misc
-
--- Other modules
-import Control.Monad.Except
-import Control.Monad.Trans.Except ( catchE, except, throwE )
-import           Data.Aeson
-
-
-
+import           Control.Monad.Except
+import           Control.Monad.Trans.Except (catchE, throwE)
 import qualified Control.Exception          as E
 
 -----------------------------Types---------------------------------------------
 data E = ParseError String
     | QueryError String
-    -- | RequestError String
     | ConfigError String
-    -- | DBError String
     | IOError String
-    -- | AuthError String
     -- | An error that should never occur when the program is written correctly
     -- (for example, incorrect pattern matching)
-    | DevError String 
+    | DevError String
     | SomeError String
 
--- это надо убрать, раз мы пользуемся мондами Parser - Except - ExceptT
-type ES = Either String
 type EE = Either E
 
 instance Show E where
-    show (ParseError s) = "Ошибка парсинга JSON: "++s
-    show (QueryError s) = "Ошибка веб-запроса: "++s
-    show (ConfigError s) = "Ошибка чтения или парсинга файла конфигурации config.json: "++s
+    show (ParseError s)  = "Parse JSON error: "++s
+    show (QueryError s)  = "Query error: "++s
+    show (ConfigError s) = "Config error: "++s
+    show (IOError s)     = "IO error: "++s
+    show (DevError s)    = "Developer error: "++s
+    show (SomeError s)   = "Some error: "++s
 instance E.Exception E
 
---конкретизируем тип ошибки конструктором c
-typeError :: (String -> E) -> ES a  -> EE a
-typeError c (Left s) = Left $ c s
-typeError _ (Right a) = Right a
-
-toEE :: Monad m => m a -> m (EE a)
-toEE x = return <$> x
-
-toE :: Monad m => Except E a -> ExceptT E m a 
-toE = except . runExcept
-
-findPosition :: [Char] -> Integer
-findPosition str = error "todo"
-
--- --пример  check 7 4 "2569 1112570 1112571 1112572 " = True, т.е. строка начинается с m-подчисла n-числа
--- --пример  check 4 2 "99 1000 1001 1002 10" = True, граничный случай
--- check :: Int -> Int -> String -> Bool
--- check m n str = let 
---     mstr = take m str;
---     nstr' = drop m str;
---     n'= read nstr';
---     n = if 
---     in
-
--- from  Server!!!!!!!!!!!!!
 -----------------------------MError--------------------------------------------
 class MonadFail m => MError m where
     throw :: E -> m a
@@ -79,8 +43,7 @@ catchEither eba handler = case eba of
 
 toEither :: MError m => m a -> m (Either E a)
 toEither ma = do
-    catch (Right <$> ma) $ \e -> return $ Left e 
-
+    catch (Right <$> ma) $ \e -> return $ Left e
 
 -----------------------------MIOError------------------------------------------
 class (MError m, MonadIO m) => MIOError m
@@ -120,7 +83,3 @@ instance MError (ExceptT E IO) where
     catch = catchE
 
 instance MIOError (ExceptT E IO)
-
------------------------------Decode--------------------------------------------
--- eDecode :: (MError m, FromJSON a) => LBS -> m a
--- eDecode bs = catchEither (eitherDecode bs) ParseError

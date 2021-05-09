@@ -3,6 +3,7 @@ module Interface.MCache where
 
 -- Our modules
 import Common.Misc
+import Interface.MError as Error
 
 -- Other modules
 import           GHC.Generics
@@ -69,8 +70,11 @@ class (MCache m, MonadIO m) => MIOCache m where
 getCacheChanged :: MCache m => m Changed 
 getCacheChanged = getsCache changed
 
-setCacheChanged :: MCache m => Changed -> m ()
-setCacheChanged ch = modifyCache $ \s -> s {changed = ch}
+setCacheChanged :: MCache m => m ()
+setCacheChanged = modifyCache $ \s -> s {changed = True}
+
+resetCacheChanged :: MCache m => m ()
+resetCacheChanged = modifyCache $ \s -> s {changed = False}
 
 getsCache :: MCache m => (Cache -> a) -> m a
 getsCache f = f <$> getCache

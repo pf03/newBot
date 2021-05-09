@@ -23,7 +23,7 @@ import Data.Maybe
 import T.State as S
 import System.Console.ANSI
 import qualified Data.Aeson.Encode.Pretty   as Aeson
-
+import qualified System.Console.ANSI              as Color
 import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString.Lazy.Char8 as LC
 
@@ -40,23 +40,23 @@ import qualified Data.ByteString.Lazy.Char8 as LC
 --запуск основного трансформера и всех монад попроще
 runT :: Show a => T a -> IO()
 runT m = do 
-    let settings = (Cyan, True, "runT")
+    let settings = LogSettings Cyan True "runT"
     es <- runExceptT (readS :: ExceptT E IO S)
     case es of 
         Left e -> do
             let dlc = Log.defaultConfig
-            Log.text dlc settings Error "Ошибка считывания конфига: "
-            Log.error dlc settings e
+            Log.critical dlc settings "Ошибка считывания конфига: "
+            Log.critical dlc settings $ show e
         Right s -> do 
             let cl = configLog s
             ea <- runExceptT $ runStateT m s
             case ea  of
                 Left e -> do 
-                    Log.text cl settings Error "Ошибка приложения: "
-                    Log.error cl settings e
+                    Log.error cl settings"Application error: "
+                    Log.error cl settings $ show e
                 Right a -> do 
-                    Log.text cl settings Info "Результат: "
-                    Log.ldata cl settings Data $ fst a
+                    Log.info cl settings "Result: "
+                    Log.info cl settings $ show . fst $ a
 
 
 saveST :: T()
@@ -67,57 +67,21 @@ saveST = do
     saveS s
 
 
----------------------------------------MonadLog-------------------------------------------------------
-
+-----------------------------Log test------------------------------------------
 testLog :: IO()
 testLog = runT $ do
-    Log.dataT Debug $ "Debug data value " ++ show [1..10]  :: T()
-    Log.dataT Info $ "Info data value " ++ show [1..10] 
-    Log.dataT Error $ "Error data value " ++ show [1..10] 
-    Log.dataT Data $ "Data data value " ++ show [1..10] 
-    Log.dataT Warning  $ "Warning data value " ++ show [1..10] 
-    Log.colorTextT Blue Debug $"Blue color scheme " ++ klichko
-    Log.colorTextT Cyan Debug $ "Cyan color scheme " ++ klichko
-    Log.colorTextT Green Debug $ "Green color scheme " ++ klichko
-    Log.colorTextT Yellow Debug $ "Yellow color scheme " ++ klichko
+    Log.debugM $ "Debug data value " ++ show [1..10::Int]  :: T()
+    Log.infoM $ "Info data value " ++ show [1..10::Int]
+    Log.warnM  $ "warnM data value " ++ show [1..10::Int]
+    Log.errorM $ "Error data value " ++ show [1..10::Int]
+    Log.criticalM  $ "criticalM data value " ++ show [1..10::Int]
+    Log.infoCM Color.Blue $ "Blue color scheme " ++ klichko
+    Log.infoCM Color.Cyan $ "Cyan color scheme " ++ klichko
+    Log.infoCM Color.Green $ "Green color scheme " ++ klichko
+    Log.infoCM Color.Yellow $ "Yellow color scheme " ++ klichko
         where klichko = "Есть очень много по этому поводу точек зрения. Я четко придерживаюсь и четко понимаю, что те проявления, если вы уже так ребром ставите вопрос, что якобы мы"
 
 
 
--------------------State <-> Config--------------------------------------
 
-readS :: MIOError m => m S
-readS = do
-    config <- readConfig
-    let s = toS config
-    return s
--- -- !!!!!!!!!!!!тут нужно переделать, чтобы не считывать каждый раз конфиг заново, а запоминать его!!!!!!!!!!!!!!
-saveS :: MIOError m => S -> m ()
-saveS s = do
-    config <- readConfig
-    let newConfig = fromS config s
-    Error.liftEIO $ L.writeFile pathConfig (Aeson.encodePretty newConfig)
 
-toS :: Config -> S
-toS config = let 
-        configApps =  _apps config;
-        configApp = head $ filter (\ca -> show (_app config) == name ca) configApps 
-        cache = Cache{
-            configApp = configApp,
-            configText = _text config,
-            changed = False
-        } 
-        in 
-    S {
-        app = _app config,
-        cache = cache,
-        configLog = _log config,
-        logSettings = Log.defaultSettings
-    }
-
-fromS :: Config -> S -> Config
-fromS config st = let 
-        configApps =  _apps config;
-        cac = cache st
-        newConfigApps = [configApp cac] <> filter (\ca -> name ca /= name (configApp cac) ) configApps in
-    config {_apps = newConfigApps}

@@ -50,55 +50,55 @@ instance IBot Pointer Init Update  where
 --вызывается либо в начале, либо когда произошла ошибка
 _getInit :: MT m => m Init
 _getInit = do
-    Log.setSettings (Color.Blue, True, "getInit") 
+    Log.setSettings Color.Blue True "getInit"
     --ConfigApp _name _host token _updateId _  _repeatNumber groupId version <- gets configApp
     ConfigApp _name _host token _updateId _  _repeatNumber groupId version <- Cache.getConfigApp
     let api = API Groups GetLongPollServer 
-    Log.sendT
+    Log.send
     json <- Request.api api (Query.getLongPollServer token groupId version) False 
-    Log.receiveT
+    Log.receive
     o <- Parse.getObject json
-    Log.receiveDataT "object" o
+    Log.receiveData "object" o
     init@(Init _server _key _ts) <-  Parse.init o 
-    Log.receiveDataT "init" init
+    Log.receiveData "init" init
     return init
 
 
 --в дальнейшем возможно переделать, чтобы не сохранять config каждый цикл, а только в конце работы бота, поэтому мы его пердаем в getUpdates
 _getUpdates :: MT m => Init -> m ([Update], Init)
 _getUpdates init@(Init server key ts) = do
-    Log.setSettings (Color.Cyan, False, "getUpdates") 
+    Log.setSettings Color.Cyan False "getUpdates" 
     --let newInit = init {ts=updateId}
     --let newInit = init
     let query = Query.longPoll init 25
     (host, path) <- parseServer server
     let request = Request.build host path query
-    Log.sendT
+    Log.send
     json <- Request.send request True   --непосредственно long polling
-    Log.receiveT
+    Log.receive
     o <- Parse.getObject json
-    Log.receiveDataT "object" o
+    Log.receiveData "object" o
     muid <- Parse.updateId o
     let newInit = init {ts = fromMaybe ts muid}
     --let newInit = init
-    Log.receiveDataT "updateId" muid
+    Log.receiveData "updateId" muid
     updates <- Parse.updates o
-    Log.receiveDataT "updates" updates
+    Log.receiveData "updates" updates
     return (updates, newInit)
 
 _sendMessage :: MT m => Update -> [Label] -> m ()
 _sendMessage update@(cid, en) btns = do
     --undefined
-    Log.setSettings (Color.Yellow, True, "sendMessage") 
+    Log.setSettings Color.Yellow True "sendMessage"
     ConfigApp _name _host token _updateId _ _repeatNumber _groupId version <- Cache.getConfigApp
-    Log.sendT
+    Log.send
     printT btns
     query <- Query.sendMessage token version update btns
-    Log.receiveDataT "query" query
+    Log.receiveData "query" query
     json <- Request.api (API Messages Send) query False 
-    Log.receiveT
+    Log.receive
     o <- Parse.getObject json
-    Log.receiveDataT "object" o
+    Log.receiveData "object" o
     --undefined    
 
  --"https://lp.vk.com/wh777777777" -> "lp.vk.com" "/wh777777777"
@@ -129,14 +129,14 @@ _test::MT m => m()
 _test = do
     -- ConfigApp _name _host token _updateId _ _repeatNumber _groupId version <- gets configApp
     ConfigApp _name _host token _updateId _ _repeatNumber _groupId version <- Cache.getConfigApp
-    Log.setSettings (Color.Yellow, True, "testRequest") 
-    Log.sendT
+    Log.setSettings Color.Yellow True "testRequest" 
+    Log.send
     let query = Query.test token version
-    Log.receiveDataT "query" query
+    Log.receiveData "query" query
     json <- Request.api (API Messages Send) query False 
-    Log.receiveT 
+    Log.receive 
     o <- Parse.getObject json
-    Log.receiveDataT "object" o
+    Log.receiveData "object" o
 
 -- test = runT _test
 
