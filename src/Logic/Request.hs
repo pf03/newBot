@@ -1,84 +1,52 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
---importPriority = 10
-module Logic.Request (build, send, api) where 
+module Logic.Request (build, send, api) where
 
 -- Our modules
-import Interface.MError as Error --70
--- import Types --100
--- import App
-import Common.Misc
--- import Class
-import Interface.MCache as Cache
-import Interface.Messenger.IAPI as API
--- import Interface.Class
+import           Common.Misc
+import           Interface.MCache         as Cache hiding (host, token)
+import           Interface.MError         as Error
+import           Interface.MLog           as Log hiding (send)
+import           Interface.Messenger.IAPI as API
 
 -- Other modules
-import Control.Monad.Trans.Except
-import Control.Monad ( when )
-import Network.HTTP.Simple
-import qualified Data.ByteString as B
-import qualified Data.ByteString.Char8 as BC
-import qualified Data.ByteString.Lazy as L
-import qualified Data.ByteString.Lazy.Char8 as LC
-import Data.Char ( toLower )
---import Debug.Trace  --unsafe debug!!!
-import Control.Monad.State.Lazy
-import Control.Monad.Error.Class
-import Data.Aeson
+import           Control.Monad.State.Lazy
+import qualified Data.ByteString.Char8    as BC
+import qualified Data.ByteString.Lazy     as L
+import           Network.HTTP.Simple
 
 build :: Host -> Path -> Query -> Request
-build host path query = setRequestSecure True
-  $ setRequestMethod "POST"
-  $ setRequestPort 443
-  $ setRequestHost (BC.pack host)
-  $ setRequestPath (BC.pack path)
-  $ setRequestBodyURLEncoded (map (\(a, Just b) -> (a, b) ) query) --переделать покрасивее
-  defaultRequest
+build h path query = setRequestSecure True
+    $ setRequestMethod "POST"
+    $ setRequestPort 443
+    $ setRequestHost (BC.pack h)
+    $ setRequestPath (BC.pack path)
+    $ setRequestBodyURLEncoded (map (\(a, Just b) -> (a, b) ) query)
+    defaultRequest
 
---низкоуровневая обертка, нужна для VK
---работает ли здесь вообще обработка ошибок???
---сделать обработку ошибки записи как в writeConfig ?? либо какие-то универсальные функции для чтения и записи файлов с обработчиком ошибок
-send :: MIOError m => Request -> Bool -> m LBS
+-- | Low level wrapper for request
+send :: (MLog m, MIOError m) => Request -> Bool -> m LBS
 send request save = do
-  --printT request
-  response <- httpLBS request --- ЗДЕСЬ ПРИКРУТИТЬ ОБРАБОТКУ ОШИБОК !!!!
-  let status = getResponseStatusCode response
-  if status == 200
-  then do
-    let jsonBody = getResponseBody response
-    when save $ do 
-      liftIO $ print "saving request to file"
-      Error.liftEIO  $ L.writeFile "data.json" jsonBody 
-    return  jsonBody
-  else do 
-    printT "Request failed with error"
-    printT response
-    Error.throw $ QueryError "Request failed with error"
+    Log.debugM request
+    response <- Error.liftEIO $ httpLBS request
+    let status = getResponseStatusCode response
+    if status == 200
+    then do
+        let jsonBody = getResponseBody response
+        when save $ do
+            Log.warnM "Saving request to file"
+            Error.liftEIO  $ L.writeFile "data.json" jsonBody
+        return  jsonBody
+    else do
+        Log.errorM "Request failed with error"
+        Log.errorM $ show response
+        Error.throw $ QueryError "Request failed with error"
 
---высокоуровневая обертка, как оказалось для Telegram подходит отлично, а для VK не подходит, верней не подходит только для longPolling
-api :: (IAPI api, MCache m, MIOError m) => api -> Query -> Bool -> m LBS
-api api query save = do
-  --config@(Config _ configApp _) <- get
+-- | High level wrapper for API request
+api :: (IAPI api, MCache m, MIOError m, MLog m) => api -> Query -> Bool -> m LBS
+api a query save = do
   host <- Cache.getHost
   token <- Cache.getToken
-  let path = getPath token api
+  let path = API.getPath token a
   let request = build host path query
-  --printT request
   send request save
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

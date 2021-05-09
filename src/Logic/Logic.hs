@@ -6,13 +6,6 @@ import           Interface.MCache            as Cache
 import           Interface.Messenger.IBot    as Bot
 import qualified Interface.Messenger.IUpdate as Update
 
--- Other modules
--- import           Control.Monad.Reader
--- import qualified Data.Map.Internal           as M
--- import           Prelude                     hiding (repeat)
-
--- import           Control.Monad.State.Lazy
-
 toMessageCommand :: String -> Either Message Command
 toMessageCommand str = let
     w = words str;
@@ -23,14 +16,14 @@ toMessageCommand str = let
             "/help" -> Right Help
             "/repeat" -> Right Repeat
             "/start" -> Right Start
-            '/':n:[] | n `elem` ("12345"::String) -> Right $ Button $ read [n]
+            ['/',n] | n `elem` ("12345"::String) -> Right $ Button $ read [n]
             '/':x:xs | x /=' ' -> Right . Unknown . unwords $ (x:xs):tail w
-            x -> Left str
+            _ -> Left str
         _ -> case head w of
             '/':x:xs | x /=' ' -> Right . Unknown . unwords $ (x:xs):tail w
-            x                  -> Left str
+            _ -> Left str
 
-answer :: (MCache m, IBot _pointer _init update) => update -> m (Changed, update, [Label])
+answer :: (MCache m, IBot _pointer _init update) => update -> m (update, [Label])
 answer update = do
     let mmessage = Update.getMessage update
     let mcommand = Update.getCommand update
@@ -38,10 +31,10 @@ answer update = do
     let cid = Update.getChatId update
     case memc of
         Just emc -> do
-            (changed, newMessage, btns) <- answerMessageCommand cid emc
-            return (changed, Update.setMessage update newMessage, btns)  --ответ на команду или сообщение
+            (newMessage, btns) <- answerMessageCommand cid emc
+            return (Update.setMessage update newMessage, btns)  --ответ на команду или сообщение
         Nothing -> do
-            return (False, update , []) --ответ по умолчанию
+            return (update , []) -- default answer
 
 maybeToEither:: Maybe a -> Maybe b -> Maybe (Either a b)
 maybeToEither ma mb =
@@ -52,17 +45,13 @@ maybeToEither ma mb =
             Nothing -> Nothing
 
 --flag StateChanged needed in order to update the config later in a dirty function
-answerMessageCommand :: MCache m => ChatId -> Either Message Command -> m (Changed, Message, [Label])
+answerMessageCommand :: MCache m => ChatId -> Either Message Command -> m (Message, [Label])
 answerMessageCommand cid emc = do
     text <- textAnswer cid emc
     labels <- case emc of
-        Right Repeat -> return $ map (('/':). show) [1..5]
+        Right Repeat -> return $ map (('/':). show) [1::Int ..5]
         _            -> return []
-    case emc of
-        Right (Button n) -> do
-            Cache.setCacheChanged
-            return (True, text, labels)
-        _ -> return (False , text, labels)
+    return (text, labels)
 
 textAnswer :: MCache m => ChatId -> Either Message Command -> m Message
 textAnswer cid emc = do

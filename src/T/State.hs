@@ -7,28 +7,24 @@ module T.State where
 -- Our modules
 import           Interface.MCache           as Cache
 import           Interface.MError           as Error
-import           Interface.MT
 import           Interface.MLog             as Log
+import           Interface.MT
 import           Logic.Config               as Config
 
 -- Other modules
 import           Control.Monad.State.Lazy
 import           Control.Monad.Trans.Except
+import qualified Data.Aeson.Encode.Pretty   as Aeson
+import qualified Data.ByteString.Lazy       as L
 import qualified Data.Map.Internal          as M
 import           GHC.Generics               hiding (S)
-import qualified Data.ByteString.Lazy as L
-import qualified Data.Aeson.Encode.Pretty   as Aeson
 
 -----------------------------Types---------------------------------------------
 type T = StateT S (ExceptT E IO)
 
--- data App = Telegram | VK deriving (Show, Generic)
-
 data S = S {
-    app :: App,
+    app         :: App,
     cache       :: Cache,
-    -- configApp :: ConfigApp,
-    -- configText :: ConfigText,
     configLog   :: LogConfig,
     logSettings :: LogSettings
 } deriving (Show, Generic)
@@ -43,7 +39,6 @@ instance MLog T where
 instance MError T where
     throw :: E -> T a
     throw e  = lift $ throwE e
-
     catch :: T a -> (E -> T a) -> T a
     catch ta f  = StateT $ \s -> catchE (runStateT ta s) $ \e -> runStateT (f e) s
 
@@ -55,8 +50,8 @@ instance MCache T where
 
 instance MIOCache T where
     writeCache = do
-        changed <- Cache.getCacheChanged
-        when changed $ do
+        ch <- Cache.getCacheChanged
+        when ch $ do
             s <- get
             saveS s
             Cache.resetCacheChanged
@@ -81,13 +76,13 @@ setCache c = modify $ \s -> s {cache = c}
 getApp :: MonadState S m =>  m App
 getApp = gets app
 
--------------------State <-> Config--------------------------------------
+-----------------------------State <-> Config----------------------------------
 readS :: MIOError m => m S
 readS = do
     config <- readConfig
     let s = toS config
     return s
--- -- !!!!!!!!!!!!тут нужно переделать, чтобы не считывать каждый раз конфиг заново, а запоминать его!!!!!!!!!!!!!!
+
 saveS :: MIOError m => S -> m ()
 saveS s = do
     config <- Config.readConfig
@@ -95,28 +90,22 @@ saveS s = do
     liftIO $ L.writeFile pathConfig (Aeson.encodePretty newConfig)
 
 toS :: Config -> S
-toS config = let 
-        configApps =  _apps config;
-        configApp = head $ filter (\ca -> show (_app config) == name ca) configApps 
-        cache = Cache{
-            configApp = configApp,
-            configText = _text config,
-            changed = False
-        } 
-        in 
-    S {
+toS config = S {
         app = _app config,
-        cache = cache,
+        cache = cac,
         configLog = _log config,
         logSettings = Log.defaultSettings
-    }
+    } where
+        configApps =  _apps config;
+        ca = head $ filter (\ca -> show (_app config) == name ca) configApps
+        cac = Cache{
+            configApp = ca,
+            configText = _text config,
+            changed = False
+        }
 
 fromS :: Config -> S -> Config
-fromS config st = let 
-        configApps =  _apps config;
-        cac = cache st
-        newConfigApps = [configApp cac] <> filter (\ca -> name ca /= name (configApp cac) ) configApps in
-    config {_apps = newConfigApps}
-
-
-
+fromS config st = config {_apps = newConfigApps} where
+    configApps =  _apps config;
+    cac = cache st;
+    newConfigApps = [configApp cac] <> filter (\ca -> name ca /= name (configApp cac) ) configApps

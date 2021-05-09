@@ -1,7 +1,7 @@
 module Interface.Messenger.IUpdate where
 
+-- Our modules
 import Common.Misc
--- import Interface.MCache as Cache
 
 class IUpdate update where 
   setMessage :: update -> Message -> update

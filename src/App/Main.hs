@@ -1,19 +1,20 @@
-
-
 module App.Main where
 
-import           Control.Concurrent
+-- Our modules
 import           Logic.Bot          as Bot
 import           Logic.Config       as Config
-import           T.State            as S
+import           T.State            as S hiding (app)
 import           T.Transformer
 import           Telegram.Bot       as Telegram
 import           VK.Bot             as VK
 
+-- Other modules
+import           Control.Concurrent
+
 main:: IO()
 main = do
   exVar <- newMVar False  --это не работает, не дожидается конца запроса
-  forkIO $ runT switchApplication
+  _ <- forkIO $ runT switchApplication
   exit exVar
 
 switchApplication :: T ()
@@ -23,7 +24,6 @@ switchApplication = do
     VK       -> Bot.application VK.Pointer
     Telegram -> Bot.application Telegram.Pointer
 
---вывод на консоль должен быть в порядке очередности
 exit :: MVar Bool -> IO()
 exit exVar = do
   threadDelay 2000000
