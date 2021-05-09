@@ -77,6 +77,11 @@ catchEither eba handler = case eba of
         Left b  -> throw $ handler b
         Right a -> return a
 
+toEither :: MError m => m a -> m (Either E a)
+toEither ma = do
+    catch (Right <$> ma) $ \e -> return $ Left e 
+
+
 -----------------------------MIOError------------------------------------------
 class (MError m, MonadIO m) => MIOError m
 

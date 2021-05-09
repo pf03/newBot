@@ -13,7 +13,7 @@ import Data.Aeson
 
 -----------------------------Types---------------------------------------------
 data Cache = Cache {
-    app :: App,
+    -- app :: App,
     configApp :: ConfigApp,
     configText :: ConfigText,
     changed :: Changed
@@ -49,9 +49,7 @@ instance ToJSON ConfigText
 type Token = String
 type Host = String
 
-data App = VK | Telegram deriving (Show, Generic)  -- это нарушает универсальность!!! Убрать из кеша, либо абстрагироваться от названий, сделать просто строку!!
-instance FromJSON App
-instance ToJSON App
+
 
 -----------------------------Class---------------------------------------------
 class Monad m => MCache m where
@@ -92,8 +90,8 @@ modifyCache f = do
 
 
 
-getApp :: MCache m => m App
-getApp = getsCache app
+-- getApp :: MCache m => m App
+-- getApp = getsCache app
 
 getConfigApp :: MCache m => m ConfigApp
 getConfigApp = getsCache configApp --trivial

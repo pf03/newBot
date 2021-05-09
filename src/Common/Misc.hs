@@ -14,16 +14,12 @@ import Data.Text.Encoding
 import Data.Text (pack)
 
 -----------------------------Types---------------------------------------------
--- type FileName = String
--- type PathInfo = [Text]
--- type Path = String
--- data Action = Check | Execute --flag
 type BS = BC.ByteString
 type LBS = LC.ByteString
 type Path = String
 type Message = String  
 type Label = String  
-data Command = Help | Repeat | Start | Unknown String| Button Int deriving (Show, Eq)  --возможные команды боту
+data Command = Help | Repeat | Start | Unknown String| Button Int deriving (Show, Eq)
 type UpdateId = Int
 type ChatId = Int
 type Key = String 
@@ -33,7 +29,7 @@ type StrId = String
 type FileId = String
 type Url = String
 type ItemName = String
-type TimeOut = Int   --таймаут для long polling
+type TimeOut = Int   -- time out long polling
 ----------------вспомогательные монадические функции -------------------------------------
 ifJust :: Monad m => Maybe a -> m () -> m () 
 ifJust ma m = case ma of 

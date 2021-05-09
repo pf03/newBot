@@ -30,6 +30,7 @@ dependencies:
 - transformers
 - mtl
 - aeson
+- aeson-pretty
 - ansi-terminal
 - http-conduit
 - hspec

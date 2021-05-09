@@ -21,6 +21,10 @@ import qualified Data.Map.Internal as M
 import GHC.Generics
 
 -----------------------------Types---------------------------------------------
+data App = Telegram | VK deriving (Show, Generic)
+instance ToJSON App
+instance FromJSON App
+
 data Config = Config {
     _app :: App,
     _apps :: [ConfigApp],

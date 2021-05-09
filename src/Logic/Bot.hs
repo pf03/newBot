@@ -20,19 +20,6 @@ import Data.Maybe
 import Control.Concurrent
 --import GHC.Generics  --зачем это?
 
--- это уровень App
--- main:: IO()
--- main = do
---   exVar <- newMVar False
---   forkIO $ runT switchApplication
---   exit exVar
-
--- switchApplication :: T () 
--- switchApplication = do
---   app <- Cache.getApp
---   case app of
---     VK -> application VK.Pointer 
---     Telegram -> application Telegram.Pointer
 
 application :: (MT m, IBot pointer init _update) => pointer -> m () 
 application pointer = do 
@@ -72,18 +59,7 @@ calcSendMesages = mapM_ $ \update -> do
       Cache.writeCache
   Bot.sendMessage answer btns
 
---вывод на консоль должен быть в порядке очередности
-exit :: MVar Bool -> IO()
-exit exVar = do 
-  threadDelay 2000000
-  putStrLn "Введите exit для выхода из приложения"
-  line <-getLine
-  if line == "exit" then do 
-    putStrLn "Выходим из приложения прямо сейчас..."
-    --putMVar exVar True
-  else do
-    putStrLn "Неверная команда"
-    exit exVar
+
 
 
 

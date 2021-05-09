@@ -9,19 +9,24 @@ import           Interface.MCache           as Cache
 import           Interface.MError           as Error
 import           Interface.MT
 import           Interface.MLog             as Log
+import           Logic.Config               as Config
 
 -- Other modules
 import           Control.Monad.State.Lazy
 import           Control.Monad.Trans.Except
 import qualified Data.Map.Internal          as M
 import           GHC.Generics               hiding (S)
+import qualified Data.ByteString.Lazy as L
+
 
 -----------------------------Types---------------------------------------------
 type T = StateT S (ExceptT E IO)
 
+-- data App = Telegram | VK deriving (Show, Generic)
+
 data S = S {
+    app :: App,
     cache       :: Cache,
-    -- app :: App,
     -- configApp :: ConfigApp,
     -- configText :: ConfigText,
     configLog   :: ConfigLog,
@@ -51,8 +56,7 @@ instance MCache T where
 
 instance MIOCache T where
     writeCache = undefined 
-
-
+    
 instance MT T
 
 getLogSettings :: MonadState S m => m LogSettings
@@ -69,3 +73,9 @@ getCache = gets cache
 
 setCache :: MonadState S m => Cache -> m ()
 setCache c = modify $ \s -> s {cache = c}
+
+getApp :: MonadState S m =>  m App
+getApp = gets app
+
+
+
