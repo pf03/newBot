@@ -22,7 +22,6 @@ import           VK.Update
 -- Other modules
 import           Data.Aeson
 import           Data.Aeson.Types
-import qualified Data.ByteString.Lazy.Char8 as LC
 import           Data.Maybe
 import           Data.Text                  (pack)
 import           GHC.Exts

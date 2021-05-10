@@ -1,12 +1,10 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
---{-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE DerivingStrategies #-}
-module Telegram.Bot 
---(App.Main, reset, Pointer(..)) 
-where
+
+module Telegram.Bot (Pointer (..), reset) where
 
 -- Our modules
 import           Common.Misc
@@ -25,22 +23,19 @@ import           Telegram.API           as API
 import           Control.Applicative
 import qualified System.Console.ANSI      as Color (Color (..))
 
--- instance App.Auth Auth where
---     --getAuth1 ::  T Auth
---     getAuth1 = return $ Auth ()
-
-data Pointer = Pointer 
-
+-----------------------------Types---------------------------------------------
+data Pointer = Pointer
 -- New type wrappers in order to avoid orphan instances
-newtype Init = Init {unwrapInit :: UpdateId}
-newtype WrapUpdate = WrapUpdate {unwrapUpdate :: Update} deriving newtype (IUpdate)
+newtype Init = Init UpdateId
+newtype WrapUpdate = WrapUpdate Update deriving newtype (IUpdate)
 
+-----------------------------Instance------------------------------------------
 instance IBot Pointer Init WrapUpdate where
     getInit :: MT m => Pointer -> m Init
     getInit _ = Init <$> _getUpdateId
 
     getUpdateId :: Init -> UpdateId
-    getUpdateId = unwrapInit
+    getUpdateId (Init uid) = uid
 
     setUpdateId :: Init -> UpdateId -> Init
     setUpdateId _ newuid = Init newuid
@@ -54,21 +49,23 @@ instance IBot Pointer Init WrapUpdate where
     sendMessage (WrapUpdate u) ls = _sendMessage u ls
 
 --------------------------------Internal functions----------------------------------------
+-- Initialization - get last updateId for getUpdates request
 _getUpdateId :: MT m => m UpdateId
 _getUpdateId = do
     Log.setSettings Color.Blue True "_getUpdateId"
     uidFromFile <- Cache.getUpdateIdFromFile
     if uidFromFile
-        then  return 0  --если updateId получаем из файла, то инициализация не нужна
+        then  return 0  -- if we get updateId from a file, then initialization is not needed
         else do
             Log.send
             (_, muid) <- _getUpdates Nothing
             Log.receive
-            maybe _getUpdateId (return . (-) 1 ) muid --отнимаем единицу, чтобы второй запрос был с muid, а не muid+1
+            maybe _getUpdateId (return . (-) 1 ) muid
 
---по умолчанию возвращается то же значение, что и было
---наша функция более универсальная, чем требует интерфейс, а именно использует Maybe UpdateId вместо UpdateId
---поэтому она может использоваться и для инициализации, когда UpdateId нету, и для основной работы
+
+-- Get updates from messenger server by the long polling method
+-- _getUpdates Nothing - for initialization
+-- _getUpdates (Just uid) - for get updates
 _getUpdates :: MT m => Maybe UpdateId -> m ([Update], Maybe UpdateId)
 _getUpdates muid = do
     Log.setSettings Color.Cyan True $ template "_getUpdates, muid = {0}" [show muid]
@@ -83,7 +80,7 @@ _getUpdates muid = do
     Log.receiveData "update" us
     return (us, mnewuid <|> muid)
 
---отвечаем одному пользователю Update -> UserId
+-- Send response to a single user
 _sendMessage :: MT m => Update -> [Label] -> m ()
 _sendMessage update btns = do
     Log.setSettings Color.Yellow True "sendMessage"
@@ -95,9 +92,9 @@ _sendMessage update btns = do
     o <- Parse.getObject json
     Log.receiveData "object" o
 
---сброс сообщений, которые мы не можем распарсить
-_reset :: MT m => m ()
-_reset = do
+-- Dumping messages that we cannot parse, for debugging purposes
+reset :: MT m => m ()
+reset = do
     uid <- Cache.getUpdateId
     Log.setSettings Color.Cyan True $ template "reset, uid = {0}" [show uid]
     Log.send
@@ -106,8 +103,3 @@ _reset = do
     o <- Parse.getObject json
     mnewuid <- Parse.updateId o
     Log.receiveData "mnewuid" mnewuid
-
--- reset :: IO ()
--- reset = runT reset
-
-

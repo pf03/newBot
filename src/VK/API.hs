@@ -1,29 +1,23 @@
+{-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
---{-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE FlexibleInstances #-}
--- {-# LANGUAGE DeriveGeneric #-}
---importPriority = 59
+
 module VK.API where
 
 -- Our modules
-import Interface.Messenger.IAPI as API  --60
+import           Interface.Messenger.IAPI as API
 
 -- Other modules
-import Data.Char
--- import GHC.Generics
--- import Data.Aeson
--- import Common.Misc
+import           Data.Char                (toLower)
 
 -----------------------------Types---------------------------------------------
-data API =  API APIGroup APIName
+data API = API APIGroup APIName
 data APIGroup = Groups | Messages deriving Show
 data APIName = GetLongPollServer | Send deriving Show
 
-
--------------------------instance App.API---------------------------------------
+-----------------------------Instance------------------------------------------
 instance IAPI API where
-    apiName (API apiGroup apiName) =  let 
+    apiName (API apiGroup an) = (toLower g:gs) ++ "." ++ (toLower n:ns) where
         (g:gs) = show apiGroup;
-        (n:ns) = show apiName in 
-        (toLower g:gs)++ "." ++ (toLower n:ns)
-    getPath token api = "/method/" ++ apiName api
+        (n:ns) = show an
+
+    getPath _ api = "/method/" ++ apiName api
