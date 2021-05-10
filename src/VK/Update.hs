@@ -1,5 +1,6 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE InstanceSigs #-}
 module VK.Update where
 
 -- Our modules
@@ -22,21 +23,17 @@ type GroupId = Int
 
 --------------------------instance App.Update------------------------------------
 instance IUpdate Update  where
-    setMessage = _setMessage
-    getMessage = _getMessage
-    getCommand = _getCommand
-    getChatId = _getChatId
 
-_setMessage :: Update -> Message -> Update
-_setMessage (cid, Entity _ as)  message = (cid, Entity (Left message) as)
+    setMessage :: Update -> Message -> Update
+    setMessage (cid, Entity _ as)  message = (cid, Entity (Left message) as)
 
-_getMessage :: Update -> Maybe Message
-_getMessage (_, Entity (Left message) _) = Just message
-_getMessage _ = Nothing
+    getMessage :: Update -> Maybe Message
+    getMessage (_, Entity (Left message) _) = Just message
+    getMessage _ = Nothing
 
-_getCommand :: Update -> Maybe Command
-_getCommand (_, Entity (Right command) _) = Just command
-_getCommand _ = Nothing
+    getCommand :: Update -> Maybe Command
+    getCommand (_, Entity (Right command) _) = Just command
+    getCommand _ = Nothing
 
-_getChatId :: Update -> ChatId
-_getChatId = fst
+    getChatId :: Update -> ChatId
+    getChatId = fst

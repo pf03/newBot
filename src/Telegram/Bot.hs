@@ -1,6 +1,9 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 --{-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE DerivingStrategies #-}
 module Telegram.Bot 
 --(App.Main, reset, Pointer(..)) 
 where
@@ -11,6 +14,7 @@ import           Interface.MLog           as Log
 import           Interface.MT
 import           Interface.MCache as Cache
 import           Interface.Messenger.IBot
+import           Interface.Messenger.IUpdate
 import qualified Logic.Request as Request
 import qualified Telegram.Parse           as Parse
 import qualified Telegram.Query           as Query
@@ -19,8 +23,6 @@ import           Telegram.API           as API
 
 --Other modules
 import           Control.Applicative
-import           Control.Monad.State.Lazy
-import           Data.Maybe
 import qualified System.Console.ANSI      as Color (Color (..))
 
 -- instance App.Auth Auth where
@@ -29,22 +31,34 @@ import qualified System.Console.ANSI      as Color (Color (..))
 
 data Pointer = Pointer 
 
-instance IBot Pointer UpdateId Update where
-    getInit pointer = _getUpdateId
-    getUpdateId = id
-    setUpdateId uid newuid = newuid
-    getUpdates uid = do
-       (us, Just uid) <- _getUpdates . Just $ uid
-       return (us, uid)
-    sendMessage = _sendMessage
+-- New type wrappers in order to avoid orphan instances
+newtype Init = Init {unwrapInit :: UpdateId}
+newtype WrapUpdate = WrapUpdate {unwrapUpdate :: Update} deriving newtype (IUpdate)
 
+instance IBot Pointer Init WrapUpdate where
+    getInit :: MT m => Pointer -> m Init
+    getInit _ = Init <$> _getUpdateId
+
+    getUpdateId :: Init -> UpdateId
+    getUpdateId = unwrapInit
+
+    setUpdateId :: Init -> UpdateId -> Init
+    setUpdateId _ newuid = Init newuid
+
+    getUpdates:: MT m => Init -> m ([WrapUpdate], Init)
+    getUpdates (Init uid) = do
+       (us, Just newuid) <- _getUpdates . Just $ uid
+       return (WrapUpdate <$> us, Init newuid)
+
+    sendMessage:: MT m => WrapUpdate -> [Label] -> m ()
+    sendMessage (WrapUpdate u) ls = _sendMessage u ls
 
 --------------------------------Internal functions----------------------------------------
 _getUpdateId :: MT m => m UpdateId
 _getUpdateId = do
     Log.setSettings Color.Blue True "_getUpdateId"
-    updateIdFromFile <- Cache.getUpdateIdFromFile
-    if updateIdFromFile
+    uidFromFile <- Cache.getUpdateIdFromFile
+    if uidFromFile
         then  return 0  --если updateId получаем из файла, то инициализация не нужна
         else do
             Log.send
@@ -71,7 +85,7 @@ _getUpdates muid = do
 
 --отвечаем одному пользователю Update -> UserId
 _sendMessage :: MT m => Update -> [Label] -> m ()
-_sendMessage update@(cid, en) btns = do
+_sendMessage update btns = do
     Log.setSettings Color.Yellow True "sendMessage"
     Log.send
     (api, query) <- Query.sendMessage update btns

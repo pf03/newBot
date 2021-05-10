@@ -1,194 +1,180 @@
---{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE OverloadedStrings #-}
---{-# LANGUAGE TypeApplications #-}
---importPriority = 49
-module Telegram.Parse (module Logic.Parse, Telegram.Parse.updateId, updates, keyboard, pollOptions) where
+
+module Telegram.Parse
+( module Logic.Parse
+, Telegram.Parse.updateId
+, updates
+, keyboard
+, pollOptions
+) where
 
 -- Our modules
-import Interface.MError as Error --70
-import Logic.Parse 
-import Logic.Logic 
-import Telegram.Update 
-import Common.Misc
+import           Common.Misc
+import           Interface.MError           as Error
+import           Logic.Logic
+import           Logic.Parse
+import           Telegram.Update
 
 -- Other modules
---import qualified Data.ByteString as B
---import qualified Data.ByteString.Char8 as BC
---import qualified Data.ByteString.Lazy as L
+import           Data.Aeson
+import           Data.Aeson.Types
 import qualified Data.ByteString.Lazy.Char8 as LC
-import Data.Aeson
-import Data.Aeson.Types
-import Data.Text (Text, pack)
---import GHC.Generics
-import GHC.Exts -- (fromList)
-import Control.Monad.Except
-import Control.Monad.Trans.Except
-import Data.Maybe
-import Control.Applicative
+import           Data.Text                  (pack)
+import           Control.Applicative
+import           GHC.Exts
 -----------------------------Types---------------------------------------------
 type OResultItem = Object
 type OMessageItem = Object
 
------------------RECEIVE-----------------------------
-
-
-
-------------------External functions------------------------
+-----------------------------Receive-------------------------------------------
+-----------------------------External------------------------------------------
 updateId :: MError m => Object -> m (Maybe UpdateId)
 updateId o = do
-  ids <- _parseE _parseUpdateIds o
-  case ids of
-    [] -> return Nothing --throwError $ ParseError "Обновления не обнаружены"
-    x:xs -> return $ Just $ maximum ids
-
--- parseChatMessage :: Object -> Except  E Update
--- parseChatMessage = _parseE _parseChatMessage
+    ids <- _parseE _parseUpdateIds o
+    case ids of
+        []   -> return Nothing 
+        _ -> return $ Just $ maximum ids
 
 updates :: MError m => Object -> m [Update]
 updates = _parseE _parseUpdates
 
---------------------Internal functions--------------------------
+-----------------------------Internal------------------------------------------
 
 _parseUpdateIds :: Object -> Parser [UpdateId]
-_parseUpdateIds = _withArrayItem "result" (.: "update_id") 
+_parseUpdateIds = _withArrayItem "result" (.: "update_id")
 
 _parseChatLastMessage :: Object -> Parser Update
 _parseChatLastMessage o = do
-  cm <- _parseUpdates o
-  case cm of
-    [] -> fail "No message to reply"
-    x:xs -> return $ last xs
+    cm <- _parseUpdates o
+    case cm of
+        []   -> fail "No message to reply"
+        _    -> return $ last cm
 
 _parseUpdates :: Object -> Parser [Update]
 _parseUpdates = _withArraymItem "result" _parseUpdate
 
 _parseUpdate :: OResultItem -> Parser (Maybe Update)
 _parseUpdate o = do
-      mmessage <- o.:?"message"  --если сообщения нет, то игнорируем такое обновление, это например редактирование сообщения или голос в опросе
-      case mmessage of 
+    mmessage <- o.:?"message"  -- If there is no message field, then we ignore such an update (editing a message, a vote in a poll etc)
+    case mmessage of
         Nothing -> return Nothing
         Just message -> do
-          chat <- message.:"chat" --update будет иметь тип [Maybe ChatId, Maybe Entity] - надо подумать
-          chatId <- chat.:"id"
-          mforward <- _parseForward message 
-          case mforward of 
-            Just forward -> return . Just $ (chatId, forward)
-            Nothing -> do
-              mtext <- message .:? "text"
-              case mtext of 
-                Nothing -> do 
-                  mother <- _parseOther message --всегда Just
-                  msticker <- _parseSticker message 
-                  manimation <- _parseAnimation message
-                  mphoto <- _parsePhoto message
-                  mvideo <- _parseVideo message
-                  mdocument <- _parseDocument message
-                  mpoll <- _parsePoll message
-                  mcontact <- _parseContact message
-                  mlocation <- _parseLocation message
-                  --приоритет mother определяется его положением в строке
-                  let mentity = mforward <|> mother <|> msticker <|> manimation <|> mphoto <|> mvideo <|> mdocument <|> mpoll <|> mcontact <|> mlocation
-                  case mentity of
-                    Nothing -> fail "Unknown entity type"
-                    Just entity -> return . Just $ (chatId, entity)
-                Just text ->  do --команда боту или просто текст или forward
-                  let emc = toMessageCommand text
-                  case emc of 
-                    Left message -> return . Just $  (chatId, Message message)
-                    Right command -> do  --проверяем, что это команда
-                      typeEntities <- _withArrayItem "entities" (.: "type") message
-                      if ("bot_command"::String) `elem` typeEntities
+            chat <- message.:"chat"
+            chatId <- chat.:"id"
+            mforward <- _parseForward message
+            case mforward of
+                Just forward -> return . Just $ (chatId, forward)
+                Nothing -> _parseMessage chatId message
+
+_parseMessage:: ChatId -> Object -> Parser (Maybe Update)
+_parseMessage chatId message = do
+    mtext <- message .:? "text"
+    case mtext of
+        Nothing -> do
+            mother <- _parseOther message -- for universal response, allways Just
+            msticker <- _parseSticker message
+            manimation <- _parseAnimation message
+            mphoto <- _parsePhoto message
+            mvideo <- _parseVideo message
+            mdocument <- _parseDocument message
+            mpoll <- _parsePoll message
+            mcontact <- _parseContact message
+            mlocation <- _parseLocation message
+            -- The priority of "mother" is determined by its position in the line. If "mother" will be first, other cases will never work
+            let mentity = msticker <|> manimation <|> mphoto <|> mvideo <|> mdocument <|> mpoll <|> mcontact <|> mlocation <|> mother 
+            case mentity of
+                Nothing     -> fail "Unknown entity type"
+                Just entity -> return . Just $ (chatId, entity)
+        Just text ->  do -- command or test
+            let emc = toMessageCommand text
+            case emc of
+                Left m -> return . Just $  (chatId, Message m)
+                Right command -> do
+                    typeEntities <- _withArrayItem "entities" (.: "type") message
+                    if ("bot_command"::String) `elem` typeEntities
                         then return . Just $ (chatId, Command command)
                         else fail "Unknown entity type"
 
-_parseForward :: OMessageItem -> Parser (Maybe Entity)     
+_parseForward :: OMessageItem -> Parser (Maybe Entity)
 _parseForward message = do
-  mforwardFrom <- message .:? "forward_from"
-  case mforwardFrom of 
-    Nothing -> return Nothing
-    Just forwardFrom -> do
-      forwardFromId <- forwardFrom .: "id"
-      messageId <- message .: "message_id"
-      --userName <- forwardFrom .: "username"
-      return $ Just $ Forward forwardFromId messageId --userName
+    mforwardFrom <- message .:? "forward_from"
+    case mforwardFrom of
+        Nothing -> return Nothing
+        Just forwardFrom -> do
+            forwardFromId <- forwardFrom .: "id"
+            messageId <- message .: "message_id"
+            return $ Just $ Forward forwardFromId messageId
 
---всегда Just
-_parseOther :: OMessageItem -> Parser (Maybe Entity)  
+-- allways Just
+_parseOther :: OMessageItem -> Parser (Maybe Entity)
 _parseOther o = do
     messageId <- o.:"message_id"
     return $ Just $ Other messageId
 
-_parseSticker :: OMessageItem -> Parser (Maybe Entity)     
+_parseSticker :: OMessageItem -> Parser (Maybe Entity)
 _parseSticker = _mwithItem "sticker" $ \o -> do
     fileId <- o .: "file_id"
     return $ Sticker fileId
 
-_parseAnimation :: OMessageItem -> Parser (Maybe Entity)     
+_parseAnimation :: OMessageItem -> Parser (Maybe Entity)
 _parseAnimation = _mwithItem "animation" $ \o -> do
     fileId <- o .: "file_id"
     return $ Animation fileId
 
-_parsePhoto :: OMessageItem -> Parser (Maybe Entity)   
+_parsePhoto :: OMessageItem -> Parser (Maybe Entity)
 _parsePhoto message = do
-  mphotos <- _mwithArrayItem "photo" (.:"file_id") message 
+  mphotos <- _mwithArrayItem "photo" (.:"file_id") message
   mcaption <- message .:? "caption"
-  case mphotos of 
-    Nothing -> return Nothing 
+  case mphotos of
+    Nothing     -> return Nothing
     Just photos -> return $ Just $ Photo (last photos) mcaption
 
-_parseVideo :: OMessageItem -> Parser (Maybe Entity)     
+_parseVideo :: OMessageItem -> Parser (Maybe Entity)
 _parseVideo message = do
-  mvideo <- message .:? "video"
-  case mvideo of 
-    Nothing -> return Nothing
-    Just video -> do
-      mcaption <- message .:? "caption"
-      fileId <- video .: "file_id"
-      return $ Just $ Video fileId mcaption
+    mvideo <- message .:? "video"
+    case mvideo of
+        Nothing -> return Nothing
+        Just video -> do
+            mcaption <- message .:? "caption"
+            fileId <- video .: "file_id"
+            return $ Just $ Video fileId mcaption
 
-_parseDocument :: OMessageItem -> Parser (Maybe Entity)     
+_parseDocument :: OMessageItem -> Parser (Maybe Entity)
 _parseDocument message = do
-  mfile <- message .:? "document"
-  case mfile of 
-    Nothing -> return Nothing
-    Just file -> do
-      mcaption <- message .:? "caption"
-      fileId <- file .: "file_id"
-      return $ Just $ Document fileId mcaption
+    mfile <- message .:? "document"
+    case mfile of
+        Nothing -> return Nothing
+        Just file -> do
+            mcaption <- message .:? "caption"
+            fileId <- file .: "file_id"
+            return $ Just $ Document fileId mcaption
 
-_parsePoll :: OMessageItem -> Parser (Maybe Entity)     
+_parsePoll :: OMessageItem -> Parser (Maybe Entity)
 _parsePoll = _mwithItem "poll" $ \o -> do
-      intId <- o .: "id"
-      question <- o .: "question"
-      options <- _withArrayItem "options" (.:"text") o
-      return $ Poll intId question options
+    intId <- o .: "id"
+    qu <- o .: "question"
+    ops <- _withArrayItem "options" (.:"text") o
+    return $ Poll intId qu ops
 
-_parseContact :: OMessageItem -> Parser (Maybe Entity)     
+_parseContact :: OMessageItem -> Parser (Maybe Entity)
 _parseContact  = _mwithItem "contact" $ \o -> do
-      phoneNumber <- o .: "phone_number"
-      firstName <- o .: "first_name"
-      lastName <- o .:? "last_name"
-      vсard <- o .:? "vcard"
-      return $ Contact phoneNumber firstName lastName vсard
+    pn <- o .: "phone_number"
+    fn <- o .: "first_name"
+    ln <- o .:? "last_name"
+    vc <- o .:? "vcard"
+    return $ Contact pn fn ln vc
 
-_parseLocation :: OMessageItem -> Parser (Maybe Entity)     
+_parseLocation :: OMessageItem -> Parser (Maybe Entity)
 _parseLocation  = _mwithItem "location" $ \o -> do
-      latitude <- o .: "latitude"
-      longitude <- o .: "longitude"
-      return $ Location latitude longitude
+    latitude <- o .: "latitude"
+    longitude <- o .: "longitude"
+    return $ Location latitude longitude
 
-
-
-
--------------SEND---------------------
---кнопки в формате json
---Data Keyboard = Keyboard{}
-keyboard :: [String] -> LC.ByteString 
---keyboard :: [String] -> Value
-keyboard strs =   encode $  object [ "keyboard" .=  Array ( fromList [Array $ fromList (arr strs)] ) ]
-  where
+-----------------------------Send----------------------------------------------
+keyboard :: [String] -> LC.ByteString
+keyboard strs =   encode $  object [ "keyboard" .=  Array ( fromList [Array $ fromList (arr strs)] ) ] where
     arr:: [String] -> [Value]
-    arr = map (\str -> object["text" .= str])  
+    arr = map (\str -> object["text" .= str])
 
-pollOptions :: [String] -> LC.ByteString 
-pollOptions options = encode $ Array $ fromList (map (String . pack)  options)
+pollOptions :: [String] -> LC.ByteString
+pollOptions ops = encode $ Array $ fromList (map (String . pack)  ops)

@@ -16,7 +16,7 @@ import           Control.Monad.State.Lazy
 import           Control.Monad.Trans.Except
 import qualified Data.Aeson.Encode.Pretty   as Aeson
 import qualified Data.ByteString.Lazy       as L
-import qualified Data.Map.Internal          as M
+-- import qualified Data.Map.Internal          as M
 import           GHC.Generics               hiding (S)
 
 -----------------------------Types---------------------------------------------
@@ -83,7 +83,7 @@ readS = do
     let s = toS config
     return s
 
-saveS :: MIOError m => S -> m ()
+saveS :: MIOError m => S -> m ()                                                 
 saveS s = do
     config <- Config.readConfig
     let newConfig = fromS config s
@@ -97,7 +97,7 @@ toS config = S {
         logSettings = Log.defaultSettings
     } where
         configApps =  _apps config;
-        ca = head $ filter (\ca -> show (_app config) == name ca) configApps
+        ca = head $ filter (\ca0 -> show (_app config) == name ca0) configApps
         cac = Cache{
             configApp = ca,
             configText = _text config,

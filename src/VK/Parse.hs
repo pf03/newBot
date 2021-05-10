@@ -24,7 +24,7 @@ import           Data.Aeson
 import           Data.Aeson.Types
 import qualified Data.ByteString.Lazy.Char8 as LC
 import           Data.Maybe
-import           Data.Text                  (Text, pack)
+import           Data.Text                  (pack)
 import           GHC.Exts
 import           GHC.Generics
 import           Text.Read
@@ -71,13 +71,13 @@ _parseUpdate o = do
     _type <- o.:"type" :: Parser String
     case _type of
         "message_new" -> do
-            object <-  o.: "object"
-            userId <- object .: "user_id"::Parser UserId
-            text <- object .: "body"
+            obj <-  o.: "object"
+            userId <- obj .: "user_id"::Parser UserId
+            text <- obj .: "body"
             let emc = Logic.toMessageCommand text
-            mattachments <-_mwithArrayItem "attachments" _parseAttachment object
-            let attachments = fromMaybe [] mattachments
-            return $ Just (userId, Entity emc attachments)
+            mas <-_mwithArrayItem "attachments" _parseAttachment obj
+            let as = fromMaybe [] mas
+            return $ Just (userId, Entity emc as)
         _ -> return Nothing
 
 _parseAttachment :: Object -> Parser Attachment
@@ -128,7 +128,7 @@ _parseLink o = do
     return $ Link url
 
 -----------------------------Send----------------------------------------------
-keyboard :: [String] -> LC.ByteString
+keyboard :: [String] -> LBS
 keyboard strs = encode $  object [
     "one_time" .= True,
     "inline" .= False,
@@ -142,13 +142,13 @@ _buttons = map $ \str -> object ["action".=object[
         ]
     ]
 
-contentUrl:: String -> LC.ByteString
+contentUrl:: String -> LBS
 contentUrl str = encode $  object [
     "type" .= ("url"::String),
     "url" .= str
     ]
 
-contentMessage:: OwnerId -> GroupId -> IntId -> LC.ByteString
+contentMessage:: OwnerId -> GroupId -> IntId -> LBS
 contentMessage ownerId peerId messageId = encode $  object [
     "type" .= ("message"::String),
     "owner_id" .= ownerId,

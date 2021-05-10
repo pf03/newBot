@@ -121,23 +121,5 @@ _getAllUpdates :: MT m => m ([Update], Init)
 _getAllUpdates = do
     init <- _getInit
     let newInit = init{ts=500}
-    _getUpdates newInit 
-
--- upd = runT _getAllUpdates
-
-_test::MT m => m()
-_test = do
-    -- ConfigApp _name _host token _updateId _ _repeatNumber _groupId version <- gets configApp
-    ConfigApp _name _host token _updateId _ _repeatNumber _groupId version <- Cache.getConfigApp
-    Log.setSettings Color.Yellow True "testRequest" 
-    Log.send
-    let query = Query.test token version
-    Log.receiveData "query" query
-    json <- Request.api (API Messages Send) query False 
-    Log.receive 
-    o <- Parse.getObject json
-    Log.receiveData "object" o
-
--- test = runT _test
-
+    _getUpdates newInit
 
