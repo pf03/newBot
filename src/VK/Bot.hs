@@ -8,7 +8,7 @@ module VK.Bot (Pointer(..)) where
 
 -- Our modules
 import           Common.Misc
-import           Interface.MCache         as Cache
+import           Interface.MCache         as Cache hiding (host)
 import           Interface.MError         as Error
 import           Interface.MLog           as Log
 import           Interface.MT
@@ -24,6 +24,7 @@ import           Interface.Messenger.IUpdate
 import           Data.List.Split
 import           Data.Maybe
 import qualified System.Console.ANSI      as Color (Color (..))
+import           Control.Concurrent
 
 -----------------------------Types---------------------------------------------
 data Pointer = Pointer
@@ -33,8 +34,8 @@ newtype WrapUpdate = WrapUpdate Update deriving newtype (IUpdate)
 
 -----------------------------Instance------------------------------------------
 instance IBot Pointer WrapInit WrapUpdate  where
-    getInit :: MT m => Pointer -> m WrapInit
-    getInit _ = WrapInit <$> _getInit
+    getInit :: MT m => Pointer -> MVar Bool -> m WrapInit
+    getInit _ _ = WrapInit <$> _getInit
 
     getUpdateId :: WrapInit -> UpdateId
     getUpdateId (WrapInit ini) = ts ini
@@ -55,23 +56,23 @@ instance IBot Pointer WrapInit WrapUpdate  where
 _getInit :: MT m => m Init
 _getInit = do
     Log.setSettings Color.Blue True "getInit"
-    ConfigApp _name _host token _updateId _  _repeatNumber groupId version <- Cache.getConfigApp
+    ConfigApp _name _host tk _updateId _  _repeatNumber gid v <- Cache.getConfigApp
     let api = API Groups GetLongPollServer
     Log.send
-    json <- Request.api api (Query.getLongPollServer token groupId version) False
+    json <- Request.api api (Query.getLongPollServer tk gid v) False
     Log.receive
     o <- Parse.getObject json
     Log.receiveData "object" o
-    init@(Init _server _key _ts) <-  Parse.init o
-    Log.receiveData "init" init
-    return init
+    ini@(Init _server _key _ts) <-  Parse.init o
+    Log.receiveData "init" ini
+    return ini
 
 -- Get updates from messenger server by the long polling method
 _getUpdates :: MT m => Init -> m ([Update], Init)
-_getUpdates init@(Init server key ts) = do
+_getUpdates ini@(Init server0 _ ts0) = do
     Log.setSettings Color.Cyan False "getUpdates"
-    let query = Query.longPoll init 25
-    (host, path) <- parseServer server
+    let query = Query.longPoll ini 25
+    (host, path) <- parseServer server0
     let request = Request.build host path query
     Log.send
     json <- Request.send request True -- long polling
@@ -79,21 +80,21 @@ _getUpdates init@(Init server key ts) = do
     o <- Parse.getObject json
     Log.receiveData "object" o
     muid <- Parse.updateId o
-    let newInit = init {ts = fromMaybe ts muid}
-    --let newInit = init
+    let newIni = ini {ts = fromMaybe ts0 muid}
     Log.receiveData "updateId" muid
-    updates <- Parse.updates o
-    Log.receiveData "updates" updates
-    return (updates, newInit)
+    us <- Parse.updates o
+    Log.receiveData "updates" us
+    return (us, newIni)
 
+-- Send response to a single user
 _sendMessage :: MT m => Update -> [Label] -> m ()
-_sendMessage update@(cid, en) btns = do
+_sendMessage update btns = do
     --undefined
     Log.setSettings Color.Yellow True "sendMessage"
-    ConfigApp _name _host token _updateId _ _repeatNumber _groupId version <- Cache.getConfigApp
+    ConfigApp _name _host tk _updateId _ _repeatNumber _groupId v <- Cache.getConfigApp
     Log.send
     printT btns
-    query <- Query.sendMessage token version update btns
+    query <- Query.sendMessage tk v update btns
     Log.receiveData "query" query
     json <- Request.api (API Messages Send) query False
     Log.receive
@@ -101,25 +102,17 @@ _sendMessage update@(cid, en) btns = do
     Log.receiveData "object" o
     --undefined
 
- --"https://lp.vk.com/wh777777777" -> "lp.vk.com" "/wh777777777"
+ -- "https://lp.vk.com/wh777777777" -> "lp.vk.com" "/wh777777777"
 parseServer :: MError m => String -> m (Host, Path)
-parseServer server = do
-    let error n = QueryError $ template "({1})Could not match pattern \"https://{host}/{path}\" in long polling server \"{0}\"   === " [server, show n]
-    let strs = splitOn "//" server
+parseServer url = do
+    let err = QueryError $ 
+            template "Could not match pattern \"https://{host}/{path}\" in long polling server \"{0}\"" [url]
+    let strs = splitOn "//" url
     case strs of
         [https, str] -> do
-            if https /= "https:" then Error.throw $ error 1 else do
+            if https /= "https:" then Error.throw err else do
                 let strs1 = splitOn "/" str
                 case strs1 of
                     [host, path] -> return (host, '/':path)
-                    _            -> Error.throw $ error 2
-        _ -> Error.throw $ error 3
-
-
---приходит ошибка, причем ts Int, а не Str {"failed":1,"ts":589}
-_getAllUpdates :: MT m => m ([Update], Init)
-_getAllUpdates = do
-    init <- _getInit
-    let newInit = init{ts=500}
-    _getUpdates newInit
-
+                    _            -> Error.throw err
+        _ -> Error.throw err

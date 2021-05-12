@@ -51,7 +51,7 @@ class Monad m => MCache m where
     
 class (MCache m, MonadIO m) => MIOCache m where
     -- Write only if cache changed
-    writeCache :: m () 
+    writeCache :: m ()
 
 getCacheChanged :: MCache m => m Changed 
 getCacheChanged = getsCache changed

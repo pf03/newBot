@@ -16,7 +16,6 @@ import           Control.Monad.State.Lazy
 import           Control.Monad.Trans.Except
 import qualified Data.Aeson.Encode.Pretty   as Aeson
 import qualified Data.ByteString.Lazy       as L
--- import qualified Data.Map.Internal          as M
 import           GHC.Generics               hiding (S)
 
 -----------------------------Types---------------------------------------------
@@ -27,6 +26,7 @@ data S = S {
     cache       :: Cache,
     configLog   :: LogConfig,
     logSettings :: LogSettings
+    -- exitFlag    :: Bool
 } deriving (Show, Generic)
 
 -----------------------------Instances-----------------------------------------

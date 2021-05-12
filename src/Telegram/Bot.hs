@@ -18,10 +18,13 @@ import qualified Telegram.Parse           as Parse
 import qualified Telegram.Query           as Query
 import           Telegram.Update           as Update
 import           Telegram.API           as API
+import           Interface.MError as Error
 
 --Other modules
 import           Control.Applicative
 import qualified System.Console.ANSI      as Color (Color (..))
+import           Control.Concurrent
+import           Control.Monad.State.Lazy
 
 -----------------------------Types---------------------------------------------
 data Pointer = Pointer
@@ -31,8 +34,8 @@ newtype WrapUpdate = WrapUpdate Update deriving newtype (IUpdate)
 
 -----------------------------Instance------------------------------------------
 instance IBot Pointer Init WrapUpdate where
-    getInit :: MT m => Pointer -> m Init
-    getInit _ = Init <$> _getUpdateId
+    getInit :: MT m => Pointer -> MVar Bool -> m Init
+    getInit _ userExitMVar = Init <$> _getUpdateId userExitMVar
 
     getUpdateId :: Init -> UpdateId
     getUpdateId (Init uid) = uid
@@ -50,8 +53,8 @@ instance IBot Pointer Init WrapUpdate where
 
 --------------------------------Internal functions----------------------------------------
 -- Initialization - get last updateId for getUpdates request
-_getUpdateId :: MT m => m UpdateId
-_getUpdateId = do
+_getUpdateId :: MT m => MVar Bool -> m UpdateId
+_getUpdateId userExitMVar = do
     Log.setSettings Color.Blue True "_getUpdateId"
     uidFromFile <- Cache.getUpdateIdFromFile
     if uidFromFile
@@ -60,8 +63,10 @@ _getUpdateId = do
             Log.send
             (_, muid) <- _getUpdates Nothing
             Log.receive
-            maybe _getUpdateId (return . (-) 1 ) muid
-
+            exit <- liftIO $ readMVar userExitMVar
+            if exit 
+                then Error.throw $ IOError "Application exit by user choice"
+                else maybe (_getUpdateId userExitMVar) (return . (-) 1 ) muid
 
 -- Get updates from messenger server by the long polling method
 -- _getUpdates Nothing - for initialization

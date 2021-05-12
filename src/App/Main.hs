@@ -11,27 +11,36 @@ import           VK.Bot             as VK
 -- Other modules
 import           Control.Concurrent
 
-main:: IO()
-main = do
-  exVar <- newMVar False  --это не работает, не дожидается конца запроса
-  _ <- forkIO $ runT switchApplication
-  exit exVar
+main_:: IO()
+main_ = do
+    userExitMVar <- newMVar False
+    appExitMVar <- newEmptyMVar
+    _ <- forkIO $ exit userExitMVar
+    threadDelay 2000000
+    _ <- forkIO $ do
+        runT (switchApplication userExitMVar)
+        putStrLn "Application closed"
+        putMVar appExitMVar ()
+    takeMVar appExitMVar
+    putStrLn "Press enter for exit..."
+    _ <- getLine
+    return ()
 
-switchApplication :: T ()
-switchApplication = do
-  app <- S.getApp
-  case app of
-    VK       -> Bot.application VK.Pointer
-    Telegram -> Bot.application Telegram.Pointer
+switchApplication :: MVar Bool -> T ()
+switchApplication userExitMVar = do
+    app <- S.getApp
+    case app of
+        VK       -> Bot.application VK.Pointer userExitMVar
+        Telegram -> Bot.application Telegram.Pointer userExitMVar 
 
-exit :: MVar Bool -> IO()
-exit exVar = do
-  threadDelay 2000000
-  putStrLn "Введите exit для выхода из приложения"
-  line <-getLine
-  if line == "exit" then do
-    putStrLn "Выходим из приложения прямо сейчас..."
-    --putMVar exVar True
-  else do
-    putStrLn "Неверная команда"
-    exit exVar
+exit :: MVar Bool -> IO ()
+exit userExitMVar = do
+    putStrLn "Press q to exit..."
+    line <- getLine
+    if line == "q" then do
+        _ <- takeMVar userExitMVar
+        putMVar userExitMVar True
+        putStrLn "Exit from application when long polling request ends..."
+    else do
+        putStrLn "Wrong command"
+        exit userExitMVar

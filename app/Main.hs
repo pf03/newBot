@@ -1,7 +1,8 @@
 module Main where
+import App.Main as App
 
 main:: IO()
-main = error "Not implemented yet!!!"
+main = App.main_
 
 
 
