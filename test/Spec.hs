@@ -1,25 +1,26 @@
 
-import Test.Hspec
-import Test.QuickCheck
-import Control.Exception (evaluate)
-import qualified Logic
-import Types 
-import Control.Monad.State.Lazy
-import Lib
-import Common
-import qualified Data.Map.Internal as M
-import Prelude hiding (repeat)
+-- Our modules
+import           Common.Misc
+import           Interface.MCache          as Cache
+import           Logic.Logic              as Logic
+
+-- Other modules
+import           Control.Exception        (evaluate)
+import           Control.Monad.State.Lazy
+import qualified Data.Map.Internal        as M
+import           Lib
+import           Prelude                  hiding (repeat)
+import           Test.Hspec
 
 main :: IO ()
-main = do 
+main = do
   hspec testToMessageCommand
   hspec testTextAnswer
-
 
 -----------------------------Logic.toMessageCommand---------------------------------------------
 testToMessageCommand :: Spec
 testToMessageCommand = do
-    describe "Logic.toMessageCommand" $ do 
+    describe "Logic.toMessageCommand" $ do
       it "returns message" $ do
         map Logic.toMessageCommand messages `eachShouldBe` map Left messages
       it "returns help command" $ do
@@ -33,43 +34,49 @@ testToMessageCommand = do
       it "returns unknown command" $ do
         unknownCases `eachShouldBe` unknownResults
 
-messages = 
+messages =
   ["", " ", "foo", "кириллица", "  kj mkl kl ", " ?/sd", "sd /sd", "a/ssdf", "s8/*-*/*-4",
-    "repeat",  
-    "/ repeat", 
-    " / repeat", 
-    "/ repeat ", 
-    " / repeat ", 
-    "   / repeat       ", 
-    " /    repeat ", 
+    "repeat",
+    "/ repeat",
+    " / repeat",
+    "/ repeat ",
+    " / repeat ",
+    "   / repeat       ",
+    " /    repeat ",
     "/ re p e at ",
     "/ vasya"]
 
+helpCases :: [Either Message Command]
 helpCases = map Logic.toMessageCommand
   ["/help", " /help", "/help ", "         /help   "]
 
+startCases :: [Either Message Command]
 startCases = map Logic.toMessageCommand
   ["/start", " /start", "/start ", "         /start   "]
 
+repeatCases :: [Either Message Command]
 repeatCases = map Logic.toMessageCommand
   ["/repeat", " /repeat", "/repeat ", "         /repeat   "]
 
-buttonCases = map Logic.toMessageCommand 
+buttonCases :: [Either Message Command]
+buttonCases = map Logic.toMessageCommand
   ["/1", "/2", "/3", "/4", "/5",
     " /1", " /2", " /3", " /4", " /5",
     " /1 ", " /2 ", " /3 ", " /4 ", " /5 "]
 
+buttonResults :: [Either Message Command]
 buttonResults = map (Right . Button) $ concat $ replicate 3 [1..5]
 
---наши команды не имеют никаких параметров, поэтому команды с параметрами относим к неизвестнымю Возможно следует отказаться от lowerCase
+unknownCases :: [Either Message Command]
 unknownCases = map Logic.toMessageCommand
-  ["/unk", " /unk", "/unk ", "         /unk   ", 
-    "/other", "/withparams 1 2 3" ,"/0", "/3 1", "/repeat 3", "/help 3",  "/Repeat", "/REPEAT", "//repeat",
+  ["/unk", " /unk", "/unk ", "         /unk   ",
+    "/other", "/withparams 1 2 3", "/a", "/6", "/0", "/3 1", "/repeat 3", "/help 3",  "/Repeat", "/REPEAT", "//repeat",
     "/repeat 3", "/6", "/0", "/help 5 3",
-    "  /repeat 3", " /6", " /0 ", "     /help  5    3  ", 
+    "  /repeat 3", " /6", " /0 ", "     /help  5    3  ",
     "/3 /repeat", "    /0 /repeat", "  /33 /repeat    ", "/6    /repeat"
   ]
 
+unknownResults :: [Either Message Command]
 unknownResults = map (Right . Unknown)
   ["unk", "unk", "unk", "unk",
     "other", "withparams 1 2 3", "a", "6", "0", "3 1", "repeat 3", "help 3", "Repeat", "REPEAT", "/repeat",
@@ -81,9 +88,9 @@ unknownResults = map (Right . Unknown)
 -------------------------------Logic.textAnswer-------------------------------------------------------------
 testTextAnswer :: Spec
 testTextAnswer = do
-    describe "Logic.textAnswer" $ do 
+    describe "Logic.textAnswer" $ do
       it "have dialog with user" $ do
-        textAnswerCases `eachEvalStateShouldBe` (textAnswerResults `withInitialState` someState) 
+        textAnswerCases `eachEvalStateShouldBe` (textAnswerResults `withInitialState` someCache)
 
 --query - answer to bot
 textAnswerTuples :: [(Either Message Command, Message)]
@@ -92,7 +99,7 @@ textAnswerTuples =  [
     Right Repeat `to` "someRepeatText",
     Right (Button 3) `to` "someButtonText",
     Left "How do you do?" `to` "How do you do? How do you do? How do you do?",
-    Right Help `to` "someHelpText", 
+    Right Help `to` "someHelpText",
     Right Start `to` "someHelpText",
     Right Repeat `to` "someRepeatText",
     Right (Button 5) `to` "someButtonText",
@@ -101,35 +108,30 @@ textAnswerTuples =  [
     Left "good bye" `to` "good bye good bye good bye good bye good bye"
   ]
 
-textAnswerCases :: [State S Message]
+textAnswerCases :: [State Cache Message]
 textAnswerCases = map (Logic.textAnswer someChatId . fst) textAnswerTuples
 
 textAnswerResults :: [Message]
 textAnswerResults = map snd textAnswerTuples
+
+to :: a -> b -> (a, b)
 to = (,)
 
-textAnswerCase :: State S Message
-textAnswerCase = Logic.textAnswer someChatId $ Left "hello bot" 
+textAnswerCase :: State Cache Message
+textAnswerCase = Logic.textAnswer someChatId $ Left "hello bot"
 
 textAnswerResult :: Message
 textAnswerResult = "hello bot"
 
-someState :: S
-someState = S {
-  app = notUsed "app",
-  configApp = someConfigApp,
-  configText = someConfigText,
-  configLog = notUsed "configLog",
-  logSettings = notUsed "logSettings"
-}
-
+someConfigText :: ConfigText
 someConfigText = ConfigText{
-  help = "someHelpText", 
-  repeat = "someRepeatText", 
-  unknown = "someUnknownText", 
+  help = "someHelpText",
+  repeat = "someRepeatText",
+  unknown = "someUnknownText",
   button = "someButtonText"
 }
 
+someConfigApp :: ConfigApp
 someConfigApp = ConfigApp {
   name = "someAppName",
   host = "someAppHost",
@@ -141,8 +143,12 @@ someConfigApp = ConfigApp {
   version = "someAppVersion"
 }
 
-someChatId = 666
+someCache :: Cache
+someCache = Cache {
+    configApp = someConfigApp,
+    configText = someConfigText,
+    changed = False
+}
 
---не знаю, как сделать по другому, чтобы не определять ненужные сущности
-notUsed :: String -> a
-notUsed field = error $ template "Field {0} should not be used in S" [field]
+someChatId :: ChatId
+someChatId = 666

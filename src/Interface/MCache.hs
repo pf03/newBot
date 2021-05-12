@@ -1,4 +1,6 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
 module Interface.MCache where
 
 -- Our modules
@@ -9,6 +11,7 @@ import              Control.Monad.IO.Class
 import              Data.Aeson
 import qualified    Data.Map.Internal as M
 import              GHC.Generics
+import Control.Monad.Trans.State.Lazy
 
 -----------------------------Types---------------------------------------------
 data Cache = Cache {
@@ -53,6 +56,7 @@ class (MCache m, MonadIO m) => MIOCache m where
     -- Write only if cache changed
     writeCache :: m ()
 
+-----------------------------Functions-----------------------------------------
 getCacheChanged :: MCache m => m Changed 
 getCacheChanged = getsCache changed
 
@@ -114,3 +118,9 @@ setRepeatNumber cid rn = do
     setCacheChanged
     rns <- getRepeatNumbers
     setRepeatNumbers $ M.insert cid rn rns
+
+-----------------------------State---------------------------------------------
+instance MCache (State Cache) where
+    getCache = get
+    setCache = put
+

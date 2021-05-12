@@ -1,6 +1,5 @@
 module Lib where
 import Test.Hspec
-import Test.QuickCheck
 import Control.Exception (evaluate)
 import Control.Monad.State.Lazy
 
@@ -12,7 +11,7 @@ allShouldBe cases result = eachShouldBe cases (replicate (length cases) result)
 
 --EACH of cases SHOULD BE eqaul to each of results
 eachShouldBe :: (HasCallStack, Show a, Eq a) => [a] -> [a] -> Expectation
-eachShouldBe cases results = bimapM_ shouldBe cases results
+eachShouldBe = bimapM_ shouldBe
 
 ----------------------------------State cases-------------------------------------------------
 
@@ -25,9 +24,9 @@ allEvalStatesShouldBe states (result, initialState) = eachEvalStateShouldBe stat
 eachEvalStateShouldBe :: (HasCallStack, Show a, Eq a) => [State s a] -> ([a], s) -> Expectation
 eachEvalStateShouldBe [] ([], _) = return () 
 eachEvalStateShouldBe (s:ss) (r:rs, initialState) = do
-  let (a, modifiedState) = runState s initialState
-  a `shouldBe` r
-  eachEvalStateShouldBe ss (rs, modifiedState)
+    let (a, modifiedState) = runState s initialState
+    a `shouldBe` r
+    eachEvalStateShouldBe ss (rs, modifiedState)
 eachEvalStateShouldBe _ _ = error "lists of tests and answers must have equal lengths"
 
 --EVAL STATE of case SHOULD BE equal to result WITH INITIAL STATE
@@ -40,8 +39,8 @@ withInitialState = (,)
 bimapM_ :: Monad m => (a -> b -> m c) -> [a] -> [b] -> m ()
 bimapM_ f [] [] = return ()
 bimapM_ f (x:xs) (y:ys) = do
-  f x y
-  bimapM_ f xs ys
+    f x y
+    bimapM_ f xs ys
 bimapM_ _ _ _ = error "list args of bimapM_ must have equal lengths"
 
 
