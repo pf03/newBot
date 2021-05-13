@@ -5,6 +5,7 @@
 module T.State where
 
 -- Our modules
+import           Common.Misc
 import           Interface.MCache           as Cache
 import           Interface.MError           as Error
 import           Interface.MLog             as Log
@@ -80,8 +81,7 @@ getApp = gets app
 readS :: MIOError m => m S
 readS = do
     config <- readConfig
-    let s = toS config
-    return s
+    toS config
 
 saveS :: MIOError m => S -> m ()                                                 
 saveS s = do
@@ -89,20 +89,23 @@ saveS s = do
     let newConfig = fromS config s
     liftEIO $ L.writeFile pathConfig (Aeson.encodePretty newConfig)
 
-toS :: Config -> S
-toS config = S {
+toS :: MError m => Config -> m S
+toS config = do
+    ca <- case filter (\ca0 -> show (_app config) == name ca0) configApps of
+        []  -> Error.throw $ ConfigError $ template "There is no app with name {0} in config" [show (_app config)]
+        cas -> return $ head cas
+    let cac = Cache {
+        configApp = ca,
+        configText = _text config,
+        changed = False
+    }
+    return $ S {
         app = _app config,
         cache = cac,
         configLog = _log config,
         logSettings = Log.defaultSettings
     } where
         configApps =  _apps config;
-        ca = head $ filter (\ca0 -> show (_app config) == name ca0) configApps
-        cac = Cache{
-            configApp = ca,
-            configText = _text config,
-            changed = False
-        }
 
 fromS :: Config -> S -> Config
 fromS config st = config {_apps = newConfigApps} where

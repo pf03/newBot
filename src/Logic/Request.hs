@@ -29,13 +29,10 @@ build h path query = setRequestSecure True
 send :: (MLog m, MIOError m) => Request -> Bool -> m LBS
 send request save = do
     Log.debugM request
-
     response <- resp
-    --response <- Error.liftEIO $ httpLBS request
     let status = getResponseStatusCode response
     if status == 200
     then do
-        
         let jsonBody = getResponseBody response
         when save $ do
             Log.warnM "Saving request to file"
@@ -45,10 +42,8 @@ send request save = do
         Log.errorM "Request failed with error"
         Log.errorM $ show response
         Error.throw $ QueryError "Request failed with error" where
-
             resp :: (MLog m, MIOError m) => m (Response LBS)
             resp = do
-                -- er <- Error.toEither $ (httpLBS request)
                 er <- Error.toEither $ Error.liftEIO (httpLBS request)
                 case er of
                     Left Error.Exit -> do  -- Exit from application by user choise

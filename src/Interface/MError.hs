@@ -66,7 +66,7 @@ liftEIO m = do
     liftE ea
     where
     ehandler :: E.AsyncException -> IO (EE a)
-    ehandler e = return $ Left Exit
+    ehandler _ = return $ Left Exit
     iohandler :: E.IOException -> IO (EE a)
     iohandler e = return . Left  . IOError . show $ e
     otherhandler :: E.SomeException -> IO (EE a)

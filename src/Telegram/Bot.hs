@@ -18,7 +18,6 @@ import qualified Telegram.Parse           as Parse
 import qualified Telegram.Query           as Query
 import           Telegram.Update           as Update
 import           Telegram.API           as API
-import           Interface.MError as Error
 
 --Other modules
 import           Control.Applicative

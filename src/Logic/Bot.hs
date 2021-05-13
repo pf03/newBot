@@ -9,7 +9,6 @@ import           Interface.MLog           as Log
 import           Interface.MT
 import           Interface.Messenger.IBot as Bot
 import qualified Logic.Logic              as Logic
-import           Interface.MError as Error
 
 -- Other modules
 import           Control.Monad.State.Lazy
