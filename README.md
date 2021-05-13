@@ -9,9 +9,11 @@
 3. To run the binary file successfully, copy the following files and folders from repository into the same folder with the binary file:
 * config-example.json
 3. Rename the config-example.json file to config.json and edit it
+
 Be sure to edit the following fields:
-* apps.token
-* apps.groupId for VK
+* "apps.token"
+* "apps.groupId" for VK
+
 The fields "apps.repeatNumber" and "apps.updateId" can be left as they are, they will be filled in while the bot is running.
 4. To test pure functions run ‘stack test’
 
@@ -24,10 +26,9 @@ The bot operation logic is divided into the following layers (presented in the c
   * MError  - error handling,
   * MLog    - logging,
   * MCache  - working with changing data in pure code,
-  * MDB     - work with PostgreSQL database;
   * Messenger - common interface for different messengers
 3. Logic    - the main logic of the program
-4. VK       - implementation of the messenger interface for api vk
+4. VK       - implementation of the messenger interface for api VK
 5. VK       - implementation of the messenger interface for api telegram
 6. T        - one of the possible implementations of the monadic interface - transformer T;
 7. App      - application layer functions that have access to both the interface and its implementation.
