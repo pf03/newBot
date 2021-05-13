@@ -1,12 +1,4 @@
-module Interface.MT 
--- ( module Interface.Class, --не очень хорошая идея так как лучше сущности импортировать квалифицированно или хотя бы с алиасами
---  module Cache, 
---  module Error, 
---  module Log ) 
-
-where
-
---этот модуль может реэкспортировать все остальные классы!!!
+module Interface.MT where
 
 --Our modules
 import Interface.MCache as Cache

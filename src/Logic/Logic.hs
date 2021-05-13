@@ -32,7 +32,7 @@ answer update = do
     case memc of
         Just emc -> do
             (newMessage, btns) <- answerMessageCommand cid emc
-            return (Update.setMessage update newMessage, btns)  --ответ на команду или сообщение
+            return (Update.setMessage update newMessage, btns)  -- answer to message or command
         Nothing -> do
             return (update , []) -- default answer
 
@@ -44,7 +44,6 @@ maybeToEither ma mb =
             Just b  -> Just $ Right b
             Nothing -> Nothing
 
---flag StateChanged needed in order to update the config later in a dirty function
 answerMessageCommand :: MCache m => ChatId -> Either Message Command -> m (Message, [Label])
 answerMessageCommand cid emc = do
     text <- textAnswer cid emc
@@ -69,7 +68,3 @@ textAnswer cid emc = do
             Cache.setRepeatNumber cid n
             return $ template buttonText [show mrn, show n]
         Right (Unknown com) -> return $ template unknownText [com]
-
-
-
-

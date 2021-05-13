@@ -123,4 +123,3 @@ setRepeatNumber cid rn = do
 instance MCache (State Cache) where
     getCache = get
     setCache = put
-
