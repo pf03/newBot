@@ -14,6 +14,7 @@ data E = ParseError String
     -- (for example, incorrect pattern matching)
     | DevError String
     | SomeError String
+    | Exit
 
 type EE = Either E
 
@@ -24,6 +25,7 @@ instance Show E where
     show (IOError s)     = "IO error: "++s
     show (DevError s)    = "Developer error: "++s
     show (SomeError s)   = "Some error: "++s
+    show Exit = "Exit from application by user choise"
 instance E.Exception E
 
 -----------------------------MError--------------------------------------------
@@ -56,12 +58,15 @@ catchEIO m h = do
     --handler :: Exception e => (e -> IO (EE a))
     handler e = return . Left  . h $ e
 
+
 -- * The same as previous, but errors are handled automatically, without user handlers
 liftEIO :: MIOError m => IO a -> m a
 liftEIO m = do
-    ea <- liftIO $  (Right <$> m) `E.catch` iohandler `E.catch` otherhandler
+    ea <- liftIO $  (Right <$> m) `E.catch` ehandler `E.catch` iohandler `E.catch` otherhandler
     liftE ea
     where
+    ehandler :: E.AsyncException -> IO (EE a)
+    ehandler e = return $ Left Exit
     iohandler :: E.IOException -> IO (EE a)
     iohandler e = return . Left  . IOError . show $ e
     otherhandler :: E.SomeException -> IO (EE a)

@@ -6,11 +6,10 @@ module Interface.Messenger.IBot where
 import Interface.MT
 import Interface.Messenger.IUpdate
 import Common.Misc
-import           Control.Concurrent
 
 class (IUpdate update) => IBot pointer init update  | pointer -> init , init -> update, update -> pointer where 
     -- Initial bot request to messenger server that returns the initialization data
-    getInit :: MT m => pointer -> MVar Bool -> m init
+    getInit :: MT m => pointer -> m init
     -- Get UpdateId from initialization data
     getUpdateId :: init -> UpdateId
     -- Set UpdateId to initialization data

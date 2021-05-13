@@ -24,7 +24,6 @@ import           Interface.Messenger.IUpdate
 import           Data.List.Split
 import           Data.Maybe
 import qualified System.Console.ANSI      as Color (Color (..))
-import           Control.Concurrent
 
 -----------------------------Types---------------------------------------------
 data Pointer = Pointer
@@ -34,8 +33,8 @@ newtype WrapUpdate = WrapUpdate Update deriving newtype (IUpdate)
 
 -----------------------------Instance------------------------------------------
 instance IBot Pointer WrapInit WrapUpdate  where
-    getInit :: MT m => Pointer -> MVar Bool -> m WrapInit
-    getInit _ _ = WrapInit <$> _getInit
+    getInit :: MT m => Pointer -> m WrapInit
+    getInit _ = WrapInit <$> _getInit
 
     getUpdateId :: WrapInit -> UpdateId
     getUpdateId (WrapInit ini) = ts ini

@@ -87,7 +87,7 @@ saveS :: MIOError m => S -> m ()
 saveS s = do
     config <- Config.readConfig
     let newConfig = fromS config s
-    liftIO $ L.writeFile pathConfig (Aeson.encodePretty newConfig)
+    liftEIO $ L.writeFile pathConfig (Aeson.encodePretty newConfig)
 
 toS :: Config -> S
 toS config = S {

@@ -14,6 +14,7 @@ import           Control.Monad.State.Lazy
 import qualified Data.ByteString.Char8    as BC
 import qualified Data.ByteString.Lazy     as L
 import           Network.HTTP.Simple
+import           Control.Concurrent
 
 build :: Host -> Path -> Query -> Request
 build h path query = setRequestSecure True
@@ -29,12 +30,12 @@ send :: (MLog m, MIOError m) => Request -> Bool -> m LBS
 send request save = do
     Log.debugM request
 
-
-    response <- Error.liftEIO $ httpLBS request
+    response <- resp
+    --response <- Error.liftEIO $ httpLBS request
     let status = getResponseStatusCode response
     if status == 200
     then do
-        response <- req 1
+        
         let jsonBody = getResponseBody response
         when save $ do
             Log.warnM "Saving request to file"
@@ -45,10 +46,19 @@ send request save = do
         Log.errorM $ show response
         Error.throw $ QueryError "Request failed with error" where
 
-            req :: (MLog m, MIOError m) => Int -> m (Response LBS)
-            req n = Error.catch (Error.liftEIO $ httpLBS request) $ \e -> do
-                Log.errorM "Request failed. Attempt 1 of 3"
-                if n >= 3 then Error.throw e else req (n+1) 
+            resp :: (MLog m, MIOError m) => m (Response LBS)
+            resp = do
+                -- er <- Error.toEither $ (httpLBS request)
+                er <- Error.toEither $ Error.liftEIO (httpLBS request)
+                case er of
+                    Left Error.Exit -> do  -- Exit from application by user choise
+                        Error.throw Error.Exit
+                    Left e -> do
+                        Log.errorM "Network connection error. Timeout 3 sec..."
+                        Log.errorM $ show e
+                        liftEIO $ threadDelay 3000000  -- liftEIO for correct catch async exceptions
+                        resp
+                    Right r -> return r
 
 
 -- | High level wrapper for API request
