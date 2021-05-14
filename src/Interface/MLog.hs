@@ -1,48 +1,53 @@
 {-# LANGUAGE DeriveGeneric #-}
+
 module Interface.MLog where
 
---Our modules
-import qualified Common.Color           as Color
-import           Common.Misc
-
---Other modules
-import           Control.Monad
-import           Control.Monad.IO.Class (MonadIO (..))
-import           Data.Aeson             (encode)
-import           Data.Aeson.Types       (FromJSON, ToJSON)
-import qualified Data.ByteString        as B
-import           GHC.Generics           (Generic)
-import           Prelude                hiding (error)
-import           System.Console.ANSI
-import Data.Char ( toUpper )
+import qualified Common.Color as Color
+import Common.Misc (Convert (convert), putStrLnT, template)
+import Control.Monad (when)
+import Control.Monad.IO.Class (MonadIO (..))
+import Data.Aeson (encode)
+import Data.Aeson.Types (FromJSON, ToJSON)
+import qualified Data.ByteString as B
+import Data.Char (toUpper)
+import GHC.Generics (Generic)
+import System.Console.ANSI (Color (Black, Blue, Green, Magenta, Red, Yellow))
+import Prelude hiding (error)
 
 -----------------------------Types---------------------------------------------
-data LogConfig = LogConfig{
-    colorEnable    :: Enable,
+data LogConfig = LogConfig
+  { colorEnable :: Enable,
     terminalEnable :: Enable,
-    fileEnable     :: Enable,  
+    fileEnable :: Enable,
     -- | Minimal log level as an integer
-    minLevel       :: Int 
-} deriving (Show, Generic)
+    minLevel :: Int
+  }
+  deriving (Show, Generic)
 
 instance FromJSON LogConfig
+
 instance ToJSON LogConfig
 
-data LogLevel =  
-    Debug   | -- Debug data
-    Info    | -- Information about app work
-    Warn    | -- Warnings
-    Error   | -- Non-critical error, that can be given to the user in one form or another
-    Critical  -- Critical error leading to application termination
-    deriving (Eq, Enum, Ord, Show)
+data LogLevel
+  = Debug -- Debug data
+  | Info -- Information about app work
+  | Warn -- Warnings
+  | Error -- Non-critical error, that can be given to the user in one form or another
+  | Critical -- Critical error leading to application termination
+  deriving (Eq, Enum, Ord, Show)
 
 type FuncName = String
+
 type ColorScheme = Color
+
 type Enable = Bool
-data LogSettings = LogSettings {
-    colorScheme :: ColorScheme, 
-    enable :: Enable, 
-    funcName :: String } deriving Show
+
+data LogSettings = LogSettings
+  { colorScheme :: ColorScheme,
+    enable :: Enable,
+    funcName :: String
+  }
+  deriving (Show)
 
 -----------------------------Class---------------------------------------------
 class Monad m => MLog m where
@@ -54,19 +59,19 @@ class Monad m => MLog m where
 -----------------------------MLog----------------------------------------------
 setColorScheme :: MLog m => ColorScheme -> m ()
 setColorScheme newcs = do
-    LogSettings _ le fn  <- getSettings
-    setSettings newcs le fn
+  LogSettings _ le fn <- getSettings
+  setSettings newcs le fn
 
 getConfigSettings :: MLog m => m (LogConfig, LogSettings)
 getConfigSettings = do
-    config <- getConfig
-    settings <- getSettings
-    return (config, settings)
+  config <- getConfig
+  settings <- getSettings
+  return (config, settings)
 
 resetSettings :: MLog m => m ()
 resetSettings = do
-    let LogSettings cs e fn = defaultSettings
-    setSettings cs e fn
+  let LogSettings cs e fn = defaultSettings
+  setSettings cs e fn
 
 defaultSettings :: LogSettings
 defaultSettings = LogSettings Black True ""
@@ -74,14 +79,14 @@ defaultSettings = LogSettings Black True ""
 defaultConfig :: LogConfig
 defaultConfig = LogConfig {colorEnable = False, terminalEnable = True, fileEnable = False, minLevel = 0}
 
-
 logM :: (MLog m, Show a) => m a -> m a
 logM m = do
-    a <- m
-    debugM a
-    return a
+  a <- m
+  debugM a
+  return a
 
 -- * An exception has been made for debug information - it can be of any type Show a,
+
 -- not just a String
 debugM :: (MLog m, Show a) => a -> m ()
 debugM a = messageM Debug (show a)
@@ -91,8 +96,8 @@ infoM = messageM Info
 
 infoCM :: MLog m => ColorScheme -> String -> m ()
 infoCM cs s = do
-    setColorScheme cs
-    infoM s
+  setColorScheme cs
+  infoM s
 
 warnM :: MLog m => String -> m ()
 warnM = messageM Warn
@@ -103,30 +108,30 @@ errorM = messageM Error
 criticalM :: MLog m => String -> m ()
 criticalM = messageM Critical
 
-messageM :: MLog m => LogLevel -> String -> m()
+messageM :: MLog m => LogLevel -> String -> m ()
 messageM level s = do
-    (config, settings) <- getConfigSettings
-    message config settings level s
+  (config, settings) <- getConfigSettings
+  message config settings level s
 
 -- Additional functions for debug
-getfname :: MLog m => m String 
+getfname :: MLog m => m String
 getfname = funcName <$> getSettings
 
 send :: MLog m => m ()
 send = do
-    fname <- getfname
-    infoM $ template "Query {0} sent......" [fname]
+  fname <- getfname
+  infoM $ template "Query {0} sent......" [fname]
 
 receive :: MLog m => m ()
-receive = do 
-    fname <- getfname
-    infoM $ template "Response received to the query {0}......" [fname]
+receive = do
+  fname <- getfname
+  infoM $ template "Response received to the query {0}......" [fname]
 
 receiveData :: (MLog m, Show a) => String -> a -> m ()
 receiveData dataName dataValue = do
-    fname <- getfname
-    infoM $ template "Data {1} received in the response to the query {0}......" [fname, dataName]
-    debugM dataValue
+  fname <- getfname
+  infoM $ template "Data {1} received in the response to the query {0}......" [fname, dataName]
+  debugM dataValue
 
 -----------------------------MonadIO-------------------------------------------
 debug :: (MonadIO m, Show a) => LogConfig -> LogSettings -> a -> m ()
@@ -151,25 +156,28 @@ critical lc ls = messageIO lc ls Critical
 -- Info can be shown in different color schemes, and for other levels the color corresponds to the level
 messageIO :: MonadIO m => LogConfig -> LogSettings -> LogLevel -> String -> m ()
 messageIO (LogConfig ecolor eterminal efile ml) (LogSettings cs en _) level text = do
-    if level < toEnum ml && not en then return () else do
-        when (ecolor && eterminal ) $ do
-            if level == Info then Color.setSchemeT cs
-                else Color.setColorT $ getColor level
-        when eterminal $ putStrLnT logText
-        when efile $ file logText
-        when (ecolor && eterminal) Color.resetColorSchemeT
-        where
-            logText :: String
-            logText = map toUpper (show level) <> " " <> text
+  if level < toEnum ml || not en
+    then return ()
+    else do
+      when (ecolor && eterminal) $ do
+        if level == Info
+          then Color.setSchemeT cs
+          else Color.setColorT $ getColor level
+      when eterminal $ putStrLnT logText
+      when efile $ file logText
+      when (ecolor && eterminal) Color.resetColorSchemeT
+  where
+    logText :: String
+    logText = map toUpper (show level) <> " " <> text
 
-            getColor :: LogLevel -> Color
-            getColor  Debug    = Green
-            getColor  Info     = Blue -- here you can use different color schemes for the convenience of displaying information
-            getColor  Warn     = Magenta
-            getColor  Error    = Yellow
-            getColor  Critical = Red
+    getColor :: LogLevel -> Color
+    getColor Debug = Green
+    getColor Info = Blue -- here you can use different color schemes for the convenience of displaying information
+    getColor Warn = Magenta
+    getColor Error = Yellow
+    getColor Critical = Red
 
-            file :: (MonadIO m, ToJSON a) => a -> m()
-            file str = do
-                liftIO $ B.appendFile "log.txt" $ convert . encode $ str
-                liftIO $ B.appendFile "log.txt" $ convert ("\n" :: String)
+    file :: (MonadIO m, ToJSON a) => a -> m ()
+    file str = do
+      liftIO $ B.appendFile "log.txt" $ convert . encode $ str
+      liftIO $ B.appendFile "log.txt" $ convert ("\n" :: String)

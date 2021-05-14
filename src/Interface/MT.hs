@@ -1,9 +1,7 @@
 module Interface.MT where
 
---Our modules
-import Interface.MCache as Cache
-import Interface.MError as Error
-import Interface.MLog as Log
-
+import Interface.MCache as Cache (MIOCache)
+import Interface.MError as Error (MIOError)
+import Interface.MLog as Log (MLog)
 
 class (MIOCache m, MIOError m, MLog m) => MT m

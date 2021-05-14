@@ -1,13 +1,5 @@
 module Main where
-import App.Main as App
+import qualified App.Main as App
 
 main:: IO()
 main = App.main_
-
-
-
-
-
-  
-
-

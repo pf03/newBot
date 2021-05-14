@@ -1,7 +1,8 @@
 module Lib where
-import Test.Hspec
+
 import Control.Exception (evaluate)
-import Control.Monad.State.Lazy
+import Control.Monad.State.Lazy (State, runState)
+import Test.Hspec (Expectation, HasCallStack, shouldBe)
 
 ----------------------------------Mutiple cases-------------------------------------------------
 
@@ -22,27 +23,24 @@ allEvalStatesShouldBe states (result, initialState) = eachEvalStateShouldBe stat
 
 --EACH EVAL STATE of cases SHOULD BE eqaul to each of results WITH INITIAL STATE
 eachEvalStateShouldBe :: (HasCallStack, Show a, Eq a) => [State s a] -> ([a], s) -> Expectation
-eachEvalStateShouldBe [] ([], _) = return () 
-eachEvalStateShouldBe (s:ss) (r:rs, initialState) = do
-    let (a, modifiedState) = runState s initialState
-    a `shouldBe` r
-    eachEvalStateShouldBe ss (rs, modifiedState)
+eachEvalStateShouldBe [] ([], _) = return ()
+eachEvalStateShouldBe (s : ss) (r : rs, initialState) = do
+  let (a, modifiedState) = runState s initialState
+  a `shouldBe` r
+  eachEvalStateShouldBe ss (rs, modifiedState)
 eachEvalStateShouldBe _ _ = error "lists of tests and answers must have equal lengths"
 
 --EVAL STATE of case SHOULD BE equal to result WITH INITIAL STATE
 evalStateShouldBe :: (HasCallStack, Show a, Eq a) => State s a -> (a, s) -> Expectation
 evalStateShouldBe state (result, initialState) = eachEvalStateShouldBe [state] ([result], initialState)
 
+withInitialState :: a -> b -> (a, b)
 withInitialState = (,)
 
 --this is not equal to base Data.Bifoldable.bimapM_
 bimapM_ :: Monad m => (a -> b -> m c) -> [a] -> [b] -> m ()
 bimapM_ f [] [] = return ()
-bimapM_ f (x:xs) (y:ys) = do
-    f x y
-    bimapM_ f xs ys
+bimapM_ f (x : xs) (y : ys) = do
+  f x y
+  bimapM_ f xs ys
 bimapM_ _ _ _ = error "list args of bimapM_ must have equal lengths"
-
-
-
-
