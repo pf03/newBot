@@ -1,5 +1,6 @@
 # BOT
 *** 
+
 ## ORDER OF LAUNCH AND TESTING (tested only for Windows)
 
 1.	Run commands:
@@ -16,8 +17,16 @@ Be sure to edit the following fields:
 
 The fields "apps.repeatNumber" and "apps.updateId" can be left as they are, they will be filled in while the bot is running.
 4. To test pure functions run ‘stack test’
-
 ***
+
+## COMMANDS
+
+/help - info about bot commands;
+/start = /help;
+/repeat - send keboard to edit repeat number for current user;
+Buttons /1 ... /5 - edit repeat number for current user;
+***
+
 ## MODULES
 
 The bot operation logic is divided into the following layers (presented in the corresponding folders in the ‘src’) from low to high:
@@ -26,10 +35,10 @@ The bot operation logic is divided into the following layers (presented in the c
   * MError  - error handling,
   * MLog    - logging,
   * MCache  - working with changing data in pure code,
-  * Messenger - common interface for different messengers
-3. Logic    - the main logic of the program
-4. VK       - implementation of the messenger interface for api VK
-5. VK       - implementation of the messenger interface for api telegram
+  * Messenger - common interface for different messengers;
+3. Logic    - the main logic of the program;
+4. VK       - implementation of the messenger interface for API VK;
+5. Telegram - implementation of the messenger interface for API Telegram;
 6. T        - one of the possible implementations of the monadic interface - transformer T;
 7. App      - application layer functions that have access to both the interface and its implementation.
 

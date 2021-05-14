@@ -24,10 +24,10 @@
         }
     ],
     "text" : {
-        "help": "Вас приветстсвует бот",
-        "repeat": "Введите количество повторов. Сейчас выбрано количество повторов: {0}",
-        "button": "Количество повторов изменено с {0} на {1}",
-        "unknown": "Обнаружена неведомая команда: {0}"
+        "help": "Hello, human! This is echo bot.\n/help - info about bot commands;\n/start = /help;\n/repeat - send keboard to edit repeat number for current user;\nButtons /1 ... /5 - edit repeat number for current user;",
+        "repeat": "Check repeat number. Now checked: {0}",
+        "button": "Repeat number changed from {0} to {1}",
+        "unknown": "Unknown command: {0}"
     },
     "app": "VK"
 } 
