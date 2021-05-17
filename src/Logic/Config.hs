@@ -29,6 +29,7 @@ instance FromJSON App
 
 data Config = Config
   { _app :: App,
+    _defaultRepeatNumber :: Int,
     _apps :: [ConfigApp],
     _text :: ConfigText,
     _log :: LogConfig

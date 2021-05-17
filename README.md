@@ -29,6 +29,7 @@ in the community settings. The rest of the checkboxes shouldn't be checked.
 
 Purpose of `config.json` fields:
 * `app` - choice of VK or Telegram messenger;
+* `defaultRepeatNumber` - default repeat number in response to the user's message (from 1 to 5);
 * `log` - logging settings:
   * `colorEnable` - enable log colors in the terminal;
   * `fileEnable` - enable logging to the `log.txt` file;
@@ -45,10 +46,10 @@ Purpose of `config.json` fields:
   * `button` - answer template to` Buttons / 1 ... / 5` command;
   * `unknown` - answer template to unknown command;
 * `apps` - a list of configs for different messengers, only the one specified in the` app` field is used:
-  * `repeatNumber` - repeat number object, in which the key is the user id, the value is repeat number in response to the user's message
-  * `token` - a token for accessing the messenger API
-  * `updateId` - `updateId` value, that used if `updateIdFromFile` is` true`
-  * `updateIdFromFile` - enable reading updateId from` config.json` when starting the bot
+  * `repeatNumber` - repeat number object, in which the key is the user id, the value is repeat number in response to the user's message (from 1 to 5);
+  * `token` - a token for accessing the messenger API;
+  * `updateId` - `updateId` value, that used if `updateIdFromFile` is` true`;
+  * `updateIdFromFile` - enable reading updateId from` config.json` when starting the bot;
   * `name` - the name of the messenger (VK or Telegram);
   * `version` - API version (only for VK);
   * `groupId` - group id (only for VK);

@@ -100,7 +100,8 @@ toS config = do
         Cache
           { configApp = ca,
             configText = _text config,
-            changed = False
+            changed = False,
+            defaultRepeatNumber = _defaultRepeatNumber config
           }
   return $
     S

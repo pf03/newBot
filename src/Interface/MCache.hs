@@ -14,6 +14,7 @@ import GHC.Generics (Generic)
 data Cache = Cache
   { configApp :: ConfigApp,
     configText :: ConfigText,
+    defaultRepeatNumber :: Int,
     changed :: Changed
   }
   deriving (Show, Generic)
@@ -117,6 +118,13 @@ setRepeatNumbers rns = do
 
 getmRepeatNumber :: MCache m => ChatId -> m (Maybe Int)
 getmRepeatNumber cid = M.lookup cid <$> getRepeatNumbers
+
+getRepeatNumber :: MCache m => ChatId -> m Int
+getRepeatNumber cid = do
+  mrn <- getmRepeatNumber cid
+  case mrn of
+    Nothing -> getsCache defaultRepeatNumber
+    Just n -> return n
 
 setRepeatNumber :: MCache m => ChatId -> Int -> m ()
 setRepeatNumber cid rn = do

@@ -55,16 +55,13 @@ answerMessageCommand cid emc = do
 textAnswer :: MCache m => ChatId -> Either Message Command -> m Message
 textAnswer cid emc = do
   ConfigText helpText repeatText unknownText buttonText <- Cache.getConfigText
-  mrn <- Cache.getmRepeatNumber cid
+  rn <- Cache.getRepeatNumber cid
   case emc of
-    Left message -> do
-      case mrn of
-        Nothing -> return message
-        Just n -> return . safeInit . concat . replicate n $ (message ++ " ")
+    Left message -> return . safeInit . concat . replicate rn $ (message ++ " ")
     Right Help -> return helpText
     Right Start -> return helpText
-    Right Repeat -> return $ template repeatText [show mrn]
+    Right Repeat -> return $ template repeatText [show rn]
     Right (Button n) -> do
       Cache.setRepeatNumber cid n
-      return $ template buttonText [show mrn, show n]
+      return $ template buttonText [show rn, show n]
     Right (Unknown com) -> return $ template unknownText [com]
