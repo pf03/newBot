@@ -16,15 +16,44 @@ Be sure to edit the following fields:
 
 The fields `apps.repeatNumber` and `apps.updateId` can be left as they are, they will be filled in while the bot is running.
 
-4. For the correct launch of the bot for VK, you must select `Work with API -> Long Poll API -> Event types -> Incoming message` 
+5. For the correct launch of the bot for VK, you must select `Work with API -> Long Poll API -> Event types -> Incoming message` 
 in the community settings. The rest of the checkboxes shouldn't be checked.
 
-![vk bot settings](http://https://github.com/pf03/newBot/vk_bot_settings.png)
+![vk bot settings](https://raw.githubusercontent.com/pf03/newBot/main/vk_bot_settings.png)
 
-5. To test pure functions run `stack test`
-6. To exit the bot, type q+Enter
+6. To test pure functions run `stack test`
+7. To exit the bot, type q+Enter
 ***
 
+## CONFIG
+
+Purpose of `config.json` fields:
+* `app` - choice of VK or Telegram messenger;
+* `log` - logging settings:
+  * `colorEnable` - enable log colors in the terminal;
+  * `fileEnable` - enable logging to the `log.txt` file;
+  * `minLevel` - minimum level for logging turning on:
+    * 0 - `Debug`
+    * 1 - `Info`
+    * 2 - `Warn`
+    * 3 - `Error`
+    * 4 - `Critical`
+  * `terminalEnable` - enable logging to the terminal;
+* `text` - template for responding to bot commands:
+  * `help` - answer template to` / help` and `/ start` commands;
+  * `repeat` - answer template to` / repeat` command;
+  * `button` - answer template to` Buttons / 1 ... / 5` command;
+  * `unknown` - answer template to unknown command;
+* `apps` - a list of configs for different messengers, only the one specified in the` app` field is used:
+  * `repeatNumber` - repeat number object, in which the key is the user id, the value is repeat number in response to the user's message
+  * `token` - a token for accessing the messenger API
+  * `updateId` - `updateId` value, that used if `updateIdFromFile` is` true`
+  * `updateIdFromFile` - enable reading updateId from` config.json` when starting the bot
+  * `name` - the name of the messenger (VK or Telegram);
+  * `version` - API version (only for VK);
+  * `groupId` - group id (only for VK);
+  * `host` - API host.
+***
 
 ## COMMANDS
 
