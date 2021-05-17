@@ -34,7 +34,7 @@ data LogLevel
   | Warn -- Warnings
   | Error -- Non-critical error, that can be given to the user in one form or another
   | Critical -- Critical error leading to application termination
-  deriving (Eq, Enum, Ord, Show)
+  deriving (Eq, Enum, Ord, Show, Bounded)
 
 type FuncName = String
 
