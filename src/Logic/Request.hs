@@ -37,6 +37,7 @@ send request save = do
   if status == 200
     then do
       let jsonBody = HTTP.getResponseBody response
+      Log.debugM jsonBody
       when save $ do
         Log.warnM "Saving request to file"
         Error.liftEIO $ L.writeFile "data.json" jsonBody

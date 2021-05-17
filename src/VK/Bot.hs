@@ -71,7 +71,7 @@ _getInit = do
 -- Get updates from messenger server by the long polling method
 _getUpdates :: MT m => Init -> m ([Update], Init)
 _getUpdates ini@(Init server0 _ ts0) = do
-  Log.setSettings Color.Cyan False "getUpdates"
+  Log.setSettings Color.Cyan True "getUpdates"
   let query = Query.longPoll ini 25
   (host, path) <- parseServer server0
   let request = Request.build host path query

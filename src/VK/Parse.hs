@@ -112,7 +112,7 @@ _parseAttachment o = do
     "doc" -> _parseAttachmentItem "doc" o
     "wall" -> _parseWall o
     "link" -> _parseLink o
-    _ -> undefined
+    _ -> fail "Unknown attachment"
 
 _parseAttachmentItem :: String -> Object -> Parser Attachment
 _parseAttachmentItem str o = do

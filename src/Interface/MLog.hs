@@ -125,12 +125,12 @@ send = do
 receive :: MLog m => m ()
 receive = do
   fname <- getfname
-  infoM $ template "Response received to the query {0}......" [fname]
+  infoM $ template "Response {0} received......" [fname]
 
 receiveData :: (MLog m, Show a) => String -> a -> m ()
 receiveData dataName dataValue = do
   fname <- getfname
-  infoM $ template "Data {1} received in the response to the query {0}......" [fname, dataName]
+  infoM $ template "Data {1} received in {0} response......" [fname, dataName]
   debugM dataValue
 
 -----------------------------MonadIO-------------------------------------------
