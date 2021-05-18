@@ -5,8 +5,8 @@ module T.Transformer where
 import Control.Monad.Except (ExceptT, runExceptT)
 import Control.Monad.State.Lazy (StateT (runStateT))
 import Interface.MError (E)
-import Interface.MLog (LogSettings (LogSettings))
-import qualified Interface.MLog as Log
+import Interface.MLog.Types (LogSettings (LogSettings))
+import qualified Interface.MLog.Functions as Log
 import qualified System.Console.ANSI as Color
 import T.State (S, T)
 import qualified T.State as S

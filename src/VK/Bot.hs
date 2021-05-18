@@ -13,7 +13,8 @@ import Interface.MCache (ConfigApp (ConfigApp), Host)
 import qualified Interface.MCache as Cache
 import Interface.MError (E (QueryError), MError)
 import qualified Interface.MError as Error
-import qualified Interface.MLog as Log
+import qualified Interface.MLog.Functions as Log
+import qualified Interface.MLog.Class as Log
 import Interface.MT (MT)
 import Interface.Messenger.IBot (IBot (..))
 import Interface.Messenger.IUpdate (IUpdate)

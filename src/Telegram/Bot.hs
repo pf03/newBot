@@ -10,7 +10,8 @@ import Common.Misc (Label, UpdateId, template)
 import Control.Applicative (Alternative ((<|>)))
 import Control.Monad (forM_)
 import qualified Interface.MCache as Cache
-import qualified Interface.MLog as Log
+import qualified Interface.MLog.Class as Log
+import qualified Interface.MLog.Functions as Log
 import Interface.MT (MT)
 import Interface.Messenger.IBot (IBot (..))
 import Interface.Messenger.IUpdate (IUpdate)

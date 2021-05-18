@@ -1,60 +1,22 @@
-{-# LANGUAGE DeriveGeneric #-}
-
-module Interface.MLog where
+module Interface.MLog.Functions where
 
 import qualified Common.Color as Color
 import Common.Misc (Convert (convert), putStrLnT, template)
 import Control.Monad (when)
 import Control.Monad.IO.Class (MonadIO (..))
 import Data.Aeson (encode)
-import Data.Aeson.Types (FromJSON, ToJSON)
+import Data.Aeson.Types (ToJSON)
 import qualified Data.ByteString as B
 import Data.Char (toUpper)
-import GHC.Generics (Generic)
+import Interface.MLog.Class (MLog (..))
+import Interface.MLog.Types
+  ( ColorScheme,
+    LogConfig (..),
+    LogLevel (..),
+    LogSettings (LogSettings, funcName),
+  )
 import System.Console.ANSI (Color (Black, Blue, Green, Magenta, Red, Yellow))
 import Prelude hiding (error)
-
------------------------------Types---------------------------------------------
-data LogConfig = LogConfig
-  { colorEnable :: Enable,
-    terminalEnable :: Enable,
-    fileEnable :: Enable,
-    -- | Minimal log level as an integer
-    minLevel :: Int
-  }
-  deriving (Show, Generic)
-
-instance FromJSON LogConfig
-
-instance ToJSON LogConfig
-
-data LogLevel
-  = Debug -- Debug data
-  | Info -- Information about app work
-  | Warn -- Warnings
-  | Error -- Non-critical error, that can be given to the user in one form or another
-  | Critical -- Critical error leading to application termination
-  deriving (Eq, Enum, Ord, Show, Bounded)
-
-type FuncName = String
-
-type ColorScheme = Color
-
-type Enable = Bool
-
-data LogSettings = LogSettings
-  { colorScheme :: ColorScheme,
-    enable :: Enable,
-    funcName :: String
-  }
-  deriving (Show)
-
------------------------------Class---------------------------------------------
-class Monad m => MLog m where
-  getSettings :: m LogSettings
-  setSettings :: ColorScheme -> Enable -> FuncName -> m ()
-  getConfig :: m LogConfig
-  message :: LogConfig -> LogSettings -> LogLevel -> String -> m ()
 
 -----------------------------MLog----------------------------------------------
 setColorScheme :: MLog m => ColorScheme -> m ()
@@ -85,9 +47,7 @@ logM m = do
   debugM a
   return a
 
--- * An exception has been made for debug information - it can be of any type Show a,
-
--- not just a String
+-- * An exception has been made for debug information - it can be of any type Show a, not just a String
 debugM :: (MLog m, Show a) => a -> m ()
 debugM a = messageM Debug (show a)
 

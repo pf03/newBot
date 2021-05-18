@@ -15,8 +15,9 @@ import Interface.MCache (Cache (..), MCache, MIOCache)
 import qualified Interface.MCache as Cache
 import Interface.MError ( E (ConfigError),MError, MIOError)
 import qualified Interface.MError as Error
-import Interface.MLog (ColorScheme, Enable, FuncName, LogConfig, LogSettings (LogSettings), MLog (..))
-import qualified Interface.MLog as Log
+import Interface.MLog.Types (ColorScheme, Enable, FuncName, LogConfig, LogSettings (LogSettings))
+import Interface.MLog.Class (MLog (..))
+import qualified Interface.MLog.Functions as Log
 import Interface.MT (MT)
 import Logic.Config (App, Config (..))
 import qualified Logic.Config as Config

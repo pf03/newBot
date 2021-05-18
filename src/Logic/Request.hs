@@ -12,7 +12,8 @@ import Interface.MCache as Cache (Host, MCache)
 import qualified Interface.MCache as Cache
 import Interface.MError as Error (E (Exit, QueryError), MIOError)
 import qualified Interface.MError as Error
-import Interface.MLog as Log (MLog, debugM, errorM, warnM)
+import qualified Interface.MLog.Functions as Log
+import Interface.MLog.Class as Log (MLog)
 import Interface.Messenger.IAPI as API (IAPI (getPath))
 import Network.HTTP.Simple as HTTP (Query, Request, Response)
 import qualified Network.HTTP.Simple as HTTP

@@ -6,7 +6,8 @@ module Logic.Bot where
 import Common.Misc (template)
 import Control.Monad.State.Lazy (when)
 import qualified Interface.MCache as Cache
-import qualified Interface.MLog as Log
+import qualified Interface.MLog.Functions as Log
+import qualified Interface.MLog.Class as Log
 import Interface.MT (MT)
 import Interface.Messenger.IBot as Bot (IBot (..))
 import qualified Logic.Logic as Logic
