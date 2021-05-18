@@ -31,7 +31,7 @@ build h path query =
 -- | Low level wrapper for request
 send :: (MLog m, MIOError m) => Request -> Bool -> m LBS
 send request save = do
-  Log.debugM request
+  -- Log.debugM request
   response <- resp
   let status = HTTP.getResponseStatusCode response
   if status == 200

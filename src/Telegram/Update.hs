@@ -37,15 +37,11 @@ data Entity
 instance IUpdate Update where
   setMessage :: Update -> Message -> Update
   setMessage (cid, Message _) message = (cid, Message message)
-  setMessage (cid, Photo fileId (Just _)) message = (cid, Photo fileId (Just message))
-  setMessage (cid, Video fileId (Just _)) message = (cid, Video fileId (Just message))
   setMessage (cid, Command _) message = (cid, Message message)
   setMessage u _ = u
 
   getMessage :: Update -> Maybe Message
   getMessage (_, Message message) = Just message
-  getMessage (_, Photo _ (Just message)) = Just message
-  getMessage (_, Video _ (Just message)) = Just message
   getMessage _ = Nothing
 
   getCommand :: Update -> Maybe Command
@@ -54,3 +50,8 @@ instance IUpdate Update where
 
   getChatId :: Update -> ChatId
   getChatId = fst
+
+  hasAttachment :: Update -> Bool
+  hasAttachment (_, Message _) = False
+  hasAttachment (_, Command _) = False
+  hasAttachment (_, _) = True

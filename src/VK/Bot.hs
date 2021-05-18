@@ -24,6 +24,7 @@ import VK.Parse (Init (Init, ts))
 import qualified VK.Parse as Parse
 import qualified VK.Query as Query
 import VK.Update (Update)
+import Control.Monad (forM_)
 
 -----------------------------Types---------------------------------------------
 data Pointer = Pointer
@@ -49,7 +50,7 @@ instance IBot Pointer WrapInit WrapUpdate where
     (us, newini) <- _getUpdates ini
     return (WrapUpdate <$> us, WrapInit newini)
 
-  sendMessage :: MT m => WrapUpdate -> [Label] -> m ()
+  sendMessage :: MT m => WrapUpdate -> [Label] -> Int -> m ()
   sendMessage (WrapUpdate u) = _sendMessage u
 
 --------------------------------Internal functions----------------------------------------
@@ -88,21 +89,20 @@ _getUpdates ini@(Init server0 _ ts0) = do
   return (us, newIni)
 
 -- Send response to a single user
-_sendMessage :: MT m => Update -> [Label] -> m ()
-_sendMessage update btns = do
-  --undefined
+_sendMessage :: MT m => Update -> [Label] -> Int -> m ()
+_sendMessage update btns rn = do
   Log.setSettings Color.Yellow True "sendMessage"
   ConfigApp _name _host tk _updateId _ _repeatNumber _groupId v <- Cache.getConfigApp
   Log.send
   printT btns
   query <- Query.sendMessage tk v update btns
-  Log.receiveData "query" query
-  json <- Request.api (API Messages Send) query False
-  Log.receive
-  o <- Parse.getObject json
-  Log.receiveData "object" o
-
---undefined
+  Log.debugM update
+  forM_ [1..rn] $ \_ -> do 
+    Log.receiveData "query" query
+    json <- Request.api (API Messages Send) query False
+    Log.receive
+    o <- Parse.getObject json
+    Log.receiveData "object" o
 
 -- "https://lp.vk.com/wh777777777" -> "lp.vk.com" "/wh777777777"
 parseServer :: MError m => String -> m (Host, Path)

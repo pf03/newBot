@@ -15,8 +15,6 @@ getUpdates moffset timeout = "timeout" <:> timeout ++ "offset" <:?> moffset
 sendMessage :: MError m => Update -> [Label] -> m (API, Query)
 sendMessage (cid, en) btns = do
   api <- _getAPI en
-  -- query <- helper en
-
   qu <- case en of
     Message m ->
       return $

@@ -8,6 +8,7 @@ module Telegram.Bot (Pointer (..), reset) where
 
 import Common.Misc (Label, UpdateId, template)
 import Control.Applicative (Alternative ((<|>)))
+import Control.Monad (forM_)
 import qualified Interface.MCache as Cache
 import qualified Interface.MLog as Log
 import Interface.MT (MT)
@@ -44,7 +45,7 @@ instance IBot Pointer Init WrapUpdate where
     (us, Just newuid) <- _getUpdates . Just $ uid
     return (WrapUpdate <$> us, Init newuid)
 
-  sendMessage :: MT m => WrapUpdate -> [Label] -> m ()
+  sendMessage :: MT m => WrapUpdate -> [Label] -> Int -> m ()
   sendMessage (WrapUpdate u) ls = _sendMessage u ls
 
 --------------------------------Internal functions----------------------------------------
@@ -73,22 +74,23 @@ _getUpdates muid = do
   o <- Parse.getObject response
   Log.receiveData "object -- convert" o
   mnewuid <- Parse.updateId o
-  Log.receiveData "mnewuid" mnewuid
+  Log.receiveData "mnewuid" mnewuid  
   us <- Parse.updates o
   Log.receiveData "update" us
   return (us, mnewuid <|> muid)
 
 -- Send response to a single user
-_sendMessage :: MT m => Update -> [Label] -> m ()
-_sendMessage update btns = do
+_sendMessage :: MT m => Update -> [Label] -> Int -> m ()
+_sendMessage update btns rn = do
   Log.setSettings Color.Yellow True "sendMessage"
   Log.send
   (api, query) <- Query.sendMessage update btns
-  Log.receiveData "(api, query)" (api, query)
-  json <- Request.api api query False
-  Log.receive
-  o <- Parse.getObject json
-  Log.receiveData "object" o
+  forM_ [1 .. rn] $ \_ -> do
+    Log.receiveData "(api, query)" (api, query)
+    json <- Request.api api query False
+    Log.receive
+    o <- Parse.getObject json
+    Log.receiveData "object" o
 
 -- Dumping messages that we cannot parse, for debugging purposes
 reset :: MT m => m ()

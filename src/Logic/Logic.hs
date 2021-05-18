@@ -1,9 +1,9 @@
 module Logic.Logic where
 
 import Common.Misc (ChatId, Command (..), Label, Message, safeInit, template)
-import Interface.MCache(ConfigText (ConfigText), MCache)
+import Interface.MCache (ConfigText (ConfigText), MCache)
 import qualified Interface.MCache as Cache
-import Interface.Messenger.IBot as Bot (IBot)
+import Interface.Messenger.IUpdate (IUpdate)
 import qualified Interface.Messenger.IUpdate as Update
 
 toMessageCommand :: String -> Either Message Command
@@ -23,7 +23,7 @@ toMessageCommand str =
           '/' : x : xs | x /= ' ' -> Right . Unknown . unwords $ (x : xs) : tail w
           _ -> Left str
 
-answer :: (MCache m, IBot _pointer _init update) => update -> m (update, [Label])
+answer :: (MCache m, IUpdate update) => update -> m (update, [Label])
 answer update = do
   let mmessage = Update.getMessage update
   let mcommand = Update.getCommand update

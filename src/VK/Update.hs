@@ -41,3 +41,7 @@ instance IUpdate Update where
 
   getChatId :: Update -> ChatId
   getChatId = fst
+
+  hasAttachment :: Update -> Bool
+  hasAttachment (_, Entity _ []) = False
+  hasAttachment (_, Entity _ _) = True
