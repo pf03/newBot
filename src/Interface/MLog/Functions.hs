@@ -11,9 +11,9 @@ import Data.Char (toUpper)
 import Interface.MLog.Class (MLog (..))
 import Interface.MLog.Types
   ( ColorScheme,
-    LogConfig (..),
-    LogLevel (..),
-    LogSettings (LogSettings, funcName),
+    Config (..),
+    Level (..),
+    Settings (Settings, funcName),
   )
 import System.Console.ANSI (Color (Black, Blue, Green, Magenta, Red, Yellow))
 import Prelude hiding (error)
@@ -21,10 +21,10 @@ import Prelude hiding (error)
 -----------------------------MLog----------------------------------------------
 setColorScheme :: MLog m => ColorScheme -> m ()
 setColorScheme newcs = do
-  LogSettings _ le fn <- getSettings
+  Settings _ le fn <- getSettings
   setSettings newcs le fn
 
-getConfigSettings :: MLog m => m (LogConfig, LogSettings)
+getConfigSettings :: MLog m => m (Config, Settings)
 getConfigSettings = do
   config <- getConfig
   settings <- getSettings
@@ -32,14 +32,14 @@ getConfigSettings = do
 
 resetSettings :: MLog m => m ()
 resetSettings = do
-  let LogSettings cs e fn = defaultSettings
+  let Settings cs e fn = defaultSettings
   setSettings cs e fn
 
-defaultSettings :: LogSettings
-defaultSettings = LogSettings Black True ""
+defaultSettings :: Settings
+defaultSettings = Settings Black True ""
 
-defaultConfig :: LogConfig
-defaultConfig = LogConfig {colorEnable = False, terminalEnable = True, fileEnable = False, minLevel = 0}
+defaultConfig :: Config
+defaultConfig = Config {colorEnable = False, terminalEnable = True, fileEnable = False, minLevel = 0}
 
 logM :: (MLog m, Show a) => m a -> m a
 logM m = do
@@ -68,7 +68,7 @@ errorM = messageM Error
 criticalM :: MLog m => String -> m ()
 criticalM = messageM Critical
 
-messageM :: MLog m => LogLevel -> String -> m ()
+messageM :: MLog m => Level -> String -> m ()
 messageM level s = do
   (config, settings) <- getConfigSettings
   message config settings level s
@@ -94,19 +94,19 @@ receiveData dataName dataValue = do
   debugM dataValue
 
 -----------------------------MonadIO-------------------------------------------
-debug :: (MonadIO m, Show a) => LogConfig -> LogSettings -> a -> m ()
+debug :: (MonadIO m, Show a) => Config -> Settings -> a -> m ()
 debug lc ls a = messageIO lc ls Debug (show a)
 
-info :: MonadIO m => LogConfig -> LogSettings -> String -> m ()
+info :: MonadIO m => Config -> Settings -> String -> m ()
 info lc ls = messageIO lc ls Info
 
-warn :: MonadIO m => LogConfig -> LogSettings -> String -> m ()
+warn :: MonadIO m => Config -> Settings -> String -> m ()
 warn lc ls = messageIO lc ls Warn
 
-error :: MonadIO m => LogConfig -> LogSettings -> String -> m ()
+error :: MonadIO m => Config -> Settings -> String -> m ()
 error lc ls = messageIO lc ls Error
 
-critical :: MonadIO m => LogConfig -> LogSettings -> String -> m ()
+critical :: MonadIO m => Config -> Settings -> String -> m ()
 critical lc ls = messageIO lc ls Critical
 
 -----------------------------Default implementation----------------------------
@@ -114,8 +114,8 @@ critical lc ls = messageIO lc ls Critical
 -- In pure code, for example for testing, you can replace this implementation with another one,
 -- for example based on writerT, or empty return () implementation
 -- Info can be shown in different color schemes, and for other levels the color corresponds to the level
-messageIO :: MonadIO m => LogConfig -> LogSettings -> LogLevel -> String -> m ()
-messageIO (LogConfig ecolor eterminal efile ml) (LogSettings cs en _) level text = do
+messageIO :: MonadIO m => Config -> Settings -> Level -> String -> m ()
+messageIO (Config ecolor eterminal efile ml) (Settings cs en _) level text = do
   if level < toEnum ml || not en
     then return ()
     else do
@@ -130,7 +130,7 @@ messageIO (LogConfig ecolor eterminal efile ml) (LogSettings cs en _) level text
     logText :: String
     logText = map toUpper (show level) <> " " <> text
 
-    getColor :: LogLevel -> Color
+    getColor :: Level -> Color
     getColor Debug = Green
     getColor Info = Blue -- here you can use different color schemes for the convenience of displaying information
     getColor Warn = Magenta

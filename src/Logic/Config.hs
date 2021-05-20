@@ -17,7 +17,7 @@ import Interface.MCache (ConfigApp, ConfigText)
 import qualified Interface.MCache as Cache
 import Interface.MError (E (ConfigError), MIOError, MError)
 import qualified Interface.MError as Error
-import Interface.MLog.Types (LogConfig, LogLevel, minLevel)
+import qualified Interface.MLog.Exports as Log
 import qualified Logic.Parse as Parse (eDecode)
 import System.IO.Error (isDoesNotExistError)
 import Control.Monad (when, forM_)
@@ -36,7 +36,7 @@ data Config = Config
     _defaultRepeatNumber :: Int,
     _apps :: [ConfigApp],
     _text :: ConfigText,
-    _log :: LogConfig
+    _log :: Log.Config
   }
   deriving (Show, Generic)
 
@@ -74,9 +74,9 @@ pathConfig = "config.json"
 -----------------------------Check---------------------------------------------
 checkMinLogLevel :: MError m => Config -> m ()
 checkMinLogLevel c = do
-  let ml = minLevel . _log $ c
-  let minB = fromEnum (minBound :: LogLevel)
-  let maxB = fromEnum(maxBound :: LogLevel)
+  let ml = Log.minLevel . _log $ c
+  let minB = fromEnum (minBound :: Log.Level)
+  let maxB = fromEnum(maxBound :: Log.Level)
   --Error.throw $ ConfigError $ template "{0}={1}" [show $ fromEnum minB, show $ fromEnum maxB]
   when (ml < minB) $ Error.throw $ ConfigError $ 
     template "Min log level shouldn't be less than {0}" [show minB]

@@ -6,12 +6,11 @@ module Logic.Bot where
 import Common.Misc (template)
 import Control.Monad.State.Lazy (when)
 import qualified Interface.MCache as Cache
-import qualified Interface.MLog.Functions as Log
-import qualified Interface.MLog.Class as Log
+import qualified Interface.MLog.Exports as Log
 import Interface.MT (MT)
 import Interface.Messenger.IBot as Bot (IBot (..))
-import qualified Logic.Logic as Logic
 import Interface.Messenger.IUpdate as Update (getChatId, hasAttachment)
+import qualified Logic.Logic as Logic
 import qualified System.Console.ANSI as Color (Color (..))
 import Prelude hiding (init)
 
@@ -47,14 +46,16 @@ longPolling pointer init = do
 -- | Response to all users
 calcSendMesages :: (MT m, IBot _pointer _init update) => [update] -> m ()
 calcSendMesages = mapM_ $ \update -> do
-  (answer, btns) <- if Update.hasAttachment update
-    then return (update, [])
-    else Logic.answer update
+  (answer, btns) <-
+    if Update.hasAttachment update
+      then return (update, [])
+      else Logic.answer update
   Log.infoM "Update config in file..."
   Cache.writeCache
-  rn <- if Update.hasAttachment update
-    then do
-      let cid = Update.getChatId update
-      Cache.getRepeatNumber cid
-    else return 1
+  rn <-
+    if Update.hasAttachment update
+      then do
+        let cid = Update.getChatId update
+        Cache.getRepeatNumber cid
+      else return 1
   Bot.sendMessage answer btns rn

@@ -12,8 +12,7 @@ import Interface.MCache as Cache (Host, MCache)
 import qualified Interface.MCache as Cache
 import Interface.MError as Error (E (Exit, QueryError), MIOError)
 import qualified Interface.MError as Error
-import qualified Interface.MLog.Functions as Log
-import Interface.MLog.Class as Log (MLog)
+import qualified Interface.MLog.Exports as Log
 import Interface.Messenger.IAPI as API (IAPI (getPath))
 import Network.HTTP.Simple as HTTP (Query, Request, Response)
 import qualified Network.HTTP.Simple as HTTP
@@ -30,7 +29,7 @@ build h path query =
               HTTP.defaultRequest
 
 -- | Low level wrapper for request
-send :: (MLog m, MIOError m) => Request -> Bool -> m LBS
+send :: (Log.MLog m, MIOError m) => Request -> Bool -> m LBS
 send request save = do
   -- Log.debugM request
   response <- resp
@@ -48,7 +47,7 @@ send request save = do
       Log.errorM $ show response
       Error.throw $ QueryError "Request failed with error"
   where
-    resp :: (MLog m, MIOError m) => m (Response LBS)
+    resp :: (Log.MLog m, MIOError m) => m (Response LBS)
     resp = do
       er <- Error.toEither $ Error.liftEIO (HTTP.httpLBS request)
       case er of
@@ -63,7 +62,7 @@ send request save = do
         Right r -> return r
 
 -- | High level wrapper for API request
-api :: (IAPI api, MCache m, MIOError m, MLog m) => api -> Query -> Bool -> m LBS
+api :: (IAPI api, MCache m, MIOError m, Log.MLog m) => api -> Query -> Bool -> m LBS
 api a query save = do
   host <- Cache.getHost
   token <- Cache.getToken

@@ -6,7 +6,7 @@ import Data.Aeson.Types (FromJSON, ToJSON)
 import GHC.Generics (Generic)
 import System.Console.ANSI (Color)
 
-data LogConfig = LogConfig
+data Config = Config
   { colorEnable :: Enable,
     terminalEnable :: Enable,
     fileEnable :: Enable,
@@ -15,11 +15,11 @@ data LogConfig = LogConfig
   }
   deriving (Show, Generic)
 
-instance FromJSON LogConfig
+instance FromJSON Config
 
-instance ToJSON LogConfig
+instance ToJSON Config
 
-data LogLevel
+data Level
   = Debug -- Debug data
   | Info -- Information about app work
   | Warn -- Warnings
@@ -33,7 +33,7 @@ type ColorScheme = Color
 
 type Enable = Bool
 
-data LogSettings = LogSettings
+data Settings = Settings
   { colorScheme :: ColorScheme,
     enable :: Enable,
     funcName :: String

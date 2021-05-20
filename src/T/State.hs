@@ -15,9 +15,7 @@ import Interface.MCache (Cache (..), MCache, MIOCache)
 import qualified Interface.MCache as Cache
 import Interface.MError ( E (ConfigError),MError, MIOError)
 import qualified Interface.MError as Error
-import Interface.MLog.Types (ColorScheme, Enable, FuncName, LogConfig, LogSettings (LogSettings))
-import Interface.MLog.Class (MLog (..))
-import qualified Interface.MLog.Functions as Log
+import qualified Interface.MLog.Exports as Log
 import Interface.MT (MT)
 import Logic.Config (App, Config (..))
 import qualified Logic.Config as Config
@@ -28,13 +26,13 @@ type T = StateT S (ExceptT E IO)
 data S = S
   { app :: App,
     cache :: Cache,
-    configLog :: LogConfig,
-    logSettings :: LogSettings
+    configLog :: Log.Config,
+    logSettings :: Log.Settings
   }
   deriving (Show, Generic)
 
 -----------------------------Instances-----------------------------------------
-instance MLog T where
+instance Log.MLog T where
   getSettings = getLogSettings
   setSettings = setLogSettings
   getConfig = getLogConfig
@@ -62,13 +60,13 @@ instance MIOCache T where
 
 instance MT T
 
-getLogSettings :: MonadState S m => m LogSettings
+getLogSettings :: MonadState S m => m Log.Settings
 getLogSettings = gets logSettings
 
-setLogSettings :: MonadState S m => ColorScheme -> Enable -> FuncName -> m ()
-setLogSettings cs en fn = modify $ \s -> s {logSettings = LogSettings cs en fn}
+setLogSettings :: MonadState S m => Log.ColorScheme -> Log.Enable -> Log.FuncName -> m ()
+setLogSettings cs en fn = modify $ \s -> s {logSettings = Log.Settings cs en fn}
 
-getLogConfig :: MonadState S m => m LogConfig
+getLogConfig :: MonadState S m => m Log.Config
 getLogConfig = gets configLog
 
 getCache :: MonadState S m => m Cache
