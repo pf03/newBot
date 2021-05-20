@@ -30,7 +30,7 @@ import Data.Maybe (fromMaybe)
 import Data.Text (pack)
 import GHC.Exts (IsList (fromList))
 import GHC.Generics (Generic)
-import Interface.MError (MError)
+import Interface.MError.Exports (MError)
 import qualified Logic.Logic as Logic
 import Logic.Parse
   ( eDecode,

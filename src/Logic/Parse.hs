@@ -8,7 +8,7 @@ import Data.Aeson.Types (Parser, parseEither)
 import Data.Maybe (fromJust, isJust)
 import Data.Text (pack)
 import Interface.Class (MError)
-import qualified Interface.MError as Error
+import qualified Interface.MError.Exports as Error
 import Network.HTTP.Simple (Query)
 
 -----------------------------From JSON-----------------------------------------

@@ -4,7 +4,7 @@ module T.Transformer where
 
 import Control.Monad.Except (ExceptT, runExceptT)
 import Control.Monad.State.Lazy (StateT (runStateT))
-import qualified Interface.MError as Error
+import qualified Interface.MError.Exports as Error
 import qualified Interface.MLog.Exports as Log
 import qualified Interface.MLog.Functions as Log
 import qualified System.Console.ANSI as Color

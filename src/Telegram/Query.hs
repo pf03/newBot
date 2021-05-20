@@ -1,8 +1,8 @@
 module Telegram.Query (getUpdates, sendMessage) where
 
 import Common.Misc (Label, TimeOut, UpdateId)
-import Interface.MError (E (QueryError), MError)
-import qualified Interface.MError as Error (throw)
+import Interface.Class (MError)
+import qualified Interface.MError.Exports as Error
 import Network.HTTP.Simple (Query)
 import Telegram.API (API (..))
 import Telegram.Parse ((<:>), (<:?>))
@@ -21,7 +21,7 @@ sendMessage (cid, en) btns = do
         if null btns
           then "text" <:> m
           else "text" <:> m ++ "reply_markup" <:> Encode.keyboard btns
-    Command _ -> Error.throw $ QueryError "Unable to send command to user"
+    Command _ -> Error.throw $ Error.QueryError "Unable to send command to user"
     Sticker fid -> return $ "sticker" <:> fid
     Animation fid -> return $ "animation" <:> fid
     Photo fid mc -> return $ "photo" <:> fid ++ "caption" <:?> mc
@@ -41,7 +41,7 @@ sendMessage (cid, en) btns = do
 
 _getAPI :: MError m => Entity -> m API
 _getAPI Message {} = return SendMessage
-_getAPI Command {} = Error.throw $ QueryError "Unable to send command to user"
+_getAPI Command {} = Error.throw $ Error.QueryError "Unable to send command to user"
 _getAPI Sticker {} = return SendSticker
 _getAPI Animation {} = return SendAnimation
 _getAPI Photo {} = return SendPhoto

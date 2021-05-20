@@ -12,7 +12,7 @@ import Data.List.Split (splitOn)
 import Data.Maybe (fromMaybe)
 import Interface.Class (IBot, IUpdate, MError, MT)
 import qualified Interface.MCache.Exports as Cache
-import qualified Interface.MError as Error
+import qualified Interface.MError.Exports as Error
 import qualified Interface.MLog.Exports as Log
 import qualified Interface.Messenger.IBot as IBot
 import qualified Interface.Messenger.IUpdate as IUpdate
