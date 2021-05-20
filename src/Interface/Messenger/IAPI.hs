@@ -1,7 +1,7 @@
 module Interface.Messenger.IAPI where
 
 import Common.Misc (Path)
-import Interface.MCache as Cache (Token)
+import Interface.MCache.Types (Token)
 
 class IAPI api where
   apiName :: api -> String

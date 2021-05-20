@@ -2,7 +2,7 @@ module Logic.Logic where
 
 import Common.Misc (ChatId, Command (..), Label, Message, safeInit, template)
 import Interface.Class (IUpdate, MCache)
-import qualified Interface.MCache as Cache
+import qualified Interface.MCache.Exports as Cache
 import qualified Interface.Messenger.IUpdate as Update
 
 toMessageCommand :: String -> Either Message Command

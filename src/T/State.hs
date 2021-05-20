@@ -12,7 +12,7 @@ import qualified Data.Aeson.Encode.Pretty as Aeson
 import qualified Data.ByteString.Lazy as L
 import GHC.Generics (Generic)
 import Interface.Class (MCache, MError, MIOCache, MIOError, MT)
-import qualified Interface.MCache as Cache
+import qualified Interface.MCache.Exports as Cache
 import qualified Interface.MError as Error
 import qualified Interface.MLog.Exports as Log
 import qualified Logic.Config as Config

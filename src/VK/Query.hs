@@ -8,7 +8,7 @@ where
 import Common.Misc (Label, Message, TimeOut, UserId, jc, safeTail, template)
 import Data.Either (rights)
 import Interface.Class (MError)
-import qualified Interface.MCache as Cache
+import qualified Interface.MCache.Exports as Cache
 import qualified Interface.MError as Error
 import Network.HTTP.Simple (Query, QueryItem)
 import VK.Parse as Parse ((<:>))

@@ -1,68 +1,16 @@
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE FlexibleInstances #-}
-
-module Interface.MCache where
+module Interface.MCache.Functions where
 
 import Common.Misc (ChatId, UpdateId)
-import Control.Monad.IO.Class (MonadIO)
-import Control.Monad.Trans.State.Lazy (State, get, put)
-import Data.Aeson (FromJSON, ToJSON)
 import qualified Data.Map.Internal as M
-import GHC.Generics (Generic)
+import Interface.MCache.Class (MCache (..))
+import Interface.MCache.Types
+  ( Cache (changed, configApp, configText, defaultRepeatNumber),
+    Changed,
+    ConfigApp (host, repeatNumber, token, updateId, updateIdFromFile),
+    ConfigText,
+    Host,
+  )
 
------------------------------Types---------------------------------------------
-data Cache = Cache
-  { configApp :: ConfigApp,
-    configText :: ConfigText,
-    defaultRepeatNumber :: Int,
-    changed :: Changed
-  }
-  deriving (Show, Generic)
-
-type Changed = Bool
-
-data ConfigApp = ConfigApp
-  { name :: String,
-    host :: Host,
-    token :: Token,
-    updateId :: UpdateId,
-    updateIdFromFile :: Bool,
-    repeatNumber :: M.Map ChatId Int,
-    groupId :: Int,
-    version :: String --API version
-  }
-  deriving (Show, Generic)
-
-instance FromJSON ConfigApp
-
-instance ToJSON ConfigApp
-
-data ConfigText = ConfigText
-  { help :: String,
-    repeat :: String,
-    unknown :: String,
-    button :: String
-  }
-  deriving (Show, Generic)
-
-instance FromJSON ConfigText
-
-instance ToJSON ConfigText
-
-type Token = String
-
-type Host = String
-
------------------------------Class---------------------------------------------
-class Monad m => MCache m where
-  getCache :: m Cache
-  setCache :: Cache -> m ()
-
-class (MCache m, MonadIO m) => MIOCache m where
-  -- Write only if cache changed
-  writeCache :: m ()
-
------------------------------Functions-----------------------------------------
 getCacheChanged :: MCache m => m Changed
 getCacheChanged = getsCache changed
 
@@ -131,8 +79,3 @@ setRepeatNumber cid rn = do
   setCacheChanged
   rns <- getRepeatNumbers
   setRepeatNumbers $ M.insert cid rn rns
-
------------------------------State---------------------------------------------
-instance MCache (State Cache) where
-  getCache = get
-  setCache = put

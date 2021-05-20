@@ -17,7 +17,7 @@ import qualified Data.ByteString.Lazy as L
 import qualified Data.Map.Internal as M
 import GHC.Generics (Generic)
 import Interface.Class (MError, MIOError)
-import qualified Interface.MCache as Cache
+import qualified Interface.MCache.Exports as Cache
 import qualified Interface.MError as Error
 import qualified Interface.MLog.Exports as Log
 import qualified Logic.Parse as Parse (eDecode)

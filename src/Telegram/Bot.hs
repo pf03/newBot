@@ -10,7 +10,7 @@ import Common.Misc (Label, UpdateId, template)
 import Control.Applicative (Alternative ((<|>)))
 import Control.Monad (forM_)
 import Interface.Class (IBot, IUpdate, MT)
-import qualified Interface.MCache as Cache
+import qualified Interface.MCache.Exports as Cache
 import qualified Interface.MLog.Exports as Log
 import qualified Interface.Messenger.IBot as IBot
 import qualified Interface.Messenger.IUpdate as IUpdate
