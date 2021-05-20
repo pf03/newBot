@@ -5,7 +5,8 @@
 module VK.Update where
 
 import Common.Misc (ChatId, Command, IntId, ItemName, Key, Message, Url)
-import Interface.Messenger.IUpdate as Update (IUpdate (..))
+import Interface.Class ( IUpdate ) 
+import qualified Interface.Messenger.IUpdate as Update 
 
 -----------------------------Types---------------------------------------------
 type Update = (ChatId, Entity)

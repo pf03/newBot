@@ -11,21 +11,18 @@ import Control.Monad.Trans.Except (ExceptT, catchE, throwE)
 import qualified Data.Aeson.Encode.Pretty as Aeson
 import qualified Data.ByteString.Lazy as L
 import GHC.Generics (Generic)
-import Interface.MCache (Cache (..), MCache, MIOCache)
+import Interface.Class (MCache, MError, MIOCache, MIOError, MT)
 import qualified Interface.MCache as Cache
-import Interface.MError ( E (ConfigError),MError, MIOError)
 import qualified Interface.MError as Error
 import qualified Interface.MLog.Exports as Log
-import Interface.MT (MT)
-import Logic.Config (App, Config (..))
 import qualified Logic.Config as Config
 
 -----------------------------Types---------------------------------------------
-type T = StateT S (ExceptT E IO)
+type T = StateT S (ExceptT Error.E IO)
 
 data S = S
-  { app :: App,
-    cache :: Cache,
+  { app :: Config.App,
+    cache :: Cache.Cache,
     configLog :: Log.Config,
     logSettings :: Log.Settings
   }
@@ -39,9 +36,9 @@ instance Log.MLog T where
   message = Log.messageIO
 
 instance MError T where
-  throw :: E -> T a
+  throw :: Error.E -> T a
   throw e = lift $ throwE e
-  catch :: T a -> (E -> T a) -> T a
+  catch :: T a -> (Error.E -> T a) -> T a
   catch ta f = StateT $ \s -> catchE (runStateT ta s) $ \e -> runStateT (f e) s
 
 instance MIOError T
@@ -69,13 +66,13 @@ setLogSettings cs en fn = modify $ \s -> s {logSettings = Log.Settings cs en fn}
 getLogConfig :: MonadState S m => m Log.Config
 getLogConfig = gets configLog
 
-getCache :: MonadState S m => m Cache
+getCache :: MonadState S m => m Cache.Cache
 getCache = gets cache
 
-setCache :: MonadState S m => Cache -> m ()
+setCache :: MonadState S m => Cache.Cache -> m ()
 setCache c = modify $ \s -> s {cache = c}
 
-getApp :: MonadState S m => m App
+getApp :: MonadState S m => m Config.App
 getApp = gets app
 
 -----------------------------State <-> Config----------------------------------
@@ -90,31 +87,31 @@ saveS s = do
   let newConfig = fromS config s
   Error.liftEIO $ L.writeFile Config.pathConfig (Aeson.encodePretty newConfig)
 
-toS :: MError m => Config -> m S
+toS :: MError m => Config.Config -> m S
 toS config = do
-  ca <- case filter (\ca0 -> show (_app config) == Cache.name ca0) configApps of
-    [] -> Error.throw $ ConfigError $ template "There is no app with name {0} in config" [show (_app config)]
+  ca <- case filter (\ca0 -> show (Config._app config) == Cache.name ca0) configApps of
+    [] -> Error.throw $ Error.ConfigError $ template "There is no app with name {0} in config" [show (Config._app config)]
     cas -> return $ head cas
   let cac =
-        Cache
-          { configApp = ca,
-            configText = _text config,
-            changed = False,
-            defaultRepeatNumber = _defaultRepeatNumber config
+        Cache.Cache
+          { Cache.configApp = ca,
+            Cache.configText = Config._text config,
+            Cache.changed = False,
+            Cache.defaultRepeatNumber = Config._defaultRepeatNumber config
           }
   return $
     S
-      { app = _app config,
+      { app = Config._app config,
         cache = cac,
-        configLog = _log config,
+        configLog = Config._log config,
         logSettings = Log.defaultSettings
       }
   where
-    configApps = _apps config
+    configApps = Config._apps config
 
-fromS :: Config -> S -> Config
-fromS config st = config {_apps = newConfigApps}
+fromS :: Config.Config -> S -> Config.Config
+fromS config st = config {Config._apps = newConfigApps}
   where
-    configApps = _apps config
+    configApps = Config._apps config
     cac = cache st
-    newConfigApps = [configApp cac] <> filter (\ca -> Cache.name ca /= Cache.name (configApp cac)) configApps
+    newConfigApps = [Cache.configApp cac] <> filter (\ca -> Cache.name ca /= Cache.name (Cache.configApp cac)) configApps

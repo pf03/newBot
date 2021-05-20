@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5c612d572b9e43fe153b9f6bf30d1f368d492d4230194a486c8a054a6b0fb04b
+-- hash: 8cffb6657e06d3273c1f96886db9884727dff479e285a2161f39895a57995338
 
 name:           bot
 version:        0.1.0.0
@@ -30,6 +30,7 @@ library
       App.Main
       Common.Color
       Common.Misc
+      Interface.Class
       Interface.MCache
       Interface.MError
       Interface.Messenger.IAPI

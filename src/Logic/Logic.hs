@@ -1,9 +1,8 @@
 module Logic.Logic where
 
 import Common.Misc (ChatId, Command (..), Label, Message, safeInit, template)
-import Interface.MCache (ConfigText (ConfigText), MCache)
+import Interface.Class (IUpdate, MCache)
 import qualified Interface.MCache as Cache
-import Interface.Messenger.IUpdate (IUpdate)
 import qualified Interface.Messenger.IUpdate as Update
 
 toMessageCommand :: String -> Either Message Command
@@ -54,7 +53,7 @@ answerMessageCommand cid emc = do
 
 textAnswer :: MCache m => ChatId -> Either Message Command -> m Message
 textAnswer cid emc = do
-  ConfigText helpText repeatText unknownText buttonText <- Cache.getConfigText
+  Cache.ConfigText helpText repeatText unknownText buttonText <- Cache.getConfigText
   rn <- Cache.getRepeatNumber cid
   case emc of
     Left message -> return . safeInit . concat . replicate rn $ (message ++ " ")

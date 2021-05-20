@@ -7,23 +7,23 @@ import Data.Aeson (FromJSON (parseJSON), Object, Value (Object), eitherDecode, (
 import Data.Aeson.Types (Parser, parseEither)
 import Data.Maybe (fromJust, isJust)
 import Data.Text (pack)
-import Interface.MError (E (ParseError), MError)
+import Interface.Class (MError)
 import qualified Interface.MError as Error
 import Network.HTTP.Simple (Query)
 
 -----------------------------From JSON-----------------------------------------
 getObject :: MError m => LBS -> m Object
-getObject bs = Error.catchEither (eitherDecode bs) ParseError
+getObject bs = Error.catchEither (eitherDecode bs) Error.ParseError
 
 getValue :: MError m => LBS -> m Value
-getValue bs = Error.catchEither (eitherDecode bs) ParseError
+getValue bs = Error.catchEither (eitherDecode bs) Error.ParseError
 
 eDecode :: (MError m, FromJSON a) => LBS -> m a
-eDecode bs = Error.catchEither (eitherDecode bs) ParseError
+eDecode bs = Error.catchEither (eitherDecode bs) Error.ParseError
 
 -- Quitting the Parser monad
 _parseE :: MError m => (Object -> Parser a) -> Object -> m a
-_parseE f o = Error.catchEither (parseEither f o) ParseError
+_parseE f o = Error.catchEither (parseEither f o) Error.ParseError
 
 _parseJSONo :: FromJSON a => Object -> Parser a
 _parseJSONo = parseJSON . Object

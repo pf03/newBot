@@ -7,35 +7,36 @@ where
 
 import Common.Misc (Label, Message, TimeOut, UserId, jc, safeTail, template)
 import Data.Either (rights)
-import Interface.MCache (Token)
-import Interface.MError (E (QueryError), MError)
-import qualified Interface.MError as Error (throw)
+import Interface.Class (MError)
+import qualified Interface.MCache as Cache
+import qualified Interface.MError as Error
 import Network.HTTP.Simple (Query, QueryItem)
-import VK.Parse (Init (key, ts), (<:>))
+import VK.Parse as Parse ((<:>))
 import qualified VK.Parse as Encode (contentUrl, keyboard)
+import qualified VK.Parse as Parse (Init (key, ts), (<:>))
 import VK.Update (Attachment (..), Entity (Entity), GroupId, Update)
 
 -----------------------------Types---------------------------------------------
 type Version = String
 
 -----------------------------External------------------------------------------
-getLongPollServer :: Token -> GroupId -> Version -> Query
+getLongPollServer :: Cache.Token -> GroupId -> Version -> Query
 getLongPollServer token groupId version =
   "group_id" <:> groupId
     ++ "access_token" <:> token
     ++ "v" <:> version
 
-longPoll :: Init -> TimeOut -> Query
+longPoll :: Parse.Init -> TimeOut -> Query
 longPoll ini timeout =
   "act" <:> ("a_check" :: String)
-    ++ "key" <:> key ini
-    ++ "ts" <:> ts ini
+    ++ "key" <:> Parse.key ini
+    ++ "ts" <:> Parse.ts ini
     ++ "wait" <:> timeout
 
-sendMessage :: MError m => Token -> Version -> Update -> [Label] -> m Query
+sendMessage :: MError m => Cache.Token -> Version -> Update -> [Label] -> m Query
 sendMessage token version (cid, Entity emc as) btns = do
   case emc of
-    Right _ -> Error.throw $ QueryError "Unable to send command to user"
+    Right _ -> Error.throw $ Error.QueryError "Unable to send command to user"
     Left message -> do
       let qDefault = _queryDefault token cid version
       let qMessage = "message" <:> message
@@ -44,7 +45,7 @@ sendMessage token version (cid, Entity emc as) btns = do
       return $ qDefault ++ qMessage ++ qButtons ++ qAttachments
 
 -----------------------------Internal------------------------------------------
-_queryDefault :: Token -> UserId -> Version -> Query
+_queryDefault :: Cache.Token -> UserId -> Version -> Query
 _queryDefault token userId version = "peer_id" <:> userId ++ "access_token" <:> token ++ "v" <:> version
 
 _queryMessage :: Message -> Query

@@ -5,11 +5,11 @@ module Logic.Bot where
 
 import Common.Misc (template)
 import Control.Monad.State.Lazy (when)
+import Interface.Class (IBot, MT)
 import qualified Interface.MCache as Cache
 import qualified Interface.MLog.Exports as Log
-import Interface.MT (MT)
-import Interface.Messenger.IBot as Bot (IBot (..))
-import Interface.Messenger.IUpdate as Update (getChatId, hasAttachment)
+import qualified Interface.Messenger.IBot as IBot
+import qualified Interface.Messenger.IUpdate as IUpdate
 import qualified Logic.Logic as Logic
 import qualified System.Console.ANSI as Color (Color (..))
 import Prelude hiding (init)
@@ -19,12 +19,12 @@ application :: (MT m, IBot pointer init _update) => pointer -> m ()
 application pointer = do
   Log.setSettings Color.Blue True "application"
   uidFromFile <- Cache.getUpdateIdFromFile
-  init <- Bot.getInit pointer
+  init <- IBot.getInit pointer
   if uidFromFile
     then do
       uid <- Cache.getUpdateId
       Log.infoM $ template "Received updateId from file: {0}" [show uid]
-      longPolling pointer (Bot.setUpdateId init uid) -- updateId from the request, overwrite the one from the file
+      longPolling pointer (IBot.setUpdateId init uid) -- updateId from the request, overwrite the one from the file
     else do
       longPolling pointer init
 
@@ -32,11 +32,11 @@ application pointer = do
 longPolling :: (MT m, IBot pointer init update) => pointer -> init -> m ()
 longPolling pointer init = do
   Log.setSettings Color.Cyan True "longPolling"
-  (updates, newInit) <- Bot.getUpdates init
+  (updates, newInit) <- IBot.getUpdates init
   uidFromFile <- Cache.getUpdateIdFromFile
   when uidFromFile do
     uid <- Cache.getUpdateId
-    let newuid = Bot.getUpdateId newInit
+    let newuid = IBot.getUpdateId newInit
     Cache.setUpdateId newuid
     Log.infoM $ template "Update updateId in file from {0} to {1}" [show uid, show newuid]
     Cache.writeCache
@@ -47,15 +47,15 @@ longPolling pointer init = do
 calcSendMesages :: (MT m, IBot _pointer _init update) => [update] -> m ()
 calcSendMesages = mapM_ $ \update -> do
   (answer, btns) <-
-    if Update.hasAttachment update
+    if IUpdate.hasAttachment update
       then return (update, [])
       else Logic.answer update
   Log.infoM "Update config in file..."
   Cache.writeCache
   rn <-
-    if Update.hasAttachment update
+    if IUpdate.hasAttachment update
       then do
-        let cid = Update.getChatId update
+        let cid = IUpdate.getChatId update
         Cache.getRepeatNumber cid
       else return 1
-  Bot.sendMessage answer btns rn
+  IBot.sendMessage answer btns rn

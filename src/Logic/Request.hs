@@ -8,16 +8,14 @@ import Control.Concurrent (threadDelay)
 import Control.Monad.State.Lazy (when)
 import qualified Data.ByteString.Char8 as BC
 import qualified Data.ByteString.Lazy as L
-import Interface.MCache as Cache (Host, MCache)
+import Interface.Class (IAPI, MCache, MIOError, MLog)
 import qualified Interface.MCache as Cache
-import Interface.MError as Error (E (Exit, QueryError), MIOError)
 import qualified Interface.MError as Error
 import qualified Interface.MLog.Exports as Log
-import Interface.Messenger.IAPI as API (IAPI (getPath))
-import Network.HTTP.Simple as HTTP (Query, Request, Response)
+import qualified Interface.Messenger.IAPI as API
 import qualified Network.HTTP.Simple as HTTP
 
-build :: Host -> Path -> Query -> Request
+build :: Cache.Host -> Path -> HTTP.Query -> HTTP.Request
 build h path query =
   HTTP.setRequestSecure True $
     HTTP.setRequestMethod "POST" $
@@ -29,7 +27,7 @@ build h path query =
               HTTP.defaultRequest
 
 -- | Low level wrapper for request
-send :: (Log.MLog m, MIOError m) => Request -> Bool -> m LBS
+send :: (MLog m, MIOError m) => HTTP.Request -> Bool -> m LBS
 send request save = do
   -- Log.debugM request
   response <- resp
@@ -45,9 +43,9 @@ send request save = do
     else do
       Log.errorM "Request failed with error"
       Log.errorM $ show response
-      Error.throw $ QueryError "Request failed with error"
+      Error.throw $ Error.QueryError "Request failed with error"
   where
-    resp :: (Log.MLog m, MIOError m) => m (Response LBS)
+    resp :: (MLog m, MIOError m) => m (HTTP.Response LBS)
     resp = do
       er <- Error.toEither $ Error.liftEIO (HTTP.httpLBS request)
       case er of
@@ -62,7 +60,7 @@ send request save = do
         Right r -> return r
 
 -- | High level wrapper for API request
-api :: (IAPI api, MCache m, MIOError m, Log.MLog m) => api -> Query -> Bool -> m LBS
+api :: (IAPI api, MCache m, MIOError m, MLog m) => api -> HTTP.Query -> Bool -> m LBS
 api a query save = do
   host <- Cache.getHost
   token <- Cache.getToken

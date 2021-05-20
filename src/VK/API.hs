@@ -4,7 +4,8 @@
 module VK.API where
 
 import Data.Char (toLower)
-import Interface.Messenger.IAPI as API (IAPI (..))
+import Interface.Class ( IAPI )
+import qualified Interface.Messenger.IAPI as IAPI (IAPI (..))
 
 -----------------------------Types---------------------------------------------
 data API = API APIGroup APIName
@@ -20,4 +21,4 @@ instance IAPI API where
       (g : gs) = show apiGroup
       (n : ns) = show an
 
-  getPath _ api = "/method/" ++ apiName api
+  getPath _ api = "/method/" ++ IAPI.apiName api

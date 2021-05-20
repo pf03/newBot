@@ -1,9 +1,7 @@
-module Interface.MT (MLog, MError, MIOError, MCache, MIOCache, MT) where
+module Interface.MT where
 
--- Re-export all classes
-
-import Interface.MCache ( MIOCache, MCache )
-import Interface.MError ( MIOError, MError )
-import Interface.MLog.Class (MLog)
+import Interface.MCache as Cache (MIOCache)
+import Interface.MError as Error (MIOError)
+import Interface.MLog.Exports as Log (MLog)
 
 class (MIOCache m, MIOError m, MLog m) => MT m

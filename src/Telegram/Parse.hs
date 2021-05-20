@@ -16,7 +16,8 @@ import Data.Aeson.Types (Parser)
 import qualified Data.ByteString.Lazy.Char8 as LC
 import Data.Text (pack)
 import GHC.Exts (IsList (fromList))
-import Interface.MError (MError)
+import Interface.Class
+import qualified Interface.MError as Error
 import qualified Logic.Logic as Logic
 import Logic.Parse
   ( eDecode,
@@ -31,7 +32,23 @@ import Logic.Parse
     _withArrayItem,
     _withArraymItem,
   )
-import Telegram.Update (Entity (..), Update)
+import Telegram.Update
+  ( Entity
+      ( Animation,
+        Command,
+        Contact,
+        Document,
+        Forward,
+        Location,
+        Message,
+        Other,
+        Photo,
+        Poll,
+        Sticker,
+        Video
+      ),
+    Update,
+  )
 
 -----------------------------Types---------------------------------------------
 type OResultItem = Object

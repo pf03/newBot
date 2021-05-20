@@ -4,7 +4,7 @@ module T.Transformer where
 
 import Control.Monad.Except (ExceptT, runExceptT)
 import Control.Monad.State.Lazy (StateT (runStateT))
-import Interface.MError (E)
+import qualified Interface.MError as Error
 import qualified Interface.MLog.Exports as Log
 import qualified Interface.MLog.Functions as Log
 import qualified System.Console.ANSI as Color
@@ -14,7 +14,7 @@ import qualified T.State as S
 runT :: Show a => T a -> IO ()
 runT m = do
   let settings = Log.Settings Color.Cyan True "runT"
-  es <- runExceptT (S.readS :: ExceptT E IO S)
+  es <- runExceptT (S.readS :: ExceptT Error.E IO S)
   case es of
     Left e -> do
       let dlc = Log.defaultConfig
