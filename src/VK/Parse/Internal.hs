@@ -6,12 +6,12 @@ import Data.Aeson.Types (Parser)
 import Data.Maybe (fromMaybe)
 import Data.Text (pack)
 import qualified Logic.Logic as Logic
-import Logic.Parse.Internal ( _parseJSONo, _mwithArrayItem, _withArraymItem )
+import Logic.Parse.Internal ( parseJSONo, mwithArrayItem, withArraymItem )
 import Text.Read (readEither)
 import VK.Update ( Init, Attachment(..), Entity(Entity), Update )
 
-_parseUpdateId :: Object -> Parser (Maybe UpdateId)
-_parseUpdateId o = do
+parseUpdateId :: Object -> Parser (Maybe UpdateId)
+parseUpdateId o = do
   mstr <- o .:? "ts"
   case mstr of
     Nothing -> return Nothing
@@ -21,71 +21,71 @@ _parseUpdateId o = do
         Left e -> fail (e ++ ": " ++ str)
         Right uid -> return $ Just uid
 
-_parseInit :: Object -> Parser Init
-_parseInit o = do
+parseInit :: Object -> Parser Init
+parseInit o = do
   response <- o .: "response"
-  _parseJSONo response
+  parseJSONo response
 
-_parseUpdates :: Object -> Parser [Update]
-_parseUpdates = _withArraymItem "updates" _parseUpdate
+parseUpdates :: Object -> Parser [Update]
+parseUpdates = withArraymItem "updates" parseUpdate
 
-_parseUpdate :: Object -> Parser (Maybe Update)
-_parseUpdate o = do
-  _type <- o .: "type" :: Parser String
-  case _type of
+parseUpdate :: Object -> Parser (Maybe Update)
+parseUpdate o = do
+  t <- o .: "type" :: Parser String
+  case t of
     "message_new" -> do
       obj <- o .: "object"
       userId <- obj .: "user_id" :: Parser UserId
       text <- obj .: "body"
       let emc = Logic.toMessageCommand text
-      mas <- _mwithArrayItem "attachments" _parseAttachment obj
+      mas <- mwithArrayItem "attachments" parseAttachment obj
       let as = fromMaybe [] mas
       return $ Just (userId, Entity emc as)
     _ -> return Nothing
 
-_parseAttachment :: Object -> Parser Attachment
-_parseAttachment o = do
-  _type <- o .: "type" :: Parser String
-  case _type of
-    "sticker" -> _parseSticker o
-    "audio" -> _parseAudio o
-    "photo" -> _parseAttachmentItem "photo" o
-    "video" -> _parseAttachmentItem "video" o
-    "doc" -> _parseAttachmentItem "doc" o
-    "wall" -> _parseWall o
-    "link" -> _parseLink o
+parseAttachment :: Object -> Parser Attachment
+parseAttachment o = do
+  t <- o .: "type" :: Parser String
+  case t of
+    "sticker" -> parseSticker o
+    "audio" -> parseAudio o
+    "photo" -> parseAttachmentItem "photo" o
+    "video" -> parseAttachmentItem "video" o
+    "doc" -> parseAttachmentItem "doc" o
+    "wall" -> parseWall o
+    "link" -> parseLink o
     _ -> fail "Unknown attachment"
 
-_parseAttachmentItem :: String -> Object -> Parser Attachment
-_parseAttachmentItem str o = do
+parseAttachmentItem :: String -> Object -> Parser Attachment
+parseAttachmentItem str o = do
   item <- o .: pack str
   itemId <- item .: "id"
   ownerId <- item .: "owner_id"
   accessKey <- item .: "access_key"
   return $ Item str ownerId itemId accessKey
 
-_parseSticker :: Object -> Parser Attachment
-_parseSticker o = do
+parseSticker :: Object -> Parser Attachment
+parseSticker o = do
   sticker <- o .: "sticker"
   stickerId <- sticker .: "id"
   return . Sticker $ stickerId
 
-_parseAudio :: Object -> Parser Attachment
-_parseAudio o = do
+parseAudio :: Object -> Parser Attachment
+parseAudio o = do
   audio <- o .: "audio"
   audioId <- audio .: "id"
   ownerId <- audio .: "owner_id"
   return $ Audio ownerId audioId
 
-_parseWall :: Object -> Parser Attachment
-_parseWall o = do
+parseWall :: Object -> Parser Attachment
+parseWall o = do
   wall <- o .: "wall"
   wallId <- wall .: "id"
   ownerId <- wall .: "to_id"
   return $ Wall ownerId wallId
 
-_parseLink :: Object -> Parser Attachment
-_parseLink o = do
+parseLink :: Object -> Parser Attachment
+parseLink o = do
   item <- o .: "link"
   url <- item .: "url"
   return $ Link url

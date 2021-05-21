@@ -1,10 +1,10 @@
 module App.Main where
 
 import qualified Logic.Bot as Bot (application)
-import Logic.Config (App (Telegram, VK))
-import T.State (T)
-import qualified T.State as S (getApp)
-import T.Transformer (runT)
+import Logic.Config.Types (App (Telegram, VK))
+import Transformer.State (Transformer)
+import qualified Transformer.State as S (getApp)
+import Transformer.Run (runT)
 import qualified Telegram.Bot.Types as Telegram
 import qualified VK.Bot.Types as VK
 
@@ -15,7 +15,7 @@ main_ = do
   _ <- getLine
   return ()
 
-switchApplication :: T ()
+switchApplication :: Transformer ()
 switchApplication = do
   app <- S.getApp
   case app of

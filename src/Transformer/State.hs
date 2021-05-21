@@ -3,7 +3,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE InstanceSigs #-}
 
-module T.State where
+module Transformer.State where
 
 import Common.Misc (template)
 import Control.Monad.State.Lazy (MonadState (get), MonadTrans (lift), StateT (..), gets, modify, when)
@@ -15,10 +15,10 @@ import Interface.Class (MCache, MError, MIOCache, MIOError, MT)
 import qualified Interface.MCache.Exports as Cache
 import qualified Interface.MError.Exports as Error
 import qualified Interface.MLog.Exports as Log
-import qualified Logic.Config as Config
+import qualified Logic.Config.Exports as Config
 
 -----------------------------Types---------------------------------------------
-type T = StateT S (ExceptT Error.E IO)
+type Transformer = StateT S (ExceptT Error.E IO)
 
 data S = S
   { app :: Config.App,
@@ -29,25 +29,25 @@ data S = S
   deriving (Show, Generic)
 
 -----------------------------Instances-----------------------------------------
-instance Log.MLog T where
+instance Log.MLog Transformer where
   getSettings = getLogSettings
   setSettings = setLogSettings
   getConfig = getLogConfig
   message = Log.messageIO
 
-instance MError T where
-  throw :: Error.E -> T a
+instance MError Transformer where
+  throw :: Error.E -> Transformer a
   throw e = lift $ throwE e
-  catch :: T a -> (Error.E -> T a) -> T a
+  catch :: Transformer a -> (Error.E -> Transformer a) -> Transformer a
   catch ta f = StateT $ \s -> catchE (runStateT ta s) $ \e -> runStateT (f e) s
 
-instance MIOError T
+instance MIOError Transformer
 
-instance MCache T where
+instance MCache Transformer where
   getCache = gets cache
   setCache c = modify (\st -> st {cache = c})
 
-instance MIOCache T where
+instance MIOCache Transformer where
   writeCache = do
     ch <- Cache.getCacheChanged
     when ch $ do
@@ -55,7 +55,7 @@ instance MIOCache T where
       saveS s
       Cache.resetCacheChanged
 
-instance MT T
+instance MT Transformer
 
 getLogSettings :: MonadState S m => m Log.Settings
 getLogSettings = gets logSettings
@@ -89,29 +89,29 @@ saveS s = do
 
 toS :: MError m => Config.Config -> m S
 toS config = do
-  ca <- case filter (\ca0 -> show (Config._app config) == Cache.name ca0) configApps of
-    [] -> Error.throw $ Error.ConfigError $ template "There is no app with name {0} in config" [show (Config._app config)]
+  ca <- case filter (\ca0 -> show (Config.app config) == Cache.name ca0) configApps of
+    [] -> Error.throw $ Error.ConfigError $ template "There is no app with name {0} in config" [show (Config.app config)]
     cas -> return $ head cas
   let cac =
         Cache.Cache
           { Cache.configApp = ca,
-            Cache.configText = Config._text config,
+            Cache.configText = Config.text config,
             Cache.changed = False,
-            Cache.defaultRepeatNumber = Config._defaultRepeatNumber config
+            Cache.defaultRepeatNumber = Config.defaultRepeatNumber config
           }
   return $
     S
-      { app = Config._app config,
+      { app = Config.app config,
         cache = cac,
-        configLog = Config._log config,
+        configLog = Config.log config,
         logSettings = Log.defaultSettings
       }
   where
-    configApps = Config._apps config
+    configApps = Config.apps config
 
 fromS :: Config.Config -> S -> Config.Config
-fromS config st = config {Config._apps = newConfigApps}
+fromS config st = config {Config.apps = newConfigApps}
   where
-    configApps = Config._apps config
+    configApps = Config.apps config
     cac = cache st
     newConfigApps = [Cache.configApp cac] <> filter (\ca -> Cache.name ca /= Cache.name (Cache.configApp cac)) configApps
