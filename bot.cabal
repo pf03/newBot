@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 508e146d8144b6b1812466cca14b52036f81d15caf626d3187441d36bc80d03d
+-- hash: 2062aaeff3ac6260780d245eb7a488cb25b05331197e97f0cbd2eeea8653cd69
 
 name:           bot
 version:        0.1.0.0
@@ -50,20 +50,27 @@ library
       Logic.Bot
       Logic.Config
       Logic.Logic
-      Logic.Parse
+      Logic.Parse.Functions
+      Logic.Parse.Internal
       Logic.Request
       T.State
       T.Transformer
       Telegram.API
       Telegram.Bot.Internal
       Telegram.Bot.Types
-      Telegram.Parse
+      Telegram.Encode
+      Telegram.Parse.Exports
+      Telegram.Parse.Functions
+      Telegram.Parse.Internal
       Telegram.Query
       Telegram.Update
       VK.API
       VK.Bot.Internal
       VK.Bot.Types
-      VK.Parse
+      VK.Encode
+      VK.Parse.Exports
+      VK.Parse.Functions
+      VK.Parse.Internal
       VK.Query
       VK.Update
   other-modules:

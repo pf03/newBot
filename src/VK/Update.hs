@@ -1,9 +1,12 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 module VK.Update where
 
+import GHC.Generics (Generic)
+import Data.Aeson ( FromJSON, ToJSON )
 import Common.Misc (ChatId, Command, IntId, ItemName, Key, Message, Url)
 import Interface.Class ( IUpdate ) 
 import qualified Interface.Messenger.IUpdate as Update 
@@ -26,6 +29,12 @@ type StickerId = Int
 type OwnerId = Int
 
 type GroupId = Int
+
+data Init = Init {server :: String, key :: String, ts :: Int} deriving (Show, Generic)
+
+instance FromJSON Init
+
+instance ToJSON Init
 
 --------------------------instance App.Update------------------------------------
 instance IUpdate Update where

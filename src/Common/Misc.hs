@@ -10,6 +10,7 @@ import qualified Data.ByteString.Lazy.Char8 as LC
 import Data.List.Split (splitOn)
 import Data.Text (pack)
 import Data.Text.Encoding (encodeUtf8)
+import Network.HTTP.Simple (Query)
 
 -----------------------------Types---------------------------------------------
 type BS = BC.ByteString
@@ -113,3 +114,16 @@ instance Convert Object where
 
 jc :: Convert a => a -> Maybe BC.ByteString
 jc = Just . convert
+
+----------------------------------------To JSON-------------------------------------
+(<:>) :: Convert a => String -> a -> Query
+(<:>) key value = [(convert key, jc value)]
+
+infixr 7 <:>
+
+(<:?>) :: Convert a => String -> Maybe a -> Query
+(<:?>) key mvalue = case mvalue of
+  Nothing -> []
+  Just value -> [(convert key, jc value)]
+
+infixr 7 <:?>

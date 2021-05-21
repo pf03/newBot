@@ -1,13 +1,12 @@
 module Telegram.Query (getUpdates, sendMessage) where
 
-import Common.Misc (Label, TimeOut, UpdateId)
+import Common.Misc ( TimeOut, UpdateId, Label, (<:>), (<:?>) )
 import Interface.Class (MError)
 import qualified Interface.MError.Exports as Error
 import Network.HTTP.Simple (Query)
 import Telegram.API (API (..))
-import Telegram.Parse ((<:>), (<:?>))
-import qualified Telegram.Parse as Encode (keyboard, pollOptions)
-import Telegram.Update (Entity (..), Update)
+import qualified Telegram.Encode as Encode (keyboard, pollOptions)
+import Telegram.Update( Entity(..), Update )
 
 getUpdates :: Maybe UpdateId -> TimeOut -> Query
 getUpdates moffset timeout = "timeout" <:> timeout ++ "offset" <:?> moffset

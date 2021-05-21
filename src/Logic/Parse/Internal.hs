@@ -1,25 +1,16 @@
 {-# LANGUAGE FlexibleInstances #-}
 
-module Logic.Parse where
+module Logic.Parse.Internal where
 
-import Common.Misc (Convert (..), Key, LBS, jc)
-import Data.Aeson (FromJSON (parseJSON), Object, Value (Object), eitherDecode, (.:), (.:?))
+import Common.Misc ( Key ) 
+import Data.Aeson ( (.:), (.:?), FromJSON(parseJSON), Object, Value(Object) )
 import Data.Aeson.Types (Parser, parseEither)
 import Data.Maybe (fromJust, isJust)
 import Data.Text (pack)
 import Interface.Class (MError)
 import qualified Interface.MError.Exports as Error
-import Network.HTTP.Simple (Query)
 
------------------------------From JSON-----------------------------------------
-getObject :: MError m => LBS -> m Object
-getObject bs = Error.catchEither (eitherDecode bs) Error.ParseError
-
-getValue :: MError m => LBS -> m Value
-getValue bs = Error.catchEither (eitherDecode bs) Error.ParseError
-
-eDecode :: (MError m, FromJSON a) => LBS -> m a
-eDecode bs = Error.catchEither (eitherDecode bs) Error.ParseError
+--All functions in Parser monad are internal
 
 -- Quitting the Parser monad
 _parseE :: MError m => (Object -> Parser a) -> Object -> m a
@@ -55,16 +46,3 @@ _withArraymItem :: Key -> (Object -> Parser (Maybe a)) -> Object -> Parser [a]
 _withArraymItem k f o = do
   ma <- _withArrayItem k f o
   return $ fmap fromJust . filter isJust $ ma
-
-----------------------------------------To JSON-------------------------------------
-(<:>) :: Convert a => String -> a -> Query
-(<:>) key value = [(convert key, jc value)]
-
-infixr 7 <:>
-
-(<:?>) :: Convert a => String -> Maybe a -> Query
-(<:?>) key mvalue = case mvalue of
-  Nothing -> []
-  Just value -> [(convert key, jc value)]
-
-infixr 7 <:?>

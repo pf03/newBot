@@ -9,7 +9,7 @@ import qualified Interface.MLog.Exports as Log
 import qualified Logic.Request as Request
 import qualified System.Console.ANSI as Color (Color (..))
 import qualified Telegram.API as API
-import qualified Telegram.Parse as Parse
+import qualified Telegram.Parse.Exports as Parse
 import qualified Telegram.Query as Query
 import qualified Telegram.Update as Update
 

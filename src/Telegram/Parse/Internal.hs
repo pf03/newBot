@@ -1,72 +1,18 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Telegram.Parse
-  ( module Logic.Parse,
-    Telegram.Parse.updateId,
-    updates,
-    keyboard,
-    pollOptions,
-  )
-where
+module Telegram.Parse.Internal where
 
 import Common.Misc (ChatId, UpdateId)
 import Control.Applicative (Alternative ((<|>)))
-import Data.Aeson (KeyValue ((.=)), Object, Value (Array, String), encode, object, (.:), (.:?))
+import Data.Aeson (Object, (.:), (.:?))
 import Data.Aeson.Types (Parser)
-import qualified Data.ByteString.Lazy.Char8 as LC
-import Data.Text (pack)
-import GHC.Exts (IsList (fromList))
-import Interface.Class ( MError )
 import qualified Logic.Logic as Logic
-import Logic.Parse
-  ( eDecode,
-    getObject,
-    getValue,
-    (<:>),
-    (<:?>),
-    _mwithArrayItem,
-    _mwithItem,
-    _parseE,
-    _parseJSONo,
-    _withArrayItem,
-    _withArraymItem,
-  )
-import Telegram.Update
-  ( Entity
-      ( Animation,
-        Command,
-        Contact,
-        Document,
-        Forward,
-        Location,
-        Message,
-        Other,
-        Photo,
-        Poll,
-        Sticker,
-        Video
-      ),
-    Update,
-  )
+import Logic.Parse.Internal (_mwithArrayItem, _mwithItem, _withArrayItem, _withArraymItem)
+import Telegram.Update (Entity (..), Update)
 
------------------------------Types---------------------------------------------
 type OResultItem = Object
 
 type OMessageItem = Object
-
------------------------------Receive-------------------------------------------
------------------------------External------------------------------------------
-updateId :: MError m => Object -> m (Maybe UpdateId)
-updateId o = do
-  ids <- _parseE _parseUpdateIds o
-  case ids of
-    [] -> return Nothing
-    _ -> return $ Just $ maximum ids
-
-updates :: MError m => Object -> m [Update]
-updates = _parseE _parseUpdates
-
------------------------------Internal------------------------------------------
 
 _parseUpdateIds :: Object -> Parser [UpdateId]
 _parseUpdateIds = _withArrayItem "result" (.: "update_id")
@@ -198,13 +144,3 @@ _parseLocation = _mwithItem "location" $ \o -> do
   latitude <- o .: "latitude"
   longitude <- o .: "longitude"
   return $ Location latitude longitude
-
------------------------------Send----------------------------------------------
-keyboard :: [String] -> LC.ByteString
-keyboard strs = encode $ object ["keyboard" .= Array (fromList [Array $ fromList (arr strs)])]
-  where
-    arr :: [String] -> [Value]
-    arr = map (\str -> object ["text" .= str])
-
-pollOptions :: [String] -> LC.ByteString
-pollOptions ops = encode $ Array $ fromList (map (String . pack) ops)

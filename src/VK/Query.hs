@@ -5,16 +5,14 @@ module VK.Query
   )
 where
 
-import Common.Misc (Label, Message, TimeOut, UserId, jc, safeTail, template)
+import Common.Misc( TimeOut, UserId, Label, Message, template, safeTail, jc, (<:>) ) 
 import Data.Either (rights)
 import Interface.Class (MError)
 import qualified Interface.MCache.Exports as Cache
 import qualified Interface.MError.Exports as Error
 import Network.HTTP.Simple (Query, QueryItem)
-import VK.Parse as Parse ((<:>))
-import qualified VK.Parse as Encode (contentUrl, keyboard)
-import qualified VK.Parse as Parse (Init (key, ts))
-import VK.Update (Attachment (..), Entity (Entity), GroupId, Update)
+import qualified VK.Encode as Encode (contentUrl, keyboard)
+import VK.Update ( Init(key, ts), GroupId, Attachment(..), Entity(Entity), Update )
 
 -----------------------------Types---------------------------------------------
 type Version = String
@@ -26,11 +24,11 @@ getLongPollServer token groupId version =
     ++ "access_token" <:> token
     ++ "v" <:> version
 
-longPoll :: Parse.Init -> TimeOut -> Query
+longPoll :: Init -> TimeOut -> Query
 longPoll ini timeout =
   "act" <:> ("a_check" :: String)
-    ++ "key" <:> Parse.key ini
-    ++ "ts" <:> Parse.ts ini
+    ++ "key" <:> key ini
+    ++ "ts" <:> ts ini
     ++ "wait" <:> timeout
 
 sendMessage :: MError m => Cache.Token -> Version -> Update -> [Label] -> m Query

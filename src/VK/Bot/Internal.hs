@@ -11,12 +11,12 @@ import qualified Interface.MLog.Exports as Log
 import qualified Logic.Request as Request
 import qualified System.Console.ANSI as Color (Color (..))
 import qualified VK.API as API
-import qualified VK.Parse as Parse
+import qualified VK.Parse.Exports as Parse
 import qualified VK.Query as Query
 import qualified VK.Update as Update
 
 -- Initialization - get last updateId, server name, key for getUpdates request
-_getInit :: MT m => m Parse.Init
+_getInit :: MT m => m Update.Init
 _getInit = do
   Log.setSettings Color.Blue True "getInit"
   Cache.ConfigApp _name _host tk _updateId _ _repeatNumber gid v <- Cache.getConfigApp
@@ -26,13 +26,13 @@ _getInit = do
   Log.receive
   o <- Parse.getObject json
   Log.receiveData "object" o
-  ini@(Parse.Init _server _key _ts) <- Parse.init o
+  ini@(Update.Init _server _key _ts) <- Parse.init o
   Log.receiveData "init" ini
   return ini
 
 -- Get updates from messenger server by the long polling method
-_getUpdates :: MT m => Parse.Init -> m ([Update.Update], Parse.Init)
-_getUpdates ini@(Parse.Init server0 _ ts0) = do
+_getUpdates :: MT m => Update.Init -> m ([Update.Update], Update.Init)
+_getUpdates ini@(Update.Init server0 _ ts0) = do
   Log.setSettings Color.Cyan True "getUpdates"
   let query = Query.longPoll ini 25
   (host, path) <- parseServer server0
@@ -43,7 +43,7 @@ _getUpdates ini@(Parse.Init server0 _ ts0) = do
   o <- Parse.getObject json
   Log.receiveData "object" o
   muid <- Parse.updateId o
-  let newIni = ini {Parse.ts = fromMaybe ts0 muid}
+  let newIni = ini {Update.ts = fromMaybe ts0 muid}
   Log.receiveData "updateId" muid
   us <- Parse.updates o
   Log.receiveData "updates" us

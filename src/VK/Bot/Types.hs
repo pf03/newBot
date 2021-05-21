@@ -10,14 +10,13 @@ import Common.Misc (Label, UpdateId)
 import Interface.Class (IBot, IUpdate, MT)
 import qualified Interface.Messenger.IBot as IBot
 import VK.Bot.Internal (_getInit, _getUpdates, _sendMessage)
-import qualified VK.Parse as Parse
 import qualified VK.Update as Update
 
 -----------------------------Types---------------------------------------------
 data Pointer = Pointer
 
 -- New type wrappers in order to avoid orphan instances
-newtype WrapInit = WrapInit Parse.Init
+newtype WrapInit = WrapInit Update.Init
 
 newtype WrapUpdate = WrapUpdate Update.Update deriving newtype (IUpdate)
 
@@ -27,10 +26,10 @@ instance IBot Pointer WrapInit WrapUpdate where
   getInit _ = WrapInit <$> _getInit
 
   getUpdateId :: WrapInit -> UpdateId
-  getUpdateId (WrapInit ini) = Parse.ts ini
+  getUpdateId (WrapInit ini) = Update.ts ini
 
   setUpdateId :: WrapInit -> UpdateId -> WrapInit
-  setUpdateId (WrapInit ini) newts = WrapInit $ ini {Parse.ts = newts}
+  setUpdateId (WrapInit ini) newts = WrapInit $ ini {Update.ts = newts}
 
   getUpdates :: MT m => WrapInit -> m ([WrapUpdate], WrapInit)
   getUpdates (WrapInit ini) = do

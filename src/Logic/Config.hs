@@ -20,7 +20,7 @@ import Interface.Class (MError, MIOError)
 import qualified Interface.MCache.Exports as Cache
 import qualified Interface.MError.Exports as Error
 import qualified Interface.MLog.Exports as Log
-import qualified Logic.Parse as Parse (eDecode)
+import qualified Logic.Parse.Functions as Parse (eDecode)
 import System.IO.Error (isDoesNotExistError)
 
 -----------------------------Types---------------------------------------------
