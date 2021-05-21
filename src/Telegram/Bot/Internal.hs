@@ -1,19 +1,11 @@
-{-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE InstanceSigs #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-
-module Telegram.Bot (Pointer (..), reset) where
+module Telegram.Bot.Internal  where
 
 import Common.Misc (Label, UpdateId, template)
 import Control.Applicative (Alternative ((<|>)))
 import Control.Monad (forM_)
-import Interface.Class (IBot, IUpdate, MT)
+import Interface.Class ( MT )
 import qualified Interface.MCache.Exports as Cache
 import qualified Interface.MLog.Exports as Log
-import qualified Interface.Messenger.IBot as IBot
-import qualified Interface.Messenger.IUpdate as IUpdate
 import qualified Logic.Request as Request
 import qualified System.Console.ANSI as Color (Color (..))
 import qualified Telegram.API as API
@@ -21,34 +13,7 @@ import qualified Telegram.Parse as Parse
 import qualified Telegram.Query as Query
 import qualified Telegram.Update as Update
 
------------------------------Types---------------------------------------------
-data Pointer = Pointer
 
--- New type wrappers in order to avoid orphan instances
-newtype Init = Init UpdateId
-
-newtype WrapUpdate = WrapUpdate Update.Update deriving newtype (IUpdate)
-
------------------------------Instance------------------------------------------
-instance IBot Pointer Init WrapUpdate where
-  getInit :: MT m => Pointer -> m Init
-  getInit _ = Init <$> _getUpdateId
-
-  getUpdateId :: Init -> UpdateId
-  getUpdateId (Init uid) = uid
-
-  setUpdateId :: Init -> UpdateId -> Init
-  setUpdateId _ newuid = Init newuid
-
-  getUpdates :: MT m => Init -> m ([WrapUpdate], Init)
-  getUpdates (Init uid) = do
-    (us, Just newuid) <- _getUpdates . Just $ uid
-    return (WrapUpdate <$> us, Init newuid)
-
-  sendMessage :: MT m => WrapUpdate -> [Label] -> Int -> m ()
-  sendMessage (WrapUpdate u) ls = _sendMessage u ls
-
---------------------------------Internal functions----------------------------------------
 -- Initialization - get last updateId for getUpdates request
 _getUpdateId :: MT m => m UpdateId
 _getUpdateId = do

@@ -1,10 +1,9 @@
 module Interface.MError.Functions where
 
 import qualified Control.Exception as E
-import Control.Monad.Except (ExceptT, MonadIO (..))
-import Control.Monad.Trans.Except (catchE, throwE)
-import Interface.MError.Class (MError (..), MIOError)
-import Interface.MError.Types (E (Exit, IOError, SomeError), EE)
+import Control.Monad.Except ( MonadIO(liftIO) ) 
+import Interface.MError.Class ( MError(..), MIOError ) 
+import Interface.MError.Types ( E(SomeError, Exit, IOError), EE )
 
 -----------------------------MError--------------------------------------------
 liftE :: MError m => Either E a -> m a

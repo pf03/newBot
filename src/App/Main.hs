@@ -5,8 +5,8 @@ import Logic.Config (App (Telegram, VK))
 import T.State (T)
 import qualified T.State as S (getApp)
 import T.Transformer (runT)
-import qualified Telegram.Bot as Telegram
-import qualified VK.Bot as VK
+import qualified Telegram.Bot.Types as Telegram
+import qualified VK.Bot.Types as VK
 
 main_ :: IO ()
 main_ = do

@@ -2,7 +2,6 @@
 
 module Interface.MError.Class where
 
-import qualified Control.Exception as E
 import Control.Monad.Except (ExceptT, MonadIO (..))
 import Control.Monad.Trans.Except (catchE, throwE)
 import Interface.MError.Types ( E )

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e6a40d4500df5103c520cf35264e8ab926ec76c8a4d4d589aa6c17087423e5cb
+-- hash: 508e146d8144b6b1812466cca14b52036f81d15caf626d3187441d36bc80d03d
 
 name:           bot
 version:        0.1.0.0
@@ -55,12 +55,14 @@ library
       T.State
       T.Transformer
       Telegram.API
-      Telegram.Bot
+      Telegram.Bot.Internal
+      Telegram.Bot.Types
       Telegram.Parse
       Telegram.Query
       Telegram.Update
       VK.API
-      VK.Bot
+      VK.Bot.Internal
+      VK.Bot.Types
       VK.Parse
       VK.Query
       VK.Update

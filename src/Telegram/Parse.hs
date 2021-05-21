@@ -17,7 +17,6 @@ import qualified Data.ByteString.Lazy.Char8 as LC
 import Data.Text (pack)
 import GHC.Exts (IsList (fromList))
 import Interface.Class ( MError )
-import qualified Interface.MError.Exports as Error
 import qualified Logic.Logic as Logic
 import Logic.Parse
   ( eDecode,

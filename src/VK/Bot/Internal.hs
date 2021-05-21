@@ -1,21 +1,13 @@
-{-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE InstanceSigs #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
+module VK.Bot.Internal where
 
-module VK.Bot (Pointer (..)) where
-
-import Common.Misc (Label, Path, UpdateId, printT, template)
+import Common.Misc ( template, printT, Path, Label )
 import Control.Monad (forM_)
 import Data.List.Split (splitOn)
 import Data.Maybe (fromMaybe)
-import Interface.Class (IBot, IUpdate, MError, MT)
+import Interface.Class ( MT, MError )
 import qualified Interface.MCache.Exports as Cache
 import qualified Interface.MError.Exports as Error
 import qualified Interface.MLog.Exports as Log
-import qualified Interface.Messenger.IBot as IBot
-import qualified Interface.Messenger.IUpdate as IUpdate
 import qualified Logic.Request as Request
 import qualified System.Console.ANSI as Color (Color (..))
 import qualified VK.API as API
@@ -23,34 +15,6 @@ import qualified VK.Parse as Parse
 import qualified VK.Query as Query
 import qualified VK.Update as Update
 
------------------------------Types---------------------------------------------
-data Pointer = Pointer
-
--- New type wrappers in order to avoid orphan instances
-newtype WrapInit = WrapInit Parse.Init
-
-newtype WrapUpdate = WrapUpdate Update.Update deriving newtype (IUpdate)
-
------------------------------Instance------------------------------------------
-instance IBot Pointer WrapInit WrapUpdate where
-  getInit :: MT m => Pointer -> m WrapInit
-  getInit _ = WrapInit <$> _getInit
-
-  getUpdateId :: WrapInit -> UpdateId
-  getUpdateId (WrapInit ini) = Parse.ts ini
-
-  setUpdateId :: WrapInit -> UpdateId -> WrapInit
-  setUpdateId (WrapInit ini) newts = WrapInit $ ini {Parse.ts = newts}
-
-  getUpdates :: MT m => WrapInit -> m ([WrapUpdate], WrapInit)
-  getUpdates (WrapInit ini) = do
-    (us, newini) <- _getUpdates ini
-    return (WrapUpdate <$> us, WrapInit newini)
-
-  sendMessage :: MT m => WrapUpdate -> [Label] -> Int -> m ()
-  sendMessage (WrapUpdate u) = _sendMessage u
-
---------------------------------Internal functions----------------------------------------
 -- Initialization - get last updateId, server name, key for getUpdates request
 _getInit :: MT m => m Parse.Init
 _getInit = do

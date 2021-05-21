@@ -13,7 +13,7 @@ import qualified Interface.MError.Exports as Error
 import Network.HTTP.Simple (Query, QueryItem)
 import VK.Parse as Parse ((<:>))
 import qualified VK.Parse as Encode (contentUrl, keyboard)
-import qualified VK.Parse as Parse (Init (key, ts), (<:>))
+import qualified VK.Parse as Parse (Init (key, ts))
 import VK.Update (Attachment (..), Entity (Entity), GroupId, Update)
 
 -----------------------------Types---------------------------------------------

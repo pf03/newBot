@@ -3,8 +3,6 @@
 module Interface.MError.Types where
 
 import qualified Control.Exception as E
-import Control.Monad.Except (ExceptT, MonadIO (..))
-import Control.Monad.Trans.Except (catchE, throwE)
 
 data E
   = ParseError String
