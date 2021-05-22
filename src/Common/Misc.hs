@@ -61,6 +61,10 @@ template str args = foldl f str $ zip ts args
        in concat $ init $ foldr (\part acc0 -> part : s : acc0) [] strs
 
 -----------------------------Monadic and simple functions----------------------
+for :: Monad m => m a -> (a-> b) -> m b
+for = flip fmap
+
+
 ifJust :: Monad m => Maybe a -> m () -> m ()
 ifJust ma m = case ma of
   Just _ -> m

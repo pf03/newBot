@@ -4,12 +4,12 @@ import Common.Misc (ChatId, UpdateId)
 import qualified Data.Map.Internal as M
 import Interface.MCache.Class (MCache (..))
 import Interface.MCache.Types
-  ( Cache (changed, configApp, configText, defaultRepeatNumber),
-    Changed,
-    ConfigApp (host, repeatNumber, token, updateId, updateIdFromFile),
-    ConfigText,
-    Host,
-  )
+    ( Cache(changed, configText, configApp, defaultRepeatNumber),
+      Changed,
+      ConfigApp(host, token, app, updateId, updateIdFromFile,repeatNumber),
+      ConfigText,
+      Host,
+      App )
 
 getCacheChanged :: MCache m => m Changed
 getCacheChanged = getsCache changed
@@ -36,6 +36,9 @@ getHost = host <$> getConfigApp
 
 getToken :: MCache m => m Host
 getToken = token <$> getConfigApp
+
+getApp :: MCache m => m App
+getApp = app <$> getConfigApp
 
 setConfigApp :: MCache m => ConfigApp -> m ()
 setConfigApp ca = modifyCache $ \s -> s {configApp = ca}

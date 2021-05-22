@@ -7,6 +7,12 @@ import Data.Aeson (FromJSON, ToJSON)
 import qualified Data.Map.Internal as M
 import GHC.Generics (Generic)
 
+data App = Telegram | VK deriving (Show, Generic, Eq)
+
+instance ToJSON App
+
+instance FromJSON App
+
 data Cache = Cache
   { configApp :: ConfigApp,
     configText :: ConfigText,
@@ -18,7 +24,8 @@ data Cache = Cache
 type Changed = Bool
 
 data ConfigApp = ConfigApp
-  { name :: String,
+  { enable :: Bool,
+    app :: App,
     host :: Host,
     token :: Token,
     updateId :: UpdateId,
