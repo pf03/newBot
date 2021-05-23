@@ -11,6 +11,8 @@ import qualified Interface.MLog.Exports as Log
 
 data Config = Config
   {
+    forks :: Bool,
+    name :: String,
     defaultRepeatNumber :: Int,
     apps :: [Cache.ConfigApp],
     text :: Cache.ConfigText,

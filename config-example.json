@@ -1,7 +1,8 @@
 {
     "apps":[
         {
-            "name":"VK",
+            "name":"VK-bot",
+            "app":"VK",
             "host":"api.vk.com",
             "token":"a1a1a1aaaaaaaaaaaaaaaa1111111111111111111111111aaaaaaaaaaaaaaaa1111111111111111a1111a",
             "updateId": 0,
@@ -12,7 +13,8 @@
 
         },
         {
-            "name": "Telegram",
+            "name":"Telegram-bot",
+            "app": "Telegram",
             "host": "api.telegram.org",
             "token": "1111111111:AAAAAAAAAAAAAAAAA-AAAAAAAAAAAAAAAAA",
             "updateId": 58414589,
@@ -28,7 +30,7 @@
         "button": "Repeat number changed from {0} to {1}",
         "unknown": "Unknown command: {0}"
     },
-    "app": "VK",
+    "name": "VK-bot",
     "defaultRepeatNumber": 3,
     "log": {
         "colorEnable": true,

@@ -25,6 +25,7 @@ type Changed = Bool
 
 data ConfigApp = ConfigApp
   { enable :: Bool,
+    name:: String,
     app :: App,
     host :: Host,
     token :: Token,

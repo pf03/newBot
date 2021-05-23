@@ -19,7 +19,7 @@ import qualified VK.Update as Update
 _getInit :: MT m => m Update.Init
 _getInit = do
   Log.setSettings Color.Blue True "getInit"
-  Cache.ConfigApp _enable _app _host tk _updateId _ _repeatNumber gid v <- Cache.getConfigApp
+  Cache.ConfigApp _enable _name _app _host tk _updateId _ _repeatNumber gid v <- Cache.getConfigApp
   let api = API.API API.Groups API.GetLongPollServer
   Log.send
   json <- Request.api api (Query.getLongPollServer tk gid v) False
@@ -53,7 +53,7 @@ _getUpdates ini@(Update.Init server0 _ ts0) = do
 _sendMessage :: MT m => Update.Update -> [Label] -> Int -> m ()
 _sendMessage update btns rn = do
   Log.setSettings Color.Yellow True "sendMessage"
-  Cache.ConfigApp _enable _name _host tk _updateId _ _repeatNumber _groupId v <- Cache.getConfigApp
+  Cache.ConfigApp _enable _name _app _host tk _updateId _ _repeatNumber _groupId v <- Cache.getConfigApp
   Log.send
   printT btns
   query <- Query.sendMessage tk v update btns
