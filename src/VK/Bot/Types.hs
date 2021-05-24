@@ -36,5 +36,5 @@ instance IBot Pointer WrapInit WrapUpdate where
     (us, newini) <- Internal.getUpdates ini
     return (WrapUpdate <$> us, WrapInit newini)
 
-  sendMessage :: MTrans m => WrapUpdate -> [Label] -> Int -> m ()
+  sendMessage :: MTrans m => WrapUpdate -> [Label] -> m ()
   sendMessage (WrapUpdate u) = Internal.sendMessage u

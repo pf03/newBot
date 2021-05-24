@@ -20,5 +20,5 @@ class (IUpdate update) => IBot pointer init update | pointer -> init, init -> up
   -- Get updates from messenger server using initialization data
   getUpdates :: MTrans m => init -> m ([update], init)
 
-  -- Send response to messenger server using received updates (repeat n times)
-  sendMessage :: MTrans m => update -> [Label] -> Int -> m ()
+  -- Send response to messenger server using received updates
+  sendMessage :: MTrans m => update -> [Label]  -> m ()

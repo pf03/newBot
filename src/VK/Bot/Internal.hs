@@ -2,7 +2,6 @@ module VK.Bot.Internal where
 
 import Common.Types ( Path, Label )
 import Common.Functions ( template)
-import Control.Monad (forM_)
 import Data.List.Split (splitOn)
 import Data.Maybe (fromMaybe)
 import Interface.Class ( MTrans, MError )
@@ -51,19 +50,18 @@ getUpdates ini@(Update.Init server0 _ ts0) = do
   return (us, newIni)
 
 -- Send response to a single user
-sendMessage :: MTrans m => Update.Update -> [Label] -> Int -> m ()
-sendMessage update btns rn = do
+sendMessage :: MTrans m => Update.Update -> [Label] -> m ()
+sendMessage update btns = do
   Log.setSettings Color.Yellow True "sendMessage"
   Cache.ConfigApp _enable _name _app _host tk _updateId _ _repeatNumber _groupId v <- Cache.getConfigApp
   Log.send
   query <- Query.sendMessage tk v update btns
   Log.debugM update
-  forM_ [1 .. rn] $ \_ -> do
-    Log.receiveData "query" query
-    json <- Request.api (API.API API.Messages API.Send) query False
-    Log.receive
-    o <- Parse.getObject json
-    Log.receiveData "object" o
+  Log.receiveData "query" query
+  json <- Request.api (API.API API.Messages API.Send) query False
+  Log.receive
+  o <- Parse.getObject json
+  Log.receiveData "object" o
 
 -- "https://lp.vk.com/wh777777777" -> "lp.vk.com" "/wh777777777"
 parseServer :: MError m => String -> m (Cache.Host, Path)

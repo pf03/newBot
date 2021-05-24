@@ -9,10 +9,10 @@ import Interface.Class (IBot, MTrans)
 import qualified Interface.MCache.Exports as Cache
 import qualified Interface.MLog.Exports as Log
 import qualified Interface.Messenger.IBot as IBot
-import qualified Interface.Messenger.IUpdate as IUpdate
 import qualified Logic.Logic as Logic
 import qualified System.Console.ANSI as Color (Color (..))
 import Prelude hiding (init)
+import Control.Monad (forM_)
 
 -- | Run bot application
 application :: (MTrans m, IBot pointer init _update) => pointer -> m ()
@@ -46,16 +46,7 @@ longPolling pointer init = do
 -- | Response to all users
 calcSendMesages :: (MTrans m, IBot _pointer _init update) => [update] -> m ()
 calcSendMesages = mapM_ $ \update -> do
-  (answer, btns) <-
-    if IUpdate.hasAttachment update
-      then return (update, [])
-      else Logic.answer update
+  list <- Logic.answer update
   Log.infoM "Update config in file..."
   Cache.writeCache
-  rn <-
-    if IUpdate.hasAttachment update
-      then do
-        let cid = IUpdate.getChatId update
-        Cache.getRepeatNumber cid
-      else return 1
-  IBot.sendMessage answer btns rn
+  forM_ list $ uncurry IBot.sendMessage

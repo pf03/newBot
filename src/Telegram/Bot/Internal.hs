@@ -3,7 +3,6 @@ module Telegram.Bot.Internal  where
 import Common.Types (Label, UpdateId)
 import Common.Functions (template)
 import Control.Applicative (Alternative ((<|>)))
-import Control.Monad (forM_)
 import Interface.Class ( MTrans )
 import qualified Interface.MCache.Exports as Cache
 import qualified Interface.MLog.Exports as Log
@@ -46,17 +45,16 @@ getUpdates muid = do
   return (us, mnewuid <|> muid)
 
 -- Send response to a single user
-sendMessage :: MTrans m => Update.Update -> [Label] -> Int -> m ()
-sendMessage update btns rn = do
+sendMessage :: MTrans m => Update.Update -> [Label] -> m ()
+sendMessage update btns = do
   Log.setSettings Color.Yellow True "sendMessage"
   Log.send
   (api, query) <- Query.sendMessage update btns
-  forM_ [1 .. rn] $ \_ -> do
-    Log.receiveData "(api, query)" (api, query)
-    json <- Request.api api query False
-    Log.receive
-    o <- Parse.getObject json
-    Log.receiveData "object" o
+  Log.receiveData "(api, query)" (api, query)
+  json <- Request.api api query False
+  Log.receive
+  o <- Parse.getObject json
+  Log.receiveData "object" o
 
 -- Dumping messages that we cannot parse, for debugging purposes
 reset :: MTrans m => m ()
