@@ -2,11 +2,11 @@ module App.LogTest where
 
 import qualified Interface.MLog.Exports as Log
 import qualified System.Console.ANSI as Color
-import Transformer.Exports (Transformer, run)
+import qualified Transformer.Exports as Transformer
 
 testLog :: IO ()
-testLog = run $ do
-  Log.debugM $ "Debug data value " ++ show [1 .. 10 :: Int] :: Transformer ()
+testLog = Transformer.run $ do
+  Log.debugM $ "Debug data value " ++ show [1 .. 10 :: Int]
   Log.infoM $ "Info data value " ++ show [1 .. 10 :: Int]
   Log.warnM $ "warnM data value " ++ show [1 .. 10 :: Int]
   Log.errorM $ "Error data value " ++ show [1 .. 10 :: Int]

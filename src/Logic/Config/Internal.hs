@@ -1,13 +1,13 @@
 module Logic.Config.Internal where
 
-import Logic.Config.Types( Config(log, defaultRepeatNumber, name, apps) )
-import Common.Misc ( template, checkUnique )
-import Control.Monad ( when, forM_, unless )
+import Common.Misc (checkUnique, template)
+import Control.Monad (forM_, unless, when)
 import qualified Data.Map.Internal as M
-import Interface.Class ( MError )
+import Interface.Class (MError)
 import qualified Interface.MCache.Exports as Cache
 import qualified Interface.MError.Exports as Error
 import qualified Interface.MLog.Exports as Log
+import Logic.Config.Types (Config (apps, defaultRepeatNumber, log, name))
 import Prelude hiding (log)
 
 checkMinLogLevel :: MError m => Config -> m ()

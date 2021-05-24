@@ -7,7 +7,7 @@ import Data.Aeson ( Object )
 import Interface.Class (MError)
 import Logic.Parse.Internal (parseE)
 import Telegram.Parse.Internal (parseUpdateIds, parseUpdates)
-import Telegram.Update (Update)
+import qualified Telegram.Update as Update
 
 updateId :: MError m => Object -> m (Maybe UpdateId)
 updateId o = do
@@ -16,5 +16,5 @@ updateId o = do
     [] -> return Nothing
     _ -> return $ Just $ maximum ids
 
-updates :: MError m => Object -> m [Update]
+updates :: MError m => Object -> m [Update.Update]
 updates = parseE parseUpdates

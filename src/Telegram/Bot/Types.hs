@@ -7,9 +7,9 @@
 module Telegram.Bot.Types (Pointer (..)) where
 
 import Common.Misc ( Label, UpdateId )
-import Interface.Class (IBot, IUpdate, MT)
+import Interface.Class (IBot, IUpdate, MTrans)
 import qualified Interface.Messenger.IBot as IBot
-import Telegram.Bot.Internal (_getUpdateId, _getUpdates, _sendMessage)
+import Telegram.Bot.Internal as Internal (getUpdateId, getUpdates, sendMessage) 
 import qualified Telegram.Update as Update
 
 -----------------------------Types---------------------------------------------
@@ -22,8 +22,8 @@ newtype WrapUpdate = WrapUpdate Update.Update deriving newtype (IUpdate)
 
 -----------------------------Instance------------------------------------------
 instance IBot Pointer Init WrapUpdate where
-  getInit :: MT m => Pointer -> m Init
-  getInit _ = Init <$> _getUpdateId
+  getInit :: MTrans m => Pointer -> m Init
+  getInit _ = Init <$> Internal.getUpdateId
 
   getUpdateId :: Init -> UpdateId
   getUpdateId (Init uid) = uid
@@ -31,10 +31,10 @@ instance IBot Pointer Init WrapUpdate where
   setUpdateId :: Init -> UpdateId -> Init
   setUpdateId _ newuid = Init newuid
 
-  getUpdates :: MT m => Init -> m ([WrapUpdate], Init)
+  getUpdates :: MTrans m => Init -> m ([WrapUpdate], Init)
   getUpdates (Init uid) = do
-    (us, Just newuid) <- _getUpdates . Just $ uid
+    (us, Just newuid) <- Internal.getUpdates . Just $ uid
     return (WrapUpdate <$> us, Init newuid)
 
-  sendMessage :: MT m => WrapUpdate -> [Label] -> Int -> m ()
-  sendMessage (WrapUpdate u) ls = _sendMessage u ls
+  sendMessage :: MTrans m => WrapUpdate -> [Label] -> Int -> m ()
+  sendMessage (WrapUpdate u) ls = Internal.sendMessage u ls

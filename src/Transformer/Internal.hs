@@ -9,7 +9,7 @@ import Control.Monad.State.Lazy (MonadIO, MonadState (get), gets, modify, when)
 import qualified Data.Aeson.Encode.Pretty as Aeson
 import qualified Data.ByteString.Lazy as L
 import GHC.Generics (Generic)
-import Interface.Class ( MIOError, MCache )
+import Interface.Class (MCache, MIOError)
 import qualified Interface.MCache.Exports as Cache
 import qualified Interface.MError.Exports as Error
 import qualified Interface.MLog.Exports as Log
@@ -34,14 +34,14 @@ setLogSettings cs en fn = modify $ \s -> s {logSettings = Log.Settings cs en fn}
 getLogConfig :: MonadState State m => m Log.Config
 getLogConfig = gets configLog
 
-_getCache :: MonadState State m => m Cache.Cache
-_getCache = gets cache
+getCache :: MonadState State m => m Cache.Cache
+getCache = gets cache
 
-_setCache :: MonadState State m => Cache.Cache -> m ()
-_setCache c = modify $ \s -> s {cache = c}
+setCache :: MonadState State m => Cache.Cache -> m ()
+setCache c = modify $ \s -> s {cache = c}
 
-_writeCache :: (MCache m, MIOError m, MonadState State m, MonadIO m) => m ()
-_writeCache = do
+writeCache :: (MCache m, MIOError m, MonadState State m, MonadIO m) => m ()
+writeCache = do
   ch <- Cache.getCacheChanged
   when ch $ do
     s <- get

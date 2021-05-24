@@ -4,7 +4,7 @@ module Interface.MError.Types where
 
 import qualified Control.Exception as E
 
-data E
+data Error
   = ParseError String
   | QueryError String
   | ConfigError String
@@ -15,9 +15,7 @@ data E
   | SomeError String
   | Exit
 
-type EE = Either E
-
-instance Show E where
+instance Show Error where
   show (ParseError s) = "Parse JSON error: " ++ s
   show (QueryError s) = "Query error: " ++ s
   show (ConfigError s) = "Config error: " ++ s
@@ -26,7 +24,7 @@ instance Show E where
   show (SomeError s) = "Some error: " ++ s
   show Exit = "Exit from application by user choice"
 
-instance E.Exception E
+instance E.Exception Error
 
-instance MonadFail (Either E) where
+instance MonadFail (Either Error) where
   fail s = Left $ DevError s

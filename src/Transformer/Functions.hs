@@ -14,7 +14,7 @@ import Control.Monad (forM_)
 run :: Show a => Transformer a -> IO ()
 run m = do
   let settings = Log.Settings Color.Cyan True "runT"
-  ec <- runExceptT (Config.readConfig :: ExceptT Error.E IO Config.Config)
+  ec <- runExceptT (Config.readConfig :: ExceptT Error.Error IO Config.Config)
   case ec of
     Left e -> do
       let dlc = Log.defaultConfig

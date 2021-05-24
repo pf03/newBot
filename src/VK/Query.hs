@@ -12,27 +12,27 @@ import qualified Interface.MCache.Exports as Cache
 import qualified Interface.MError.Exports as Error
 import Network.HTTP.Simple (Query, QueryItem)
 import qualified VK.Encode as Encode (contentUrl, keyboard)
-import VK.Update ( Init(key, ts), GroupId, Attachment(..), Entity(Entity), Update )
+import qualified VK.Update as Update
 
 -----------------------------Types---------------------------------------------
 type Version = String
 
 -----------------------------External------------------------------------------
-getLongPollServer :: Cache.Token -> GroupId -> Version -> Query
+getLongPollServer :: Cache.Token -> Update.GroupId -> Version -> Query
 getLongPollServer token groupId version =
   "group_id" <:> groupId
     ++ "access_token" <:> token
     ++ "v" <:> version
 
-longPoll :: Init -> TimeOut -> Query
+longPoll :: Update.Init -> TimeOut -> Query
 longPoll ini timeout =
   "act" <:> ("a_check" :: String)
-    ++ "key" <:> key ini
-    ++ "ts" <:> ts ini
+    ++ "key" <:> Update.key ini
+    ++ "ts" <:> Update.ts ini
     ++ "wait" <:> timeout
 
-sendMessage :: MError m => Cache.Token -> Version -> Update -> [Label] -> m Query
-sendMessage token version (cid, Entity emc as) btns = do
+sendMessage :: MError m => Cache.Token -> Version -> Update.Update -> [Label] -> m Query
+sendMessage token version (cid, Update.Entity emc as) btns = do
   case emc of
     Right _ -> Error.throw $ Error.QueryError "Unable to send command to user"
     Left message -> do
@@ -49,7 +49,7 @@ _queryDefault token userId version = "peer_id" <:> userId ++ "access_token" <:> 
 _queryMessage :: Message -> Query
 _queryMessage message = "message" <:> message
 
-_queryAttachments :: [Attachment] -> Query
+_queryAttachments :: [Update.Attachment] -> Query
 _queryAttachments as = rights esqi ++ qStr
   where
     qStr = if null str then [] else "attachment" <:> str
@@ -59,13 +59,13 @@ _queryAttachments as = rights esqi ++ qStr
     helper value1 (Left value2) = template "{0},{1}" [value1, value2]
     helper value _ = value
 
-_queryAttachment :: Attachment -> Either String QueryItem
+_queryAttachment :: Update.Attachment -> Either String QueryItem
 _queryAttachment attachment =
   case attachment of
-    Sticker stikerId -> Right ("sticker_id", jc stikerId)
-    Link url -> Right ("content_source", jc $ Encode.contentUrl url)
-    Audio ownerId objectId -> Left $ template "audio{0}_{1}" [show ownerId, show objectId]
-    Wall ownerId objectId -> Left $ template "wall{0}_{1}" [show ownerId, show objectId]
-    Item itemName ownerId objectId accessKey ->
+    Update.Sticker stikerId -> Right ("sticker_id", jc stikerId)
+    Update.Link url -> Right ("content_source", jc $ Encode.contentUrl url)
+    Update.Audio ownerId objectId -> Left $ template "audio{0}_{1}" [show ownerId, show objectId]
+    Update.Wall ownerId objectId -> Left $ template "wall{0}_{1}" [show ownerId, show objectId]
+    Update.Item itemName ownerId objectId accessKey ->
       Left $
         template "{3}{0}_{1}_{2}" [show ownerId, show objectId, accessKey, itemName]

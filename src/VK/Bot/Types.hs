@@ -7,9 +7,9 @@
 module VK.Bot.Types (Pointer (..)) where
 
 import Common.Misc (Label, UpdateId)
-import Interface.Class (IBot, IUpdate, MT)
+import Interface.Class (IBot, IUpdate, MTrans)
 import qualified Interface.Messenger.IBot as IBot
-import VK.Bot.Internal (_getInit, _getUpdates, _sendMessage)
+import VK.Bot.Internal as Internal (getInit, getUpdates, sendMessage)
 import qualified VK.Update as Update
 
 -----------------------------Types---------------------------------------------
@@ -22,8 +22,8 @@ newtype WrapUpdate = WrapUpdate Update.Update deriving newtype (IUpdate)
 
 -----------------------------Instance------------------------------------------
 instance IBot Pointer WrapInit WrapUpdate where
-  getInit :: MT m => Pointer -> m WrapInit
-  getInit _ = WrapInit <$> _getInit
+  getInit :: MTrans m => Pointer -> m WrapInit
+  getInit _ = WrapInit <$> Internal.getInit
 
   getUpdateId :: WrapInit -> UpdateId
   getUpdateId (WrapInit ini) = Update.ts ini
@@ -31,10 +31,10 @@ instance IBot Pointer WrapInit WrapUpdate where
   setUpdateId :: WrapInit -> UpdateId -> WrapInit
   setUpdateId (WrapInit ini) newts = WrapInit $ ini {Update.ts = newts}
 
-  getUpdates :: MT m => WrapInit -> m ([WrapUpdate], WrapInit)
+  getUpdates :: MTrans m => WrapInit -> m ([WrapUpdate], WrapInit)
   getUpdates (WrapInit ini) = do
-    (us, newini) <- _getUpdates ini
+    (us, newini) <- Internal.getUpdates ini
     return (WrapUpdate <$> us, WrapInit newini)
 
-  sendMessage :: MT m => WrapUpdate -> [Label] -> Int -> m ()
-  sendMessage (WrapUpdate u) = _sendMessage u
+  sendMessage :: MTrans m => WrapUpdate -> [Label] -> Int -> m ()
+  sendMessage (WrapUpdate u) = Internal.sendMessage u

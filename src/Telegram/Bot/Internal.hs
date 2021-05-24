@@ -3,7 +3,7 @@ module Telegram.Bot.Internal  where
 import Common.Misc (Label, UpdateId, template)
 import Control.Applicative (Alternative ((<|>)))
 import Control.Monad (forM_)
-import Interface.Class ( MT )
+import Interface.Class ( MTrans )
 import qualified Interface.MCache.Exports as Cache
 import qualified Interface.MLog.Exports as Log
 import qualified Logic.Request as Request
@@ -15,24 +15,24 @@ import qualified Telegram.Update as Update
 
 
 -- Initialization - get last updateId for getUpdates request
-_getUpdateId :: MT m => m UpdateId
-_getUpdateId = do
-  Log.setSettings Color.Blue True "_getUpdateId"
+getUpdateId :: MTrans m => m UpdateId
+getUpdateId = do
+  Log.setSettings Color.Blue True "getUpdateId"
   uidFromFile <- Cache.getUpdateIdFromFile
   if uidFromFile
     then return 0 -- if we get updateId from a file, then initialization is not needed
     else do
       Log.send
-      (_, muid) <- _getUpdates Nothing
+      (_, muid) <- getUpdates Nothing
       Log.receive
-      maybe _getUpdateId (return . (-) 1) muid
+      maybe getUpdateId (return . (-) 1) muid
 
 -- Get updates from messenger server by the long polling method
--- _getUpdates Nothing - for initialization
--- _getUpdates (Just uid) - for get updates
-_getUpdates :: MT m => Maybe UpdateId -> m ([Update.Update], Maybe UpdateId)
-_getUpdates muid = do
-  Log.setSettings Color.Cyan True $ template "_getUpdates, muid = {0}" [show muid]
+-- getUpdates Nothing - for initialization
+-- getUpdates (Just uid) - for get updates
+getUpdates :: MTrans m => Maybe UpdateId -> m ([Update.Update], Maybe UpdateId)
+getUpdates muid = do
+  Log.setSettings Color.Cyan True $ template "getUpdates, muid = {0}" [show muid]
   Log.send
   response <- Request.api API.GetUpdates (Query.getUpdates (fmap (+ 1) muid) 25) True
   Log.receive
@@ -45,8 +45,8 @@ _getUpdates muid = do
   return (us, mnewuid <|> muid)
 
 -- Send response to a single user
-_sendMessage :: MT m => Update.Update -> [Label] -> Int -> m ()
-_sendMessage update btns rn = do
+sendMessage :: MTrans m => Update.Update -> [Label] -> Int -> m ()
+sendMessage update btns rn = do
   Log.setSettings Color.Yellow True "sendMessage"
   Log.send
   (api, query) <- Query.sendMessage update btns
@@ -58,7 +58,7 @@ _sendMessage update btns rn = do
     Log.receiveData "object" o
 
 -- Dumping messages that we cannot parse, for debugging purposes
-reset :: MT m => m ()
+reset :: MTrans m => m ()
 reset = do
   uid <- Cache.getUpdateId
   Log.setSettings Color.Cyan True $ template "reset, uid = {0}" [show uid]

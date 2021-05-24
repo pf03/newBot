@@ -5,23 +5,23 @@
 {-# LANGUAGE InstanceSigs #-}
 
 module Transformer.Types where
-import Transformer.Internal
+import Transformer.Internal as Internal
     ( State,
       getLogSettings,
       setLogSettings,
       getLogConfig,
-      _getCache,
-      _setCache,
-      _writeCache )
+      getCache,
+      setCache,
+      writeCache )
 import Control.Monad.State.Lazy ( MonadIO, MonadTrans(lift), StateT(..), MonadState )
 import Control.Monad.Trans.Except (ExceptT, catchE, throwE)
-import Interface.Class (MCache, MError, MIOCache, MIOError, MLog, MT)
+import Interface.Class (MCache, MError, MIOCache, MIOError, MLog, MTrans)
 import qualified Interface.MCache.Exports as Cache
 import qualified Interface.MError.Exports as Error
 import qualified Interface.MLog.Exports as Log
 
 -----------------------------Types---------------------------------------------
-newtype Transformer a = Transformer {getTransformer :: StateT State (ExceptT Error.E IO) a}
+newtype Transformer a = Transformer {getTransformer :: StateT State (ExceptT Error.Error IO) a}
   deriving newtype (Functor, Applicative, Monad, MonadFail, MonadIO, MonadState State)
 
 -----------------------------Instances-----------------------------------------
@@ -32,19 +32,19 @@ instance MLog Transformer where
   message c s l st = Transformer $ Log.messageIO c s l st
 
 instance MError Transformer where
-  throw :: Error.E -> Transformer a
+  throw :: Error.Error -> Transformer a
   throw e = Transformer . lift $ throwE e
-  catch :: Transformer a -> (Error.E -> Transformer a) -> Transformer a
+  catch :: Transformer a -> (Error.Error -> Transformer a) -> Transformer a
   catch ta f = Transformer . StateT $ \s -> catchE (runStateT (getTransformer ta) s) $ 
     \e -> runStateT (getTransformer $ f e) s
 
 instance MIOError Transformer
 
 instance MCache Transformer where
-  getCache = Transformer _getCache
-  setCache c = Transformer . _setCache $ c
+  getCache = Transformer Internal.getCache
+  setCache c = Transformer . Internal.setCache $ c
 
 instance MIOCache Transformer where
-  writeCache = _writeCache
+  writeCache = Internal.writeCache
 
-instance MT Transformer
+instance MTrans Transformer

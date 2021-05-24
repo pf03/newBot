@@ -8,4 +8,4 @@ import Interface.MError.Functions as Functions
     liftEIO,
     toEither,
   )
-import Interface.MError.Types as Types (E (..), EE)
+import Interface.MError.Types as Types (Error (..))

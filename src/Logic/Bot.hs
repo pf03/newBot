@@ -5,7 +5,7 @@ module Logic.Bot where
 
 import Common.Misc (template)
 import Control.Monad.State.Lazy (when)
-import Interface.Class (IBot, MT)
+import Interface.Class (IBot, MTrans)
 import qualified Interface.MCache.Exports as Cache
 import qualified Interface.MLog.Exports as Log
 import qualified Interface.Messenger.IBot as IBot
@@ -15,7 +15,7 @@ import qualified System.Console.ANSI as Color (Color (..))
 import Prelude hiding (init)
 
 -- | Run bot application
-application :: (MT m, IBot pointer init _update) => pointer -> m ()
+application :: (MTrans m, IBot pointer init _update) => pointer -> m ()
 application pointer = do
   Log.setSettings Color.Blue True "application"
   uidFromFile <- Cache.getUpdateIdFromFile
@@ -29,7 +29,7 @@ application pointer = do
       longPolling pointer init
 
 -- | Long polling loop
-longPolling :: (MT m, IBot pointer init update) => pointer -> init -> m ()
+longPolling :: (MTrans m, IBot pointer init update) => pointer -> init -> m ()
 longPolling pointer init = do
   Log.setSettings Color.Cyan True "longPolling"
   (updates, newInit) <- IBot.getUpdates init
@@ -44,7 +44,7 @@ longPolling pointer init = do
   longPolling pointer newInit
 
 -- | Response to all users
-calcSendMesages :: (MT m, IBot _pointer _init update) => [update] -> m ()
+calcSendMesages :: (MTrans m, IBot _pointer _init update) => [update] -> m ()
 calcSendMesages = mapM_ $ \update -> do
   (answer, btns) <-
     if IUpdate.hasAttachment update

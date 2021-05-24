@@ -4,7 +4,7 @@ import Common.Misc ( template, printT, Path, Label )
 import Control.Monad (forM_)
 import Data.List.Split (splitOn)
 import Data.Maybe (fromMaybe)
-import Interface.Class ( MT, MError )
+import Interface.Class ( MTrans, MError )
 import qualified Interface.MCache.Exports as Cache
 import qualified Interface.MError.Exports as Error
 import qualified Interface.MLog.Exports as Log
@@ -16,8 +16,8 @@ import qualified VK.Query as Query
 import qualified VK.Update as Update
 
 -- Initialization - get last updateId, server name, key for getUpdates request
-_getInit :: MT m => m Update.Init
-_getInit = do
+getInit :: MTrans m => m Update.Init
+getInit = do
   Log.setSettings Color.Blue True "getInit"
   Cache.ConfigApp _enable _name _app _host tk _updateId _ _repeatNumber gid v <- Cache.getConfigApp
   let api = API.API API.Groups API.GetLongPollServer
@@ -31,8 +31,8 @@ _getInit = do
   return ini
 
 -- Get updates from messenger server by the long polling method
-_getUpdates :: MT m => Update.Init -> m ([Update.Update], Update.Init)
-_getUpdates ini@(Update.Init server0 _ ts0) = do
+getUpdates :: MTrans m => Update.Init -> m ([Update.Update], Update.Init)
+getUpdates ini@(Update.Init server0 _ ts0) = do
   Log.setSettings Color.Cyan True "getUpdates"
   let query = Query.longPoll ini 25
   (host, path) <- parseServer server0
@@ -50,8 +50,8 @@ _getUpdates ini@(Update.Init server0 _ ts0) = do
   return (us, newIni)
 
 -- Send response to a single user
-_sendMessage :: MT m => Update.Update -> [Label] -> Int -> m ()
-_sendMessage update btns rn = do
+sendMessage :: MTrans m => Update.Update -> [Label] -> Int -> m ()
+sendMessage update btns rn = do
   Log.setSettings Color.Yellow True "sendMessage"
   Cache.ConfigApp _enable _name _app _host tk _updateId _ _repeatNumber _groupId v <- Cache.getConfigApp
   Log.send

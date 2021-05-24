@@ -8,7 +8,7 @@ import Data.Aeson (Object, (.:), (.:?))
 import Data.Aeson.Types (Parser)
 import qualified Logic.Logic as Logic
 import Logic.Parse.Internal (mwithArrayItem, mwithItem, withArrayItem, withArraymItem)
-import Telegram.Update (Entity (..), Update)
+import qualified Telegram.Update as Update
 
 type OResultItem = Object
 
@@ -17,17 +17,17 @@ type OMessageItem = Object
 parseUpdateIds :: Object -> Parser [UpdateId]
 parseUpdateIds = withArrayItem "result" (.: "update_id")
 
-parseChatLastMessage :: Object -> Parser Update
+parseChatLastMessage :: Object -> Parser Update.Update
 parseChatLastMessage o = do
   cm <- parseUpdates o
   case cm of
     [] -> fail "No message to reply"
     _ -> return $ last cm
 
-parseUpdates :: Object -> Parser [Update]
+parseUpdates :: Object -> Parser [Update.Update]
 parseUpdates = withArraymItem "result" parseUpdate
 
-parseUpdate :: OResultItem -> Parser (Maybe Update)
+parseUpdate :: OResultItem -> Parser (Maybe Update.Update)
 parseUpdate o = do
   mmessage <- o .:? "message" -- If there is no message field, then we ignore such an update (editing a message, a vote in a poll etc)
   case mmessage of
@@ -40,7 +40,7 @@ parseUpdate o = do
         Just forward -> return . Just $ (chatId, forward)
         Nothing -> parseMessage chatId message
 
-parseMessage :: ChatId -> Object -> Parser (Maybe Update)
+parseMessage :: ChatId -> Object -> Parser (Maybe Update.Update)
 parseMessage chatId message = do
   mtext <- message .:? "text"
   case mtext of
@@ -63,14 +63,14 @@ parseMessage chatId message = do
       -- command or test
       let emc = Logic.toMessageCommand text
       case emc of
-        Left m -> return . Just $ (chatId, Message m)
+        Left m -> return . Just $ (chatId, Update.Message m)
         Right command -> do
           typeEntities <- withArrayItem "entities" (.: "type") message
           if ("bot_command" :: String) `elem` typeEntities
-            then return . Just $ (chatId, Command command)
+            then return . Just $ (chatId, Update.Command command)
             else fail "Unknown entity type"
 
-parseForward :: OMessageItem -> Parser (Maybe Entity)
+parseForward :: OMessageItem -> Parser (Maybe Update.Entity)
 parseForward message = do
   mforwardFrom <- message .:? "forward_from"
   case mforwardFrom of
@@ -78,33 +78,33 @@ parseForward message = do
     Just forwardFrom -> do
       forwardFromId <- forwardFrom .: "id"
       messageId <- message .: "message_id"
-      return $ Just $ Forward forwardFromId messageId
+      return $ Just $ Update.Forward forwardFromId messageId
 
 -- allways Just
-parseOther :: OMessageItem -> Parser (Maybe Entity)
+parseOther :: OMessageItem -> Parser (Maybe Update.Entity)
 parseOther o = do
   messageId <- o .: "message_id"
-  return $ Just $ Other messageId
+  return $ Just $ Update.Other messageId
 
-parseSticker :: OMessageItem -> Parser (Maybe Entity)
+parseSticker :: OMessageItem -> Parser (Maybe Update.Entity)
 parseSticker = mwithItem "sticker" $ \o -> do
   fileId <- o .: "file_id"
-  return $ Sticker fileId
+  return $ Update.Sticker fileId
 
-parseAnimation :: OMessageItem -> Parser (Maybe Entity)
+parseAnimation :: OMessageItem -> Parser (Maybe Update.Entity)
 parseAnimation = mwithItem "animation" $ \o -> do
   fileId <- o .: "file_id"
-  return $ Animation fileId
+  return $ Update.Animation fileId
 
-parsePhoto :: OMessageItem -> Parser (Maybe Entity)
+parsePhoto :: OMessageItem -> Parser (Maybe Update.Entity)
 parsePhoto message = do
   mphotos <- mwithArrayItem "photo" (.: "file_id") message
   mcaption <- message .:? "caption"
   case mphotos of
     Nothing -> return Nothing
-    Just photos -> return $ Just $ Photo (last photos) mcaption
+    Just photos -> return $ Just $ Update.Photo (last photos) mcaption
 
-parseVideo :: OMessageItem -> Parser (Maybe Entity)
+parseVideo :: OMessageItem -> Parser (Maybe Update.Entity)
 parseVideo message = do
   mvideo <- message .:? "video"
   case mvideo of
@@ -112,9 +112,9 @@ parseVideo message = do
     Just video -> do
       mcaption <- message .:? "caption"
       fileId <- video .: "file_id"
-      return $ Just $ Video fileId mcaption
+      return $ Just $ Update.Video fileId mcaption
 
-parseDocument :: OMessageItem -> Parser (Maybe Entity)
+parseDocument :: OMessageItem -> Parser (Maybe Update.Entity)
 parseDocument message = do
   mfile <- message .:? "document"
   case mfile of
@@ -122,25 +122,25 @@ parseDocument message = do
     Just file -> do
       mcaption <- message .:? "caption"
       fileId <- file .: "file_id"
-      return $ Just $ Document fileId mcaption
+      return $ Just $ Update.Document fileId mcaption
 
-parsePoll :: OMessageItem -> Parser (Maybe Entity)
+parsePoll :: OMessageItem -> Parser (Maybe Update.Entity)
 parsePoll = mwithItem "poll" $ \o -> do
   intId <- o .: "id"
   qu <- o .: "question"
   ops <- withArrayItem "options" (.: "text") o
-  return $ Poll intId qu ops
+  return $ Update.Poll intId qu ops
 
-parseContact :: OMessageItem -> Parser (Maybe Entity)
+parseContact :: OMessageItem -> Parser (Maybe Update.Entity)
 parseContact = mwithItem "contact" $ \o -> do
   pn <- o .: "phone_number"
   fn <- o .: "first_name"
   ln <- o .:? "last_name"
   vc <- o .:? "vcard"
-  return $ Contact pn fn ln vc
+  return $ Update.Contact pn fn ln vc
 
-parseLocation :: OMessageItem -> Parser (Maybe Entity)
+parseLocation :: OMessageItem -> Parser (Maybe Update.Entity)
 parseLocation = mwithItem "location" $ \o -> do
   latitude <- o .: "latitude"
   longitude <- o .: "longitude"
-  return $ Location latitude longitude
+  return $ Update.Location latitude longitude

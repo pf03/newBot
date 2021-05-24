@@ -4,22 +4,22 @@ module Interface.MError.Class where
 
 import Control.Monad.Except (ExceptT, MonadIO (..))
 import Control.Monad.Trans.Except (catchE, throwE)
-import Interface.MError.Types ( E )
+import Interface.MError.Types ( Error )
 
 class MonadFail m => MError m where
-  throw :: E -> m a
-  catch :: m a -> (E -> m a) -> m a
+  throw :: Error -> m a
+  catch :: m a -> (Error -> m a) -> m a
 
 class (MError m, MonadIO m) => MIOError m
 
-instance MError (Either E) where
+instance MError (Either Error) where
   throw = Left
   catch ma f = case ma of
     Left e -> f e
     Right a -> Right a
 
-instance MError (ExceptT E IO) where
+instance MError (ExceptT Error IO) where
   throw = throwE
   catch = catchE
 
-instance MIOError (ExceptT E IO)
+instance MIOError (ExceptT Error IO)

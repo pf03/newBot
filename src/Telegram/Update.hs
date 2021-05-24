@@ -5,7 +5,8 @@
 module Telegram.Update where
 
 import Common.Misc (ChatId, Command, FileId, IntId, Message, StrId)
-import Interface.Messenger.IUpdate (IUpdate (..))
+import Interface.Class ( IUpdate ) 
+import qualified Interface.Messenger.IUpdate as IUpdate
 
 -----------------------------Types---------------------------------------------
 -- Update matches one element of the root json array

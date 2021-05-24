@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: aafcf42cc896755a214699e9d7d2bdf800238dc349e24643e8f9a7c58a156b69
+-- hash: 4ab82ad9fdb451df2210a56e0d798ece2bb87e9118526252978124345056159f
 
 name:           bot
 version:        0.1.0.0
@@ -47,7 +47,7 @@ library
       Interface.MLog.Exports
       Interface.MLog.Functions
       Interface.MLog.Types
-      Interface.MT
+      Interface.MTrans
       Logic.Bot
       Logic.Config.Exports
       Logic.Config.Functions
