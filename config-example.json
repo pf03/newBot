@@ -3,6 +3,7 @@
         {
             "name":"VK-bot",
             "app":"VK",
+            "enable": true,
             "host":"api.vk.com",
             "token":"a1a1a1aaaaaaaaaaaaaaaa1111111111111111111111111aaaaaaaaaaaaaaaa1111111111111111a1111a",
             "updateId": 0,
@@ -15,6 +16,7 @@
         {
             "name":"Telegram-bot",
             "app": "Telegram",
+            "enable":true,
             "host": "api.telegram.org",
             "token": "1111111111:AAAAAAAAAAAAAAAAA-AAAAAAAAAAAAAAAAA",
             "updateId": 58414589,
@@ -31,6 +33,7 @@
         "unknown": "Unknown command: {0}"
     },
     "name": "VK-bot",
+    "forks":true,
     "defaultRepeatNumber": 3,
     "log": {
         "colorEnable": true,

@@ -94,6 +94,10 @@ safeInit :: [a] -> [a]
 safeInit [] = []
 safeInit x = init x
 
+-- Check for unique values in list
+checkUnique :: Eq a => [a] -> Bool 
+checkUnique l = let newList = filter (== True) ( (==) <$> l <*> l) in length newList == length l
+
 ----------------------------------------Convert--------------------------------------------------
 class Convert a where
   convert :: a -> BC.ByteString

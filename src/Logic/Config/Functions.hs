@@ -1,7 +1,7 @@
 module Logic.Config.Functions where
 
 import Logic.Config.Types ( Config )
-import Logic.Config.Internal( checkMinLogLevel, checkRepeatNumber )
+import Logic.Config.Internal
 import Control.Exception (IOException)
 import qualified Data.ByteString.Lazy as L
 import Interface.Class ( MIOError )
@@ -15,6 +15,8 @@ readConfig = do
   c <- Parse.eDecode bs
   checkMinLogLevel c
   checkRepeatNumber c
+  checkUniqueNames c
+  checkExistAndSingleName c
   return c
   where
     handler :: IOException -> Error.E

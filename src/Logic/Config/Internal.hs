@@ -1,8 +1,8 @@
 module Logic.Config.Internal where
 
-import Logic.Config.Types ( Config(log, defaultRepeatNumber, apps) )
-import Common.Misc (template)
-import Control.Monad (forM_, when)
+import Logic.Config.Types( Config(log, defaultRepeatNumber, name, apps) )
+import Common.Misc ( template, checkUnique )
+import Control.Monad ( when, forM_, unless )
 import qualified Data.Map.Internal as M
 import Interface.Class ( MError )
 import qualified Interface.MCache.Exports as Cache
@@ -39,7 +39,6 @@ checkRepeatNumber c = do
       Error.ConfigError $
         template "Default repeat number shouldn't be more than {0}" [show maxRepeatNumber]
   let rns = concatMap M.toList (Cache.repeatNumber <$> apps c)
-  -- Error.throw $ ConfigError $ show rns
   forM_ rns $ \(cid, rn) -> do
     when (rn < 1) $
       Error.throw $
@@ -49,3 +48,17 @@ checkRepeatNumber c = do
       Error.throw $
         Error.ConfigError $
           template "Repeat number {0} for user {1} shouldn't be more than {2}" [show rn, show cid, show maxRepeatNumber]
+
+checkUniqueNames :: MError m => Config -> m ()
+checkUniqueNames c = do
+  unless (checkUnique $ map Cache.name $ apps c) $
+    Error.throw $
+      Error.ConfigError "Fields apps.name in config.json must be unique"
+
+checkExistAndSingleName :: MError m => Config -> m ()
+checkExistAndSingleName c = do
+  let n = name c
+  let ns = filter (== n) $ map Cache.name $ apps c
+  when (length ns /= 1) $
+    Error.throw $
+      Error.ConfigError "Field `name` in config.json must exist and be single in list `apps.name`"

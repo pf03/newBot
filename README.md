@@ -16,19 +16,20 @@ Be sure to edit the following fields:
 
 The fields `apps.repeatNumber` and `apps.updateId` can be left as they are, they will be filled in while the bot is running.
 
-5. For the correct launch of the bot for VK, you must select `Work with API -> Long Poll API -> Event types -> Incoming message` 
+4. For the correct launch of the bot for VK, you must select `Work with API -> Long Poll API -> Event types -> Incoming message` 
 in the community settings. The rest of the checkboxes shouldn't be checked.
 
 ![vk bot settings](https://raw.githubusercontent.com/pf03/newBot/main/vk_bot_settings.png)
 
-6. To test pure functions run `stack test`
-7. To exit the bot, type q+Enter
+5. To test pure functions run `stack test`
+6. To exit the bot, type q+Enter
 ***
 
 ## CONFIG
 
 Purpose of `config.json` fields:
-* `app` - choice of VK or Telegram messenger;
+* `name` - bot name, which must be in list of `apps.name` fields;
+* `forks` = true - run all bots, that specified in `apps` (`apps.enable` must be true) in parallel mode; `forks` = false - run only one bot, that specified in `name` field
 * `defaultRepeatNumber` - default repeat number in response to the user's message (from 1 to 5);
 * `log` - logging settings:
   * `colorEnable` - enable log colors in the terminal;
@@ -46,12 +47,14 @@ Purpose of `config.json` fields:
   * `button` - answer template to` Buttons / 1 ... / 5` command;
   * `unknown` - answer template to unknown command;
 * `apps` - a list of configs for different messengers, only the one specified in the` app` field is used:
+  * `app` - the name of the messenger (VK or Telegram);
+  * `name` - bot name, must be unique;
+  * `enable` - enable current bot in parallel mode;
   * `repeatNumber` - repeat number object, in which the key is the user id, the value is repeat number in response to the user's message (from 1 to 5);
   * `token` - a token for accessing the messenger API;
   * `updateId` - `updateId` value, that used if `updateIdFromFile` is` true`;
   * `updateIdFromFile` - enable reading updateId from` config.json` when starting the bot;
-  * `name` - the name of the messenger (VK or Telegram);
-  * `version` - API version (only for VK);
+  * `version` - API version (only for VK), bot tested only with `version=5.50`;
   * `groupId` - group id (only for VK);
   * `host` - API host.
 ***
