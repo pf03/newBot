@@ -1,6 +1,6 @@
 module VK.Parse.Internal where
 
-import Common.Misc (UpdateId, UserId)
+import Common.Types (UpdateId, UserId)
 import Data.Aeson (Object, (.:), (.:?))
 import Data.Aeson.Types (Parser)
 import Data.Maybe (fromMaybe)

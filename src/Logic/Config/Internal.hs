@@ -1,6 +1,6 @@
 module Logic.Config.Internal where
 
-import Common.Misc (checkUnique, template)
+import Common.Functions (checkUnique, template)
 import Control.Monad (forM_, unless, when)
 import qualified Data.Map.Internal as M
 import Interface.Class (MError)

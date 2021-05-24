@@ -3,7 +3,7 @@
 
 module Logic.Bot where
 
-import Common.Misc (template)
+import Common.Functions (template)
 import Control.Monad.State.Lazy (when)
 import Interface.Class (IBot, MTrans)
 import qualified Interface.MCache.Exports as Cache

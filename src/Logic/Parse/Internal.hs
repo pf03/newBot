@@ -2,7 +2,7 @@
 
 module Logic.Parse.Internal where
 
-import Common.Misc ( Key ) 
+import Common.Types ( Key ) 
 import Data.Aeson ( (.:), (.:?), FromJSON(parseJSON), Object, Value(Object) )
 import Data.Aeson.Types (Parser, parseEither)
 import Data.Maybe (fromJust, isJust)

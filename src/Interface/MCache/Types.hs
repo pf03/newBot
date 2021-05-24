@@ -2,7 +2,7 @@
 
 module Interface.MCache.Types where
 
-import Common.Misc (ChatId, UpdateId)
+import Common.Types (ChatId, UpdateId)
 import Data.Aeson (FromJSON, ToJSON)
 import qualified Data.Map.Internal as M
 import GHC.Generics (Generic)

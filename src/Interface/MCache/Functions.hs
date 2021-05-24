@@ -1,6 +1,6 @@
 module Interface.MCache.Functions where
 
-import Common.Misc (ChatId, UpdateId)
+import Common.Types (ChatId, UpdateId)
 import qualified Data.Map.Internal as M
 import Interface.MCache.Class (MCache (..))
 import Interface.MCache.Types

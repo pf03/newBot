@@ -1,6 +1,7 @@
 module Telegram.Bot.Internal  where
 
-import Common.Misc (Label, UpdateId, template)
+import Common.Types (Label, UpdateId)
+import Common.Functions (template)
 import Control.Applicative (Alternative ((<|>)))
 import Control.Monad (forM_)
 import Interface.Class ( MTrans )

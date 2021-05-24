@@ -1,6 +1,6 @@
 module Telegram.Encode where
 
-import Common.Misc (LBS)
+import Common.Types (LBS)
 import Data.Aeson (KeyValue ((.=)), Value (Array, String), encode, object)
 import Data.Text (pack)
 import GHC.Exts (IsList (fromList))

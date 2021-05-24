@@ -1,7 +1,7 @@
 module VK.Encode
 where
 
-import Common.Misc ( IntId, LBS )
+import Common.Types ( IntId, LBS )
 import Data.Aeson ( encode, object, Value(Array), KeyValue((.=)) )
 import GHC.Exts (IsList (fromList))
 import VK.Update ( GroupId, OwnerId ) 

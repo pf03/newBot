@@ -2,7 +2,7 @@
 
 module Telegram.Parse.Functions where
 
-import Common.Misc ( UpdateId )
+import Common.Types ( UpdateId )
 import Data.Aeson ( Object )
 import Interface.Class (MError)
 import Logic.Parse.Internal (parseE)

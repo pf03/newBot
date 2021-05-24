@@ -4,7 +4,7 @@
 
 module Transformer.Internal where
 
-import Common.Misc (for)
+import Common.Functions (for)
 import Control.Monad.State.Lazy (MonadIO, MonadState (get), gets, modify, when)
 import qualified Data.Aeson.Encode.Pretty as Aeson
 import qualified Data.ByteString.Lazy as L

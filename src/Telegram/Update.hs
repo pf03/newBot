@@ -4,7 +4,7 @@
 
 module Telegram.Update where
 
-import Common.Misc (ChatId, Command, FileId, IntId, Message, StrId)
+import Common.Types (ChatId, Command, FileId, IntId, Message, StrId)
 import Interface.Class ( IUpdate ) 
 import qualified Interface.Messenger.IUpdate as IUpdate
 

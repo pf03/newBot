@@ -3,7 +3,7 @@
 
 module Interface.Messenger.IBot where
 
-import Common.Misc (Label, UpdateId)
+import Common.Types (Label, UpdateId)
 import Interface.MTrans (MTrans)
 import Interface.Messenger.IUpdate (IUpdate)
 

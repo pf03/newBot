@@ -1,6 +1,7 @@
 module Telegram.Query (getUpdates, sendMessage) where
 
-import Common.Misc (Label, TimeOut, UpdateId, (<:>), (<:?>))
+import Common.Types (Label, TimeOut, UpdateId)
+import Common.Convert ((<:>), (<:?>))
 import Interface.Class (MError)
 import qualified Interface.MError.Exports as Error
 import Network.HTTP.Simple (Query)
@@ -13,7 +14,7 @@ getUpdates moffset timeout = "timeout" <:> timeout ++ "offset" <:?> moffset
 
 sendMessage :: MError m => Update.Update -> [Label] -> m (API.API, Query)
 sendMessage (cid, en) btns = do
-  api <- _getAPI en
+  api <- getAPI en
   qu <- case en of
     Update.Message m ->
       return $
@@ -38,16 +39,17 @@ sendMessage (cid, en) btns = do
     Update.Other mid -> return $ "from_chat_id" <:> cid ++ "message_id" <:> mid
   return (api, "chat_id" <:> cid ++ qu)
 
-_getAPI :: MError m => Update.Entity -> m API.API
-_getAPI Update.Message {} = return API.SendMessage
-_getAPI Update.Command {} = Error.throw $ Error.QueryError "Unable to send command to user"
-_getAPI Update.Sticker {} = return API.SendSticker
-_getAPI Update.Animation {} = return API.SendAnimation
-_getAPI Update.Photo {} = return API.SendPhoto
-_getAPI Update.Video {} = return API.SendVideo
-_getAPI Update.Document {} = return API.SendDocument
-_getAPI Update.Poll {} = return API.SendPoll
-_getAPI Update.Contact {} = return API.SendContact
-_getAPI Update.Location {} = return API.SendLocation
-_getAPI Update.Forward {} = return API.ForwardMessage
-_getAPI Update.Other {} = return API.CopyMessage
+  where
+  getAPI :: MError m => Update.Entity -> m API.API
+  getAPI Update.Message {} = return API.SendMessage
+  getAPI Update.Command {} = Error.throw $ Error.QueryError "Unable to send command to user"
+  getAPI Update.Sticker {} = return API.SendSticker
+  getAPI Update.Animation {} = return API.SendAnimation
+  getAPI Update.Photo {} = return API.SendPhoto
+  getAPI Update.Video {} = return API.SendVideo
+  getAPI Update.Document {} = return API.SendDocument
+  getAPI Update.Poll {} = return API.SendPoll
+  getAPI Update.Contact {} = return API.SendContact
+  getAPI Update.Location {} = return API.SendLocation
+  getAPI Update.Forward {} = return API.ForwardMessage
+  getAPI Update.Other {} = return API.CopyMessage

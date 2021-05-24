@@ -5,7 +5,9 @@ module VK.Query
   )
 where
 
-import Common.Misc( TimeOut, UserId, Label, Message, template, safeTail, jc, (<:>) ) 
+import Common.Types( TimeOut, UserId, Label, Message) 
+import Common.Functions(template, safeTail) 
+import Common.Convert((<:>), jc) 
 import Data.Either (rights)
 import Interface.Class (MError)
 import qualified Interface.MCache.Exports as Cache
@@ -13,12 +15,10 @@ import qualified Interface.MError.Exports as Error
 import Network.HTTP.Simple (Query, QueryItem)
 import qualified VK.Encode as Encode (contentUrl, keyboard)
 import qualified VK.Update as Update
-
------------------------------Types---------------------------------------------
-type Version = String
+import qualified VK.API as API
 
 -----------------------------External------------------------------------------
-getLongPollServer :: Cache.Token -> Update.GroupId -> Version -> Query
+getLongPollServer :: Cache.Token -> Update.GroupId -> API.Version -> Query
 getLongPollServer token groupId version =
   "group_id" <:> groupId
     ++ "access_token" <:> token
@@ -31,7 +31,7 @@ longPoll ini timeout =
     ++ "ts" <:> Update.ts ini
     ++ "wait" <:> timeout
 
-sendMessage :: MError m => Cache.Token -> Version -> Update.Update -> [Label] -> m Query
+sendMessage :: MError m => Cache.Token -> API.Version -> Update.Update -> [Label] -> m Query
 sendMessage token version (cid, Update.Entity emc as) btns = do
   case emc of
     Right _ -> Error.throw $ Error.QueryError "Unable to send command to user"
@@ -43,7 +43,7 @@ sendMessage token version (cid, Update.Entity emc as) btns = do
       return $ qDefault ++ qMessage ++ qButtons ++ qAttachments
 
 -----------------------------Internal------------------------------------------
-_queryDefault :: Cache.Token -> UserId -> Version -> Query
+_queryDefault :: Cache.Token -> UserId -> API.Version -> Query
 _queryDefault token userId version = "peer_id" <:> userId ++ "access_token" <:> token ++ "v" <:> version
 
 _queryMessage :: Message -> Query

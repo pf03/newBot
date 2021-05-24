@@ -1,6 +1,6 @@
 module Interface.Messenger.IUpdate where
 
-import Common.Misc (ChatId, Command, Message)
+import Common.Types (ChatId, Command, Message)
 
 class IUpdate update where
   setMessage :: update -> Message -> update

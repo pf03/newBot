@@ -3,7 +3,7 @@
 
 module Logic.Request (build, send, api) where
 
-import Common.Misc (LBS, Path)
+import Common.Types (LBS, Path)
 import Control.Concurrent (threadDelay)
 import Control.Monad.State.Lazy (when)
 import qualified Data.ByteString.Char8 as BC

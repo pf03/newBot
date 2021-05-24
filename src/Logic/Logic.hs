@@ -1,6 +1,7 @@
 module Logic.Logic where
 
-import Common.Misc (ChatId, Command (..), Label, Message, safeInit, template)
+import Common.Types (ChatId, Command (..), Label, Message)
+import Common.Functions (safeInit, template)
 import Interface.Class (IUpdate, MCache)
 import qualified Interface.MCache.Exports as Cache
 import qualified Interface.Messenger.IUpdate as Update

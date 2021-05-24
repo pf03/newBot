@@ -1,6 +1,6 @@
 module Interface.Messenger.IAPI where
 
-import Common.Misc (Path)
+import Common.Types (Path)
 import Interface.MCache.Types (Token)
 
 class IAPI api where

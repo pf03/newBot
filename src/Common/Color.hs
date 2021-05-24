@@ -1,6 +1,6 @@
 module Common.Color where
 
-import Common.Misc (ifJust, template)
+import Common.Functions (ifJust, template)
 import Control.Monad.IO.Class (MonadIO (..))
 import Data.Maybe (fromJust)
 import System.Console.ANSI

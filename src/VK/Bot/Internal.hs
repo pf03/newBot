@@ -1,6 +1,7 @@
 module VK.Bot.Internal where
 
-import Common.Misc ( template, printT, Path, Label )
+import Common.Types ( Path, Label )
+import Common.Functions ( template)
 import Control.Monad (forM_)
 import Data.List.Split (splitOn)
 import Data.Maybe (fromMaybe)
@@ -55,7 +56,6 @@ sendMessage update btns rn = do
   Log.setSettings Color.Yellow True "sendMessage"
   Cache.ConfigApp _enable _name _app _host tk _updateId _ _repeatNumber _groupId v <- Cache.getConfigApp
   Log.send
-  printT btns
   query <- Query.sendMessage tk v update btns
   Log.debugM update
   forM_ [1 .. rn] $ \_ -> do

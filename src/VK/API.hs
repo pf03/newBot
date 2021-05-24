@@ -14,6 +14,8 @@ data APIGroup = Groups | Messages deriving (Show)
 
 data APIName = GetLongPollServer | Send deriving (Show)
 
+type Version = String
+
 -----------------------------Instance------------------------------------------
 instance IAPI API where
   apiName (API apiGroup an) = (toLower g : gs) ++ "." ++ (toLower n : ns)

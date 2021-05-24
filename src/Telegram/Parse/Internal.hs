@@ -2,7 +2,7 @@
 
 module Telegram.Parse.Internal where
 
-import Common.Misc (ChatId, UpdateId)
+import Common.Types (ChatId, UpdateId)
 import Control.Applicative (Alternative ((<|>)))
 import Data.Aeson (Object, (.:), (.:?))
 import Data.Aeson.Types (Parser)

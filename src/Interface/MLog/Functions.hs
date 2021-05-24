@@ -1,7 +1,8 @@
 module Interface.MLog.Functions where
 
 import qualified Common.Color as Color
-import Common.Misc (Convert (convert), putStrLnT, template)
+import Common.Convert (Convert (convert))
+import Common.Functions (putStrLnT, template)
 import Control.Monad (when)
 import Control.Monad.IO.Class (MonadIO (..))
 import Data.Aeson (encode)
