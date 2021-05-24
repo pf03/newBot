@@ -13,7 +13,7 @@ import qualified Logic.Request as Request
 import qualified System.Console.ANSI as Color (Color (..))
 import qualified VK.API as API
 import qualified VK.Parse.Exports as Parse
-import qualified VK.Query as Query
+import qualified VK.Query.Functions as Query
 import qualified VK.Update as Update
 
 -- Initialization - get last updateId, server name, key for getUpdates request

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: abcea7bea0c192d5b7ab5cce88d93dcfef3f568b2a479170cccd22e439b8e81a
+-- hash: c057613cd05b725e4f0b91ce14837f302e96b6309ce411e430a461666369fa4c
 
 name:           bot
 version:        0.1.0.0
@@ -79,7 +79,8 @@ library
       VK.Parse.Exports
       VK.Parse.Functions
       VK.Parse.Internal
-      VK.Query
+      VK.Query.Functions
+      VK.Query.Internal
       VK.Update
   other-modules:
       Paths_bot

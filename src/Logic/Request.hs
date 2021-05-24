@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Logic.Request (build, send, api) where
+module Logic.Request where
 
 import Common.Types (LBS, Path)
 import Control.Concurrent (threadDelay)
@@ -15,21 +15,9 @@ import qualified Interface.MLog.Exports as Log
 import qualified Interface.Messenger.IAPI as API
 import qualified Network.HTTP.Simple as HTTP
 
-build :: Cache.Host -> Path -> HTTP.Query -> HTTP.Request
-build h path query =
-  HTTP.setRequestSecure True $
-    HTTP.setRequestMethod "POST" $
-      HTTP.setRequestPort 443 $
-        HTTP.setRequestHost (BC.pack h) $
-          HTTP.setRequestPath (BC.pack path) $
-            HTTP.setRequestBodyURLEncoded
-              (map (\(a, Just b) -> (a, b)) query)
-              HTTP.defaultRequest
-
 -- | Low level wrapper for request
 send :: (MLog m, MIOError m) => HTTP.Request -> Bool -> m LBS
 send request save = do
-  -- Log.debugM request
   response <- resp
   let status = HTTP.getResponseStatusCode response
   if status == 200
@@ -67,3 +55,14 @@ api a query save = do
   let path = API.getPath token a
   let request = build host path query
   send request save
+
+build :: Cache.Host -> Path -> HTTP.Query -> HTTP.Request
+build h path query =
+  HTTP.setRequestSecure True $
+    HTTP.setRequestMethod "POST" $
+      HTTP.setRequestPort 443 $
+        HTTP.setRequestHost (BC.pack h) $
+          HTTP.setRequestPath (BC.pack path) $
+            HTTP.setRequestBodyURLEncoded
+              (map (\(a, Just b) -> (a, b)) query)
+              HTTP.defaultRequest
