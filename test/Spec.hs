@@ -1,8 +1,7 @@
-import Common.Misc (ChatId, Command (..), Message)
-import Control.Exception (evaluate)
+import Common.Types (ChatId, Command (..), Message)
 import Control.Monad.State.Lazy (State)
 import qualified Data.Map.Internal as M
-import Interface.MCache as Cache (Cache (..), ConfigApp (..), ConfigText (..))
+import qualified Interface.MCache.Exports as Cache
 import Lib
   ( allShouldBe,
     eachEvalStateShouldBe,
@@ -35,6 +34,7 @@ testToMessageCommand = do
     it "returns unknown command" $ do
       unknownCases `eachShouldBe` unknownResults
 
+messages :: [Message]
 messages =
   [ "",
     " ",
@@ -172,64 +172,61 @@ testTextAnswer = do
       textAnswerCases `eachEvalStateShouldBe` (textAnswerResults `withInitialState` someCache)
 
 --query - answer to bot
-textAnswerTuples :: [(Either Message Command, Message)]
+textAnswerTuples :: [(Either Message Command, [Message])]
 textAnswerTuples =
-  [ Left "hello bot" `to` "hello bot",
-    Right Repeat `to` "someRepeatText",
-    Right (Button 3) `to` "someButtonText",
-    Left "How do you do?" `to` "How do you do? How do you do? How do you do?",
-    Right Help `to` "someHelpText",
-    Right Start `to` "someHelpText",
-    Right Repeat `to` "someRepeatText",
-    Right (Button 5) `to` "someButtonText",
-    Left "5" `to` "5 5 5 5 5",
-    Right (Unknown "someCommand") `to` "someUnknownText",
-    Left "good bye" `to` "good bye good bye good bye good bye good bye"
+  [ Left "hello bot" `to` replicate 2 "hello bot",
+    Right Repeat `to` ["someRepeatText"],
+    Right (Button 3) `to` ["someButtonText"],
+    Left "How do you do?" `to` replicate 3 "How do you do?",
+    Right Help `to` ["someHelpText"],
+    Right Start `to` ["someHelpText"],
+    Right Repeat `to` ["someRepeatText"],
+    Right (Button 5) `to` ["someButtonText"],
+    Left "5" `to` replicate 5 "5",
+    Right (Unknown "someCommand") `to` ["someUnknownText"],
+    Left "good bye" `to` replicate 5 "good bye"
   ]
 
-textAnswerCases :: [State Cache Message]
+textAnswerCases :: [State Cache.Cache [Message]]
 textAnswerCases = map (Logic.textAnswer someChatId . fst) textAnswerTuples
 
-textAnswerResults :: [Message]
+textAnswerResults :: [[Message]]
 textAnswerResults = map snd textAnswerTuples
 
 to :: a -> b -> (a, b)
 to = (,)
 
-textAnswerCase :: State Cache Message
-textAnswerCase = Logic.textAnswer someChatId $ Left "hello bot"
-
-textAnswerResult :: Message
-textAnswerResult = "hello bot"
-
-someConfigText :: ConfigText
+someConfigText :: Cache.ConfigText
 someConfigText =
-  ConfigText
-    { help = "someHelpText",
-      repeat = "someRepeatText",
-      unknown = "someUnknownText",
-      button = "someButtonText"
+  Cache.ConfigText
+    { Cache.help = "someHelpText",
+      Cache.repeat = "someRepeatText",
+      Cache.unknown = "someUnknownText",
+      Cache.button = "someButtonText"
     }
 
-someConfigApp :: ConfigApp
+someConfigApp :: Cache.ConfigApp
 someConfigApp =
-  ConfigApp
-    { name = "someAppName",
-      host = "someAppHost",
-      token = "someAppToken",
-      updateId = 666666,
-      updateIdFromFile = False,
-      repeatNumber = M.empty,
-      groupId = 999999,
-      version = "someAppVersion"
+  Cache.ConfigApp
+    { Cache.enable = True,
+      Cache.name = "someName",
+      Cache.app = Cache.VK,
+      Cache.host = "someAppHost",
+      Cache.token = "someAppToken",
+      Cache.updateId = 666666,
+      Cache.updateIdFromFile = False,
+      Cache.repeatNumber = M.empty,
+      Cache.groupId = 999999,
+      Cache.version = "someAppVersion"
     }
 
-someCache :: Cache
+someCache :: Cache.Cache
 someCache =
-  Cache
-    { configApp = someConfigApp,
-      configText = someConfigText,
-      changed = False
+  Cache.Cache
+    { Cache.configApp = someConfigApp,
+      Cache.configText = someConfigText,
+      Cache.defaultRepeatNumber = 2,
+      Cache.changed = False
     }
 
 someChatId :: ChatId
