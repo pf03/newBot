@@ -8,8 +8,8 @@ import qualified Logic.Config.Exports as Config
 import qualified System.Console.ANSI as Color
 import Transformer.Internal as Internal( configToState, configToStates ) 
 import Transformer.Types ( Transformer(getTransformer) )
-import Control.Concurrent ( threadDelay, forkIO )
-import Control.Monad (forM_)
+import Control.Concurrent ( threadDelay )
+import Control.Concurrent.Async ( forConcurrently_ )
 
 run :: Show a => Transformer a -> IO ()
 run m = do
@@ -21,9 +21,9 @@ run m = do
       Log.critical dlc settings "Error config read while run the transfomer:"
       Log.critical dlc settings $ show e
     Right c -> if Config.forks c 
-      then forM_ (zip [1,2..] (configToStates c)) $ \(i, s) -> do
+      then forConcurrently_ (zip [1,2..] (configToStates c)) $ \(i, s) -> do
         threadDelay (i*1000000)
-        forkIO (action s)
+        action s
       else action (configToState c)      
       where
       action s0 = do
