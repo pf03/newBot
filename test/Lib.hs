@@ -28,7 +28,7 @@ eachEvalStateShouldBe (s : ss) (r : rs, initialState) = do
   let (a, modifiedState) = runState s initialState
   a `shouldBe` r
   eachEvalStateShouldBe ss (rs, modifiedState)
-eachEvalStateShouldBe _ _ = error "lists of tests and answers must have equal lengths"
+eachEvalStateShouldBe _ _ = fail "lists of tests and answers must have equal lengths"
 
 --EVAL STATE of case SHOULD BE equal to result WITH INITIAL STATE
 evalStateShouldBe :: (HasCallStack, Show a, Eq a) => State s a -> (a, s) -> Expectation

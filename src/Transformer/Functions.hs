@@ -6,33 +6,33 @@ import qualified Interface.MError.Exports as Error
 import qualified Interface.MLog.Exports as Log
 import qualified Logic.Config.Exports as Config
 import qualified System.Console.ANSI as Color
-import Transformer.Internal as Internal( configToState, configToStates ) 
+import qualified Transformer.Internal as Internal
 import Transformer.Types ( Transformer(getTransformer) )
 import Control.Concurrent ( threadDelay )
 import Control.Concurrent.Async ( forConcurrently_ )
 
 run :: Show a => Transformer a -> IO ()
 run m = do
-  let settings = Log.Settings Color.Cyan True "runT"
-  ec <- runExceptT (Config.readConfig :: ExceptT Error.Error IO Config.Config)
-  case ec of
+  let logSettings = Log.Settings Color.Cyan True "runT"
+  econfig <- runExceptT (Config.readConfig :: ExceptT Error.Error IO Config.Config)
+  case econfig of
     Left e -> do
-      let dlc = Log.defaultConfig
-      Log.critical dlc settings "Error config read while run the transfomer:"
-      Log.critical dlc settings $ show e
-    Right c -> if Config.forks c 
-      then forConcurrently_ (zip [1,2..] (configToStates c)) $ \(i, s) -> do
+      let defaultLogConfig = Log.defaultConfig
+      Log.critical defaultLogConfig logSettings "Error config read while run the transfomer:"
+      Log.critical defaultLogConfig logSettings $ show e
+    Right config -> if Config.forks config 
+      then forConcurrently_ (zip [1,2..] (Internal.configToStates config)) $ \(i, state) -> do
         threadDelay (i*1000000)
-        action s
-      else action (configToState c)      
+        action state
+      else action (Internal.configToState config)      
       where
-      action s0 = do
-        let cl = Config.log c
-        ea <- runExceptT $ runStateT (getTransformer m) s0
-        case ea of
+      action state' = do
+        let logConfig = Config.log config
+        etuple <- runExceptT $ runStateT (getTransformer m) state'
+        case etuple of
           Left e -> do
-            Log.error cl settings "Application error: "
-            Log.error cl settings $ show e
-          Right a -> do
-            Log.info cl settings "Result: "
-            Log.info cl settings $ show . fst $ a
+            Log.error logConfig logSettings "Application error: "
+            Log.error logConfig logSettings $ show e
+          Right (a, _) -> do
+            Log.info logConfig logSettings "Result: "
+            Log.info logConfig logSettings $ show a

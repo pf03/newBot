@@ -5,14 +5,7 @@
 {-# LANGUAGE InstanceSigs #-}
 
 module Transformer.Types where
-import Transformer.Internal as Internal
-    ( State,
-      getLogSettings,
-      setLogSettings,
-      getLogConfig,
-      getCache,
-      setCache,
-      writeCache )
+import qualified Transformer.Internal as Internal
 import Control.Monad.State.Lazy ( MonadIO, MonadTrans(lift), StateT(..), MonadState )
 import Control.Monad.Trans.Except (ExceptT, catchE, throwE)
 import Interface.Class (MCache, MError, MIOCache, MIOError, MLog, MTrans)
@@ -21,14 +14,14 @@ import qualified Interface.MError.Exports as Error
 import qualified Interface.MLog.Exports as Log
 
 -----------------------------Types---------------------------------------------
-newtype Transformer a = Transformer {getTransformer :: StateT State (ExceptT Error.Error IO) a}
-  deriving newtype (Functor, Applicative, Monad, MonadFail, MonadIO, MonadState State)
+newtype Transformer a = Transformer {getTransformer :: StateT Internal.State (ExceptT Error.Error IO) a}
+  deriving newtype (Functor, Applicative, Monad, MonadFail, MonadIO, MonadState Internal.State)
 
 -----------------------------Instances-----------------------------------------
 instance MLog Transformer where
-  getSettings = Transformer getLogSettings
-  setSettings cs e fn = Transformer $ setLogSettings cs e fn
-  getConfig = Transformer getLogConfig
+  getSettings = Transformer Internal.getLogSettings
+  setSettings cs e fn = Transformer $ Internal.setLogSettings cs e fn
+  getConfig = Transformer Internal.getLogConfig
   message c s l st = Transformer $ Log.messageIO c s l st
 
 instance MError Transformer where

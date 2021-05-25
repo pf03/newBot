@@ -9,7 +9,7 @@ module VK.Bot.Types (Pointer (..)) where
 import Common.Types (Label, UpdateId)
 import Interface.Class (IBot, IUpdate, MTrans)
 import qualified Interface.Messenger.IBot as IBot
-import VK.Bot.Internal as Internal (getInit, getUpdates, sendMessage)
+import qualified VK.Bot.Internal as Internal
 import qualified VK.Update as Update
 
 -----------------------------Types---------------------------------------------

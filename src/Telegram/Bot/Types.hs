@@ -9,7 +9,7 @@ module Telegram.Bot.Types (Pointer (..)) where
 import Common.Types ( Label, UpdateId )
 import Interface.Class (IBot, IUpdate, MTrans)
 import qualified Interface.Messenger.IBot as IBot
-import Telegram.Bot.Internal as Internal (getUpdateId, getUpdates, sendMessage) 
+import qualified Telegram.Bot.Internal as Internal
 import qualified Telegram.Update as Update
 
 -----------------------------Types---------------------------------------------
