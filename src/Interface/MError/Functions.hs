@@ -4,6 +4,7 @@ import qualified Control.Exception as E
 import Control.Monad.Except ( MonadIO(liftIO) ) 
 import Interface.MError.Class ( MError(..), MIOError ) 
 import Interface.MError.Types ( Error(SomeError, Exit, IOError) )
+import Control.Concurrent.Async ( AsyncCancelled )
 
 -----------------------------MError--------------------------------------------
 liftE :: MError m => Either Error a -> m a
@@ -33,9 +34,11 @@ catchEIO m h = do
 
 liftEIO :: MIOError m => IO a -> m a
 liftEIO m = do
-  ea <- liftIO $ (Right <$> m) `E.catch` ehandler `E.catch` iohandler `E.catch` otherhandler
+  ea <- liftIO $ (Right <$> m) `E.catch` asynchandler `E.catch` ehandler `E.catch` iohandler `E.catch` otherhandler
   liftE ea
   where
+    asynchandler :: AsyncCancelled -> IO (Either Error a)
+    asynchandler _ = return $ Left Exit
     ehandler :: E.AsyncException -> IO (Either Error a)
     ehandler _ = return $ Left Exit
     iohandler :: E.IOException -> IO (Either Error a)
