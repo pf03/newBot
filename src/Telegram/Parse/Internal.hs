@@ -60,15 +60,10 @@ parseMessage chatId message = do
         Nothing -> fail "Unknown entity type"
         Just entity -> return . Just $ (chatId, entity)
     Just text -> do
-      -- command or test
       let emc = Logic.toMessageCommand text
-      case emc of
+      case emc of 
         Left m -> return . Just $ (chatId, Update.Message m)
-        Right command -> do
-          typeEntities <- withArrayItem "entities" (.: "type") message
-          if ("bot_command" :: String) `elem` typeEntities
-            then return . Just $ (chatId, Update.Command command)
-            else fail "Unknown entity type"
+        Right c -> return . Just $ (chatId, Update.Command c)
 
 parseForward :: OMessageItem -> Parser (Maybe Update.Entity)
 parseForward message = do
