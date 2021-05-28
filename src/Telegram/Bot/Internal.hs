@@ -21,18 +21,18 @@ getUpdateId = do
   Cache.getmUpdateId
 
 getUpdates :: MTrans m => Maybe UpdateId -> m ([Update.Update], Maybe UpdateId)
-getUpdates muid = do
-  Log.setSettings Color.Cyan True $ template "getUpdates, muid = {0}" [show muid]
+getUpdates mUpdateId = do
+  Log.setSettings Color.Cyan True $ template "getUpdates, muid = {0}" [show mUpdateId]
   Log.send
-  response <- Request.api API.GetUpdates (Query.getUpdates (fmap (+ 1) muid) 25) True
+  response <- Request.api API.GetUpdates (Query.getUpdates (fmap (+ 1) mUpdateId) 25) True
   Log.receive
-  o <- Parse.getObject response
-  Log.receiveData "object -- convert" o
-  mnewuid <- Parse.updateId o
-  Log.receiveData "mnewuid" mnewuid
-  us <- Parse.updates o
-  Log.receiveData "update" us
-  return (us, mnewuid <|> muid)
+  object <- Parse.getObject response
+  Log.receiveData "object" object
+  newmUpdateId <- Parse.updateId object
+  Log.receiveData "newmUpdateId" newmUpdateId
+  updates <- Parse.updates object
+  Log.receiveData "update" updates
+  return (updates, newmUpdateId <|> mUpdateId)
 
 -- Send response to a single user
 sendMessage :: MTrans m => Update.Update -> [Label] -> m ()
@@ -43,17 +43,17 @@ sendMessage update btns = do
   Log.receiveData "(api, query)" (api, query)
   json <- Request.api api query False
   Log.receive
-  o <- Parse.getObject json
-  Log.receiveData "object" o
+  object <- Parse.getObject json
+  Log.receiveData "object" object
 
 -- Dumping messages that we cannot parse, for debugging purposes
 reset :: MTrans m => m ()
 reset = do
-  muid <- Cache.getmUpdateId
-  Log.setSettings Color.Cyan True $ template "reset, muid = {0}" [show muid]
+  mUpdateId <- Cache.getmUpdateId
+  Log.setSettings Color.Cyan True $ template "reset, mUpdateId = {0}" [show mUpdateId]
   Log.send
-  json <- Request.api API.GetUpdates (Query.getUpdates muid 0) True
+  json <- Request.api API.GetUpdates (Query.getUpdates mUpdateId 0) True
   Log.receive
-  o <- Parse.getObject json
-  mnewuid <- Parse.updateId o
-  Log.receiveData "mnewuid" mnewuid
+  object <- Parse.getObject json
+  newmUpdateId <- Parse.updateId object
+  Log.receiveData "mnewuid" newmUpdateId

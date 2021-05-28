@@ -26,11 +26,11 @@ instance IBot Pointer Init WrapUpdate where
   getInit _ = Init <$> Internal.getUpdateId
 
   getmUpdateId :: Init -> Maybe UpdateId
-  getmUpdateId (Init uid) = uid
+  getmUpdateId (Init mUpdateId) = mUpdateId
 
   getUpdates :: MTrans m => Init -> m ([WrapUpdate], Init)
-  getUpdates (Init muid) = do
-    (us, newmuid) <- Internal.getUpdates muid
-    return (WrapUpdate <$> us, Init newmuid)
+  getUpdates (Init mUpdateId) = do
+    (updates, newmUpdateId) <- Internal.getUpdates mUpdateId
+    return (WrapUpdate <$> updates, Init newmUpdateId)
   sendMessage :: MTrans m => WrapUpdate -> [Label] -> m ()
-  sendMessage (WrapUpdate u) ls = Internal.sendMessage u ls
+  sendMessage (WrapUpdate update) btns = Internal.sendMessage update btns

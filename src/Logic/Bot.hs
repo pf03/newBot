@@ -4,7 +4,6 @@
 module Logic.Bot where
 
 import Common.Functions (template)
-import Control.Monad.State.Lazy (when)
 import Interface.Class (IBot, MTrans)
 import qualified Interface.MCache.Exports as Cache
 import qualified Interface.MLog.Exports as Log
@@ -39,9 +38,9 @@ calcSendMesages = mapM_ $ \update -> do
 
 writeCache :: (MTrans m, IBot _pointer init _update) => init -> m ()
 writeCache init = do
-  muid <- Cache.getmUpdateId
-  let newmuid = IBot.getmUpdateId init
-  Cache.setmUpdateId newmuid
-  Log.infoM $ template "Update updateId in file from {0} to {1}" [show muid, show newmuid]
+  mUpdateId <- Cache.getmUpdateId
+  let newmUpdateId = IBot.getmUpdateId init
+  Cache.setmUpdateId newmUpdateId
+  Log.infoM $ template "Update updateId in file from {0} to {1}" [show mUpdateId, show newmUpdateId]
   Log.infoM "Update config in file..."
   Cache.writeCache

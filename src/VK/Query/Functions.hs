@@ -3,17 +3,19 @@ module VK.Query.Functions where
 import VK.Query.Internal ( queryDefault, queryAttachments ) 
 import Common.Types ( TimeOut, Label )
 import Common.Convert((<:>)) 
-import Interface.Class (MError)
+import Interface.Class (MError, MCache)
 import qualified Interface.MCache.Exports as Cache
 import qualified Interface.MError.Exports as Error
 import Network.HTTP.Simple (Query)
 import qualified VK.Encode as Encode (keyboard)
 import qualified VK.Update as Update
-import qualified VK.API as API
 
-getLongPollServer :: Cache.Token -> Update.GroupId -> API.Version -> Query
-getLongPollServer token groupId version =
-  "group_id" <:> groupId
+getLongPollServer :: MCache m => m Query
+getLongPollServer = do
+  groupId <- Cache.getGroupId
+  token <- Cache.getToken
+  version <- Cache.getAPIVersion
+  return $ "group_id" <:> groupId
     ++ "access_token" <:> token
     ++ "v" <:> version
 
@@ -24,8 +26,10 @@ longPoll ini timeout =
     ++ "ts" <:> Update.ts ini
     ++ "wait" <:> timeout
 
-sendMessage :: MError m => Cache.Token -> API.Version -> Update.Update -> [Label] -> m Query
-sendMessage token version (cid, Update.Entity emc as) btns = do
+sendMessage :: (MError m, MCache m) => Update.Update -> [Label] -> m Query
+sendMessage (cid, Update.Entity emc as) btns = do
+  token <- Cache.getToken
+  version <- Cache.getAPIVersion
   case emc of
     Right _ -> Error.throw $ Error.QueryError "Unable to send command to user"
     Left message -> do

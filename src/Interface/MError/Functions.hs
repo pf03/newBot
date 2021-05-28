@@ -9,7 +9,7 @@ import Control.Concurrent.Async ( AsyncCancelled )
 -----------------------------MError--------------------------------------------
 liftE :: MError m => Either Error a -> m a
 liftE ea = case ea of
-  Left e -> throw e
+  Left err -> throw err
   Right a -> return a
 
 catchEither :: MError m => Either b a -> (b -> Error) -> m a
@@ -19,7 +19,7 @@ catchEither eba handler = case eba of
 
 toEither :: MError m => m a -> m (Either Error a)
 toEither ma = do
-  catch (Right <$> ma) $ \e -> return $ Left e
+  catch (Right <$> ma) $ \err -> return $ Left err
 
 -----------------------------MIOError------------------------------------------
 catchEIO :: (MIOError m, E.Exception e) => IO a -> (e -> Error) -> m a
@@ -28,7 +28,7 @@ catchEIO m h = do
   liftE ea
   where
     --handler :: Exception e => (e -> IO (EE a))
-    handler e = return . Left . h $ e
+    handler err = return . Left . h $ err
 
 -- * The same as previous, but errors are handled automatically, without user handlers
 
@@ -42,6 +42,6 @@ liftEIO m = do
     ehandler :: E.AsyncException -> IO (Either Error a)
     ehandler _ = return $ Left Exit
     iohandler :: E.IOException -> IO (Either Error a)
-    iohandler e = return . Left . IOError . show $ e
+    iohandler err = return . Left . IOError . show $ err
     otherhandler :: E.SomeException -> IO (Either Error a)
-    otherhandler e = return . Left . SomeError . show $ e
+    otherhandler err = return . Left . SomeError . show $ err

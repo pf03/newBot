@@ -15,7 +15,7 @@ class (MError m, MonadIO m) => MIOError m
 instance MError (Either Error) where
   throw = Left
   catch ma f = case ma of
-    Left e -> f e
+    Left err -> f err
     Right a -> Right a
 
 instance MError (ExceptT Error IO) where

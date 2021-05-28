@@ -4,21 +4,22 @@ import Common.Types (ChatId, UpdateId)
 import qualified Data.Map.Internal as M
 import Interface.MCache.Class (MCache (..))
 import Interface.MCache.Types
-    ( Cache(changed, configText, configApp, defaultRepeatNumber),
-      Changed,
-      ConfigApp(host, token, app, updateId, repeatNumber),
-      ConfigText,
-      Host,
-      App )
+  ( App,
+    Cache (changed, configApp, configText, defaultRepeatNumber),
+    Changed,
+    ConfigApp (app, groupId, host, repeatNumber, token, updateId, version),
+    ConfigText,
+    Host,
+  )
 
 getCacheChanged :: MCache m => m Changed
 getCacheChanged = getsCache changed
 
 setCacheChanged :: MCache m => m ()
-setCacheChanged = modifyCache $ \s -> s {changed = True}
+setCacheChanged = modifyCache $ \cache -> cache {changed = True}
 
 resetCacheChanged :: MCache m => m ()
-resetCacheChanged = modifyCache $ \s -> s {changed = False}
+resetCacheChanged = modifyCache $ \cache -> cache {changed = False}
 
 getsCache :: MCache m => (Cache -> a) -> m a
 getsCache f = f <$> getCache
@@ -37,11 +38,17 @@ getHost = host <$> getConfigApp
 getToken :: MCache m => m Host
 getToken = token <$> getConfigApp
 
+getGroupId :: MCache m => m Int
+getGroupId = groupId <$> getConfigApp
+
 getApp :: MCache m => m App
 getApp = app <$> getConfigApp
 
+getAPIVersion :: MCache m => m String
+getAPIVersion = version <$> getConfigApp
+
 setConfigApp :: MCache m => ConfigApp -> m ()
-setConfigApp ca = modifyCache $ \s -> s {configApp = ca}
+setConfigApp ca = modifyCache $ \cache -> cache {configApp = ca}
 
 getConfigText :: MCache m => m ConfigText
 getConfigText = getsCache configText
@@ -51,31 +58,31 @@ getmUpdateId = updateId <$> getConfigApp
 
 -- updateId and repeatNumber only can be changed
 setmUpdateId :: MCache m => Maybe UpdateId -> m ()
-setmUpdateId muid = do
+setmUpdateId mUpdateId = do
   setCacheChanged
-  ca <- getConfigApp
-  setConfigApp ca {updateId = muid}
+  configApp0 <- getConfigApp
+  setConfigApp configApp0 {updateId = mUpdateId}
 
 getRepeatNumbers :: MCache m => m (M.Map ChatId Int)
 getRepeatNumbers = repeatNumber <$> getConfigApp
 
 setRepeatNumbers :: MCache m => M.Map ChatId Int -> m ()
-setRepeatNumbers rns = do
-  ca <- getConfigApp
-  setConfigApp ca {repeatNumber = rns}
+setRepeatNumbers repeatNumbers = do
+  configApp0 <- getConfigApp
+  setConfigApp configApp0 {repeatNumber = repeatNumbers}
 
 getmRepeatNumber :: MCache m => ChatId -> m (Maybe Int)
-getmRepeatNumber cid = M.lookup cid <$> getRepeatNumbers
+getmRepeatNumber chatId = M.lookup chatId <$> getRepeatNumbers
 
 getRepeatNumber :: MCache m => ChatId -> m Int
-getRepeatNumber cid = do
-  mrn <- getmRepeatNumber cid
-  case mrn of
+getRepeatNumber chatId = do
+  mrepeatNumber <- getmRepeatNumber chatId
+  case mrepeatNumber of
     Nothing -> getsCache defaultRepeatNumber
-    Just n -> return n
+    Just repeatNumber0 -> return repeatNumber0
 
 setRepeatNumber :: MCache m => ChatId -> Int -> m ()
-setRepeatNumber cid rn = do
+setRepeatNumber chatId repeatNumber0 = do
   setCacheChanged
-  rns <- getRepeatNumbers
-  setRepeatNumbers $ M.insert cid rn rns
+  repeatNumbers <- getRepeatNumbers
+  setRepeatNumbers $ M.insert chatId repeatNumber0 repeatNumbers

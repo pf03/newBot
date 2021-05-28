@@ -14,57 +14,57 @@ import qualified VK.API as API
 import qualified VK.Parse.Exports as Parse
 import qualified VK.Query.Functions as Query
 import qualified VK.Update as Update
+import Prelude hiding (init)
 
 -- Initialization - get last updateId, server name, key for getUpdates request
 getInit :: MTrans m => m Update.Init
 getInit = do
   Log.setSettings Color.Blue True "getInit"
-  Cache.ConfigApp _enable _name _app _host tk _updateId _repeatNumber gid v <- Cache.getConfigApp
   let api = API.API API.Groups API.GetLongPollServer
   Log.send
-  json <- Request.api api (Query.getLongPollServer tk gid v) False
+  query <- Query.getLongPollServer 
+  json <- Request.api api query False
   Log.receive
-  o <- Parse.getObject json
-  Log.receiveData "object" o
-  ini@(Update.Init server key ts) <- Parse.init o
-  Log.receiveData "init" ini
+  object <- Parse.getObject json
+  Log.receiveData "object" object
+  init@(Update.Init server key _) <- Parse.init object
+  Log.receiveData "init" init
   mupdateIdFromFile <- Cache.getmUpdateId
   case mupdateIdFromFile of
-    Nothing -> return ini
+    Nothing -> return init
     Just updateIdFromFile -> return $ Update.Init server key updateIdFromFile
 
 -- Get updates from messenger server by the long polling method
 getUpdates :: MTrans m => Update.Init -> m ([Update.Update], Update.Init)
-getUpdates ini@(Update.Init server0 _ ts0) = do
+getUpdates init@(Update.Init server _ ts) = do
   Log.setSettings Color.Cyan True "getUpdates"
-  let query = Query.longPoll ini 25
-  (host, path) <- parseServer server0
+  let query = Query.longPoll init 25
+  (host, path) <- parseServer server
   let request = Request.build host path query
   Log.send
   json <- Request.send request True -- long polling
   Log.receive
-  o <- Parse.getObject json
-  Log.receiveData "object" o
-  muid <- Parse.updateId o
-  let newIni = ini {Update.ts = fromMaybe ts0 muid}
-  Log.receiveData "updateId" muid
-  us <- Parse.updates o
-  Log.receiveData "updates" us
-  return (us, newIni)
+  object <- Parse.getObject json
+  Log.receiveData "object" object
+  mUpdateId <- Parse.updateId object
+  let newInit = init {Update.ts = fromMaybe ts mUpdateId}
+  Log.receiveData "mUpdateId" mUpdateId
+  updates <- Parse.updates object
+  Log.receiveData "updates" updates
+  return (updates, newInit)
 
 -- Send response to a single user
 sendMessage :: MTrans m => Update.Update -> [Label] -> m ()
 sendMessage update btns = do
   Log.setSettings Color.Yellow True "sendMessage"
-  Cache.ConfigApp _enable _name _app _host tk _updateId _repeatNumber _groupId v <- Cache.getConfigApp
   Log.send
-  query <- Query.sendMessage tk v update btns
+  query <- Query.sendMessage update btns
   Log.debugM update
   Log.receiveData "query" query
   json <- Request.api (API.API API.Messages API.Send) query False
   Log.receive
-  o <- Parse.getObject json
-  Log.receiveData "object" o
+  object <- Parse.getObject json
+  Log.receiveData "object" object
 
 -- "https://lp.vk.com/wh777777777" -> "lp.vk.com" "/wh777777777"
 parseServer :: MError m => String -> m (Cache.Host, Path)

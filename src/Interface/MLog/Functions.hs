@@ -22,8 +22,8 @@ import Prelude hiding (error)
 -----------------------------MLog----------------------------------------------
 setColorScheme :: MLog m => ColorScheme -> m ()
 setColorScheme newcs = do
-  Settings _ le fn <- getSettings
-  setSettings newcs le fn
+  Settings _ logEnable funcName0 <- getSettings
+  setSettings newcs logEnable funcName0
 
 getConfigSettings :: MLog m => m (Config, Settings)
 getConfigSettings = do
@@ -33,8 +33,8 @@ getConfigSettings = do
 
 resetSettings :: MLog m => m ()
 resetSettings = do
-  let Settings cs e fn = defaultSettings
-  setSettings cs e fn
+  let Settings colorScheme logEnable funcName0 = defaultSettings
+  setSettings colorScheme logEnable funcName0
 
 defaultSettings :: Settings
 defaultSettings = Settings Black True ""
@@ -56,9 +56,9 @@ infoM :: MLog m => String -> m ()
 infoM = messageM Info
 
 infoCM :: MLog m => ColorScheme -> String -> m ()
-infoCM cs s = do
-  setColorScheme cs
-  infoM s
+infoCM colorScheme str = do
+  setColorScheme colorScheme
+  infoM str
 
 warnM :: MLog m => String -> m ()
 warnM = messageM Warn
@@ -70,45 +70,45 @@ criticalM :: MLog m => String -> m ()
 criticalM = messageM Critical
 
 messageM :: MLog m => Level -> String -> m ()
-messageM level s = do
+messageM level str = do
   (config, settings) <- getConfigSettings
-  message config settings level s
+  message config settings level str
 
 -- Additional functions for debug
-getfname :: MLog m => m String
-getfname = funcName <$> getSettings
+getFuncName :: MLog m => m String
+getFuncName = funcName <$> getSettings
 
 send :: MLog m => m ()
 send = do
-  fname <- getfname
-  infoM $ template "Query {0} sent......" [fname]
+  funcName0 <- getFuncName
+  infoM $ template "Query {0} sent......" [funcName0]
 
 receive :: MLog m => m ()
 receive = do
-  fname <- getfname
-  infoM $ template "Response {0} received......" [fname]
+  funcName0 <- getFuncName
+  infoM $ template "Response {0} received......" [funcName0]
 
 receiveData :: (MLog m, Show a) => String -> a -> m ()
 receiveData dataName dataValue = do
-  fname <- getfname
-  infoM $ template "Data {1} received in {0} response......" [fname, dataName]
+  funcName0 <- getFuncName
+  infoM $ template "Data {1} received in {0} response......" [funcName0, dataName]
   debugM dataValue
 
 -----------------------------MonadIO-------------------------------------------
 debug :: (MonadIO m, Show a) => Config -> Settings -> a -> m ()
-debug lc ls a = messageIO lc ls Debug (show a)
+debug logConfig logSettings a = messageIO logConfig logSettings Debug (show a)
 
 info :: MonadIO m => Config -> Settings -> String -> m ()
-info lc ls = messageIO lc ls Info
+info logConfig logSettings = messageIO logConfig logSettings Info
 
 warn :: MonadIO m => Config -> Settings -> String -> m ()
-warn lc ls = messageIO lc ls Warn
+warn logConfig logSettings = messageIO logConfig logSettings Warn
 
 error :: MonadIO m => Config -> Settings -> String -> m ()
-error lc ls = messageIO lc ls Error
+error logConfig logSettings = messageIO logConfig logSettings Error
 
 critical :: MonadIO m => Config -> Settings -> String -> m ()
-critical lc ls = messageIO lc ls Critical
+critical logConfig logSettings = messageIO logConfig logSettings Critical
 
 -----------------------------Default implementation----------------------------
 -- The default implementation of the MLog typeclass for the IO monad.
@@ -116,17 +116,17 @@ critical lc ls = messageIO lc ls Critical
 -- for example based on writerT, or empty return () implementation
 -- Info can be shown in different color schemes, and for other levels the color corresponds to the level
 messageIO :: MonadIO m => Config -> Settings -> Level -> String -> m ()
-messageIO (Config ecolor eterminal efile ml) (Settings cs en _) level text = do
-  if level < toEnum ml || not en
+messageIO (Config enableColor enableTerminal enableFile minLevel0) (Settings colorScheme logEnable _) level text = do
+  if level < toEnum minLevel0 || not logEnable
     then return ()
     else do
-      when (ecolor && eterminal) $ do
+      when (enableColor && enableTerminal) $ do
         if level == Info
-          then Color.setSchemeT cs
+          then Color.setSchemeT colorScheme
           else Color.setColorT $ getColor level
-      when eterminal $ putStrLnT logText
-      when efile $ file logText
-      when (ecolor && eterminal) Color.resetColorSchemeT
+      when enableTerminal $ putStrLnT logText
+      when enableFile $ file logText
+      when (enableColor && enableTerminal) Color.resetColorSchemeT
   where
     logText :: String
     logText = map toUpper (show level) <> " " <> text

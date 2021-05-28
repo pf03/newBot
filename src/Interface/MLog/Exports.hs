@@ -11,7 +11,7 @@ import Interface.MLog.Functions as Functions
     error,
     errorM,
     getConfigSettings,
-    getfname,
+    getFuncName,
     info,
     infoCM,
     infoM,
