@@ -52,8 +52,7 @@ Purpose of `config.json` fields:
   * `enable` - enable current bot in parallel mode;
   * `repeatNumber` - repeat number object, in which the key is the user id, the value is repeat number in response to the user's message (from 1 to 5);
   * `token` - a token for accessing the messenger API;
-  * `updateId` - `updateId` value, that used if `updateIdFromFile` is` true`;
-  * `updateIdFromFile` - enable reading updateId from` config.json` when starting the bot;
+  * `updateId` - `updateId` value, may be `null`;
   * `version` - API version (only for VK), bot tested only with `version=5.50`;
   * `groupId` - group id (only for VK);
   * `host` - API host.

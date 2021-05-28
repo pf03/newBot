@@ -16,7 +16,7 @@ import qualified Telegram.Update as Update
 data Pointer = Pointer
 
 -- New type wrappers in order to avoid orphan instances
-newtype Init = Init UpdateId
+newtype Init = Init (Maybe UpdateId)
 
 newtype WrapUpdate = WrapUpdate Update.Update deriving newtype (IUpdate)
 
@@ -25,16 +25,12 @@ instance IBot Pointer Init WrapUpdate where
   getInit :: MTrans m => Pointer -> m Init
   getInit _ = Init <$> Internal.getUpdateId
 
-  getUpdateId :: Init -> UpdateId
-  getUpdateId (Init uid) = uid
-
-  setUpdateId :: Init -> UpdateId -> Init
-  setUpdateId _ newuid = Init newuid
+  getmUpdateId :: Init -> Maybe UpdateId
+  getmUpdateId (Init uid) = uid
 
   getUpdates :: MTrans m => Init -> m ([WrapUpdate], Init)
-  getUpdates (Init uid) = do
-    (us, Just newuid) <- Internal.getUpdates . Just $ uid
-    return (WrapUpdate <$> us, Init newuid)
-
+  getUpdates (Init muid) = do
+    (us, newmuid) <- Internal.getUpdates muid
+    return (WrapUpdate <$> us, Init newmuid)
   sendMessage :: MTrans m => WrapUpdate -> [Label] -> m ()
   sendMessage (WrapUpdate u) ls = Internal.sendMessage u ls

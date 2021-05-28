@@ -6,7 +6,7 @@ import Interface.MCache.Class (MCache (..))
 import Interface.MCache.Types
     ( Cache(changed, configText, configApp, defaultRepeatNumber),
       Changed,
-      ConfigApp(host, token, app, updateId, updateIdFromFile,repeatNumber),
+      ConfigApp(host, token, app, updateId, repeatNumber),
       ConfigText,
       Host,
       App )
@@ -46,18 +46,15 @@ setConfigApp ca = modifyCache $ \s -> s {configApp = ca}
 getConfigText :: MCache m => m ConfigText
 getConfigText = getsCache configText
 
-getUpdateId :: MCache m => m UpdateId
-getUpdateId = updateId <$> getConfigApp
+getmUpdateId :: MCache m => m (Maybe UpdateId)
+getmUpdateId = updateId <$> getConfigApp
 
 -- updateId and repeatNumber only can be changed
-setUpdateId :: MCache m => UpdateId -> m ()
-setUpdateId uid = do
+setmUpdateId :: MCache m => Maybe UpdateId -> m ()
+setmUpdateId muid = do
   setCacheChanged
   ca <- getConfigApp
-  setConfigApp ca {updateId = uid}
-
-getUpdateIdFromFile :: MCache m => MCache m => m Bool
-getUpdateIdFromFile = getsCache $ updateIdFromFile . configApp
+  setConfigApp ca {updateId = muid}
 
 getRepeatNumbers :: MCache m => m (M.Map ChatId Int)
 getRepeatNumbers = repeatNumber <$> getConfigApp

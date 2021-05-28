@@ -19,16 +19,19 @@ import qualified VK.Update as Update
 getInit :: MTrans m => m Update.Init
 getInit = do
   Log.setSettings Color.Blue True "getInit"
-  Cache.ConfigApp _enable _name _app _host tk _updateId _ _repeatNumber gid v <- Cache.getConfigApp
+  Cache.ConfigApp _enable _name _app _host tk _updateId _repeatNumber gid v <- Cache.getConfigApp
   let api = API.API API.Groups API.GetLongPollServer
   Log.send
   json <- Request.api api (Query.getLongPollServer tk gid v) False
   Log.receive
   o <- Parse.getObject json
   Log.receiveData "object" o
-  ini@(Update.Init _server _key _ts) <- Parse.init o
+  ini@(Update.Init server key ts) <- Parse.init o
   Log.receiveData "init" ini
-  return ini
+  mupdateIdFromFile <- Cache.getmUpdateId
+  case mupdateIdFromFile of
+    Nothing -> return ini
+    Just updateIdFromFile -> return $ Update.Init server key updateIdFromFile
 
 -- Get updates from messenger server by the long polling method
 getUpdates :: MTrans m => Update.Init -> m ([Update.Update], Update.Init)
@@ -53,7 +56,7 @@ getUpdates ini@(Update.Init server0 _ ts0) = do
 sendMessage :: MTrans m => Update.Update -> [Label] -> m ()
 sendMessage update btns = do
   Log.setSettings Color.Yellow True "sendMessage"
-  Cache.ConfigApp _enable _name _app _host tk _updateId _ _repeatNumber _groupId v <- Cache.getConfigApp
+  Cache.ConfigApp _enable _name _app _host tk _updateId _repeatNumber _groupId v <- Cache.getConfigApp
   Log.send
   query <- Query.sendMessage tk v update btns
   Log.debugM update

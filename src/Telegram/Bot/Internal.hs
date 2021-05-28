@@ -15,21 +15,11 @@ import qualified Telegram.Update as Update
 
 
 -- Initialization - get last updateId for getUpdates request
-getUpdateId :: MTrans m => m UpdateId
+getUpdateId :: MTrans m => m (Maybe UpdateId)
 getUpdateId = do
   Log.setSettings Color.Blue True "getUpdateId"
-  uidFromFile <- Cache.getUpdateIdFromFile
-  if uidFromFile
-    then return 0 -- if we get updateId from a file, then initialization is not needed
-    else do
-      Log.send
-      (_, muid) <- getUpdates Nothing
-      Log.receive
-      maybe getUpdateId (return . (-) 1) muid
+  Cache.getmUpdateId
 
--- Get updates from messenger server by the long polling method
--- getUpdates Nothing - for initialization
--- getUpdates (Just uid) - for get updates
 getUpdates :: MTrans m => Maybe UpdateId -> m ([Update.Update], Maybe UpdateId)
 getUpdates muid = do
   Log.setSettings Color.Cyan True $ template "getUpdates, muid = {0}" [show muid]
@@ -59,10 +49,10 @@ sendMessage update btns = do
 -- Dumping messages that we cannot parse, for debugging purposes
 reset :: MTrans m => m ()
 reset = do
-  uid <- Cache.getUpdateId
-  Log.setSettings Color.Cyan True $ template "reset, uid = {0}" [show uid]
+  muid <- Cache.getmUpdateId
+  Log.setSettings Color.Cyan True $ template "reset, muid = {0}" [show muid]
   Log.send
-  json <- Request.api API.GetUpdates (Query.getUpdates (Just uid) 0) True
+  json <- Request.api API.GetUpdates (Query.getUpdates muid 0) True
   Log.receive
   o <- Parse.getObject json
   mnewuid <- Parse.updateId o

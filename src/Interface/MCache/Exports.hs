@@ -9,8 +9,7 @@ import Interface.MCache.Functions as Functions
       getRepeatNumber,
       getRepeatNumbers,
       getToken,
-      getUpdateId,
-      getUpdateIdFromFile,
+      getmUpdateId,
       getmRepeatNumber,
       getsCache,
       modifyCache,
@@ -19,7 +18,7 @@ import Interface.MCache.Functions as Functions
       setConfigApp,
       setRepeatNumber,
       setRepeatNumbers,
-      setUpdateId,
+      setmUpdateId,
       getApp )
 import Interface.MCache.Types as Types
     ( Cache(..),

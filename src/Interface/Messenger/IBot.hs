@@ -12,10 +12,7 @@ class (IUpdate update) => IBot pointer init update | pointer -> init, init -> up
   getInit :: MTrans m => pointer -> m init
 
   -- Get UpdateId from initialization data
-  getUpdateId :: init -> UpdateId
-
-  -- Set UpdateId to initialization data
-  setUpdateId :: init -> UpdateId -> init
+  getmUpdateId :: init -> Maybe UpdateId
 
   -- Get updates from messenger server using initialization data
   getUpdates :: MTrans m => init -> m ([update], init)

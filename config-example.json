@@ -6,8 +6,6 @@
             "enable": true,
             "host":"api.vk.com",
             "token":"a1a1a1aaaaaaaaaaaaaaaa1111111111111111111111111aaaaaaaaaaaaaaaa1111111111111111a1111a",
-            "updateId": 0,
-            "updateIdFromFile": false,
             "repeatNumber": {},
             "groupId": 999999999,
             "version": "5.50" 
@@ -19,8 +17,6 @@
             "enable":true,
             "host": "api.telegram.org",
             "token": "1111111111:AAAAAAAAAAAAAAAAA-AAAAAAAAAAAAAAAAA",
-            "updateId": 58414589,
-            "updateIdFromFile": false,
             "repeatNumber": {},
             "groupId": 0,
             "version": "" 

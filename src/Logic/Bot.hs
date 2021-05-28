@@ -18,35 +18,30 @@ import Control.Monad (forM_)
 application :: (MTrans m, IBot pointer init _update) => pointer -> m ()
 application pointer = do
   Log.setSettings Color.Blue True "application"
-  uidFromFile <- Cache.getUpdateIdFromFile
   init <- IBot.getInit pointer
-  if uidFromFile
-    then do
-      uid <- Cache.getUpdateId
-      Log.infoM $ template "Received updateId from file: {0}" [show uid]
-      longPolling pointer (IBot.setUpdateId init uid) -- updateId from the request, overwrite the one from the file
-    else do
-      longPolling pointer init
+  longPolling pointer init
+  
 
 -- | Long polling loop
 longPolling :: (MTrans m, IBot pointer init update) => pointer -> init -> m ()
 longPolling pointer init = do
   Log.setSettings Color.Cyan True "longPolling"
   (updates, newInit) <- IBot.getUpdates init
-  uidFromFile <- Cache.getUpdateIdFromFile
-  when uidFromFile do
-    uid <- Cache.getUpdateId
-    let newuid = IBot.getUpdateId newInit
-    Cache.setUpdateId newuid
-    Log.infoM $ template "Update updateId in file from {0} to {1}" [show uid, show newuid]
-    Cache.writeCache
   calcSendMesages updates
+  writeCache newInit
   longPolling pointer newInit
 
 -- | Response to all users
 calcSendMesages :: (MTrans m, IBot _pointer _init update) => [update] -> m ()
 calcSendMesages = mapM_ $ \update -> do
   list <- Logic.answer update
+  forM_ list $ uncurry IBot.sendMessage
+
+writeCache :: (MTrans m, IBot _pointer init _update) => init -> m ()
+writeCache init = do
+  muid <- Cache.getmUpdateId
+  let newmuid = IBot.getmUpdateId init
+  Cache.setmUpdateId newmuid
+  Log.infoM $ template "Update updateId in file from {0} to {1}" [show muid, show newmuid]
   Log.infoM "Update config in file..."
   Cache.writeCache
-  forM_ list $ uncurry IBot.sendMessage

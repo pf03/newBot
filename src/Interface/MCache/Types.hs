@@ -29,8 +29,7 @@ data ConfigApp = ConfigApp
     app :: App,
     host :: Host,
     token :: Token,
-    updateId :: UpdateId,
-    updateIdFromFile :: Bool,
+    updateId :: Maybe UpdateId,
     repeatNumber :: M.Map ChatId Int,
     groupId :: Int,
     version :: String --API version
