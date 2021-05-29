@@ -39,7 +39,7 @@ instance ToJSON Init
 --------------------------instance App.Update------------------------------------
 instance IUpdate Update where
   setMessage :: Update -> Message -> Update
-  setMessage (cid, Entity _ as) message = (cid, Entity (Left message) as)
+  setMessage (chatId, Entity _ attachments0) message = (chatId, Entity (Left message) attachments0)
 
   getMessage :: Update -> Maybe Message
   getMessage (_, Entity (Left message) _) = Just message

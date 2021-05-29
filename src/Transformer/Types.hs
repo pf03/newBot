@@ -20,22 +20,24 @@ newtype Transformer a = Transformer {getTransformer :: StateT Internal.State (Ex
 -----------------------------Instances-----------------------------------------
 instance MLog Transformer where
   getSettings = Transformer Internal.getLogSettings
-  setSettings cs e fn = Transformer $ Internal.setLogSettings cs e fn
+  setSettings colorScheme logEnable funcName = Transformer $ 
+    Internal.setLogSettings colorScheme logEnable funcName
   getConfig = Transformer Internal.getLogConfig
-  message c s l st = Transformer $ Log.messageIO c s l st
+  message logConfig logSettings logLevel str = Transformer $ 
+    Log.messageIO logConfig logSettings logLevel str
 
 instance MError Transformer where
   throw :: Error.Error -> Transformer a
-  throw e = Transformer . lift $ throwE e
+  throw err = Transformer . lift $ throwE err
   catch :: Transformer a -> (Error.Error -> Transformer a) -> Transformer a
-  catch ta f = Transformer . StateT $ \s -> catchE (runStateT (getTransformer ta) s) $ 
-    \e -> runStateT (getTransformer $ f e) s
+  catch ta f = Transformer . StateT $ \state -> catchE (runStateT (getTransformer ta) state) $ 
+    \err -> runStateT (getTransformer $ f err) state
 
 instance MIOError Transformer
 
 instance MCache Transformer where
   getCache = Transformer Internal.getCache
-  setCache c = Transformer . Internal.setCache $ c
+  setCache cache = Transformer . Internal.setCache $ cache
 
 instance MIOCache Transformer where
   writeCache = Internal.writeCache

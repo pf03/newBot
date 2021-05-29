@@ -11,81 +11,81 @@ import Text.Read (readEither)
 import qualified VK.Update as Update
 
 parseUpdateId :: Object -> Parser (Maybe UpdateId)
-parseUpdateId o = do
-  mstr <- o .:? "ts"
+parseUpdateId object = do
+  mstr <- object .:? "ts"
   case mstr of
     Nothing -> return Nothing
     Just str -> do
-      let euid = readEither str
-      case euid of
-        Left e -> fail (e ++ ": " ++ str)
-        Right uid -> return $ Just uid
+      let eUpdateId = readEither str
+      case eUpdateId of
+        Left err -> fail (err ++ ": " ++ str)
+        Right updateId -> return $ Just updateId
 
 parseInit :: Object -> Parser Update.Init
-parseInit o = do
-  response <- o .: "response"
+parseInit object = do
+  response <- object .: "response"
   parseJSONo response
 
 parseUpdates :: Object -> Parser [Update.Update]
 parseUpdates = withArraymItem "updates" parseUpdate
 
 parseUpdate :: Object -> Parser (Maybe Update.Update)
-parseUpdate o = do
-  t <- o .: "type" :: Parser String
-  case t of
+parseUpdate object = do
+  updateType <- object .: "type" :: Parser String
+  case updateType of
     "message_new" -> do
-      obj <- o .: "object"
-      userId <- obj .: "user_id" :: Parser UserId
-      text <- obj .: "body"
-      let emc = Logic.toMessageCommand text
-      mas <- mwithArrayItem "attachments" parseAttachment obj
-      let as = fromMaybe [] mas
-      return $ Just (userId, Update.Entity emc as)
+      object1 <- object .: "object"
+      userId <- object1 .: "user_id" :: Parser UserId
+      body <- object1 .: "body"
+      let eMessageCommand = Logic.toMessageCommand body
+      mAttachments <- mwithArrayItem "attachments" parseAttachment object1
+      let attachments = fromMaybe [] mAttachments
+      return $ Just (userId, Update.Entity eMessageCommand attachments)
     _ -> return Nothing
 
 parseAttachment :: Object -> Parser Update.Attachment
-parseAttachment o = do
-  t <- o .: "type" :: Parser String
+parseAttachment object = do
+  t <- object .: "type" :: Parser String
   case t of
-    "sticker" -> parseSticker o
-    "audio" -> parseAudio o
-    "photo" -> parseAttachmentItem "photo" o
-    "video" -> parseAttachmentItem "video" o
-    "doc" -> parseAttachmentItem "doc" o
-    "wall" -> parseWall o
-    "link" -> parseLink o
+    "sticker" -> parseSticker object
+    "audio" -> parseAudio object
+    "photo" -> parseAttachmentItem "photo" object
+    "video" -> parseAttachmentItem "video" object
+    "doc" -> parseAttachmentItem "doc" object
+    "wall" -> parseWall object
+    "link" -> parseLink object
     _ -> fail "Unknown attachment"
 
 parseAttachmentItem :: String -> Object -> Parser Update.Attachment
-parseAttachmentItem str o = do
-  item <- o .: pack str
+parseAttachmentItem str object = do
+  item <- object .: pack str
   itemId <- item .: "id"
   ownerId <- item .: "owner_id"
   accessKey <- item .: "access_key"
   return $ Update.Item str ownerId itemId accessKey
 
 parseSticker :: Object -> Parser Update.Attachment
-parseSticker o = do
-  sticker <- o .: "sticker"
+parseSticker object = do
+  sticker <- object .: "sticker"
   stickerId <- sticker .: "id"
   return . Update.Sticker $ stickerId
 
 parseAudio :: Object -> Parser Update.Attachment
-parseAudio o = do
-  audio <- o .: "audio"
+parseAudio object = do
+  audio <- object .: "audio"
   audioId <- audio .: "id"
   ownerId <- audio .: "owner_id"
   return $ Update.Audio ownerId audioId
 
 parseWall :: Object -> Parser Update.Attachment
-parseWall o = do
-  wall <- o .: "wall"
+parseWall object = do
+  wall <- object .: "wall"
   wallId <- wall .: "id"
   ownerId <- wall .: "to_id"
   return $ Update.Wall ownerId wallId
 
 parseLink :: Object -> Parser Update.Attachment
-parseLink o = do
-  item <- o .: "link"
+parseLink object = do
+  item <- object .: "link"
   url <- item .: "url"
   return $ Update.Link url

@@ -27,14 +27,14 @@ longPoll ini timeout =
     ++ "wait" <:> timeout
 
 sendMessage :: (MError m, MCache m) => Update.Update -> [Label] -> m Query
-sendMessage (cid, Update.Entity emc as) btns = do
+sendMessage (chatId, Update.Entity eMessageCommand attachments) btns = do
   token <- Cache.getToken
   version <- Cache.getAPIVersion
-  case emc of
+  case eMessageCommand of
     Right _ -> Error.throw $ Error.QueryError "Unable to send command to user"
     Left message -> do
-      let qDefault = queryDefault token cid version
-      let qMessage = "message" <:> message
-      let qButtons = if null btns then [] else "keyboard" <:> Encode.keyboard btns
-      let qAttachments = queryAttachments as
-      return $ qDefault ++ qMessage ++ qButtons ++ qAttachments
+      let queryDefault0 = queryDefault token chatId version
+      let queryMessage0 = "message" <:> message
+      let queryButtons0 = if null btns then [] else "keyboard" <:> Encode.keyboard btns
+      let queryAttachments0 = queryAttachments attachments
+      return $ queryDefault0 ++ queryMessage0 ++ queryButtons0 ++ queryAttachments0

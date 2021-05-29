@@ -11,8 +11,8 @@ import Logic.Config.Types (Config (apps, defaultRepeatNumber, log, name))
 import Prelude hiding (log)
 
 checkMinLogLevel :: MError m => Config -> m ()
-checkMinLogLevel c = do
-  let ml = Log.minLevel . log $ c
+checkMinLogLevel config = do
+  let ml = Log.minLevel . log $ config
   let minB = fromEnum (minBound :: Log.Level)
   let maxB = fromEnum (maxBound :: Log.Level)
   when (ml < minB) $
@@ -28,37 +28,39 @@ maxRepeatNumber :: Int
 maxRepeatNumber = 5
 
 checkRepeatNumber :: MError m => Config -> m ()
-checkRepeatNumber c = do
-  let drn = defaultRepeatNumber c
-  when (drn < 1) $
+checkRepeatNumber config = do
+  let defaultRepeatNumber0 = defaultRepeatNumber config
+  when (defaultRepeatNumber0 < 1) $
     Error.throw $
       Error.ConfigError
         "Default repeat number shouldn't be less than 1"
-  when (drn > maxRepeatNumber) $
+  when (defaultRepeatNumber0 > maxRepeatNumber) $
     Error.throw $
       Error.ConfigError $
         template "Default repeat number shouldn't be more than {0}" [show maxRepeatNumber]
-  let rns = concatMap M.toList (Cache.repeatNumber <$> apps c)
-  forM_ rns $ \(cid, rn) -> do
-    when (rn < 1) $
+  let repeatNumbers = concatMap M.toList (Cache.repeatNumber <$> apps config)
+  forM_ repeatNumbers $ \(chatId, repeatNumber) -> do
+    when (repeatNumber < 1) $
       Error.throw $
         Error.ConfigError $
-          template "Repeat number {0} for user {1} shouldn't be less than 1" [show rn, show cid]
-    when (rn > maxRepeatNumber) $
+          template "Repeat number {0} for user {1} shouldn't be less than 1" 
+            [show repeatNumber, show chatId]
+    when (repeatNumber > maxRepeatNumber) $
       Error.throw $
         Error.ConfigError $
-          template "Repeat number {0} for user {1} shouldn't be more than {2}" [show rn, show cid, show maxRepeatNumber]
+          template "Repeat number {0} for user {1} shouldn't be more than {2}" 
+            [show repeatNumber, show chatId, show maxRepeatNumber]
 
 checkUniqueNames :: MError m => Config -> m ()
-checkUniqueNames c = do
-  unless (checkUnique $ map Cache.name $ apps c) $
+checkUniqueNames config = do
+  unless (checkUnique $ map Cache.name $ apps config) $
     Error.throw $
       Error.ConfigError "Fields apps.name in config.json must be unique"
 
 checkExistAndSingleName :: MError m => Config -> m ()
-checkExistAndSingleName c = do
-  let n = name c
-  let ns = filter (== n) $ map Cache.name $ apps c
-  when (length ns /= 1) $
+checkExistAndSingleName config = do
+  let name0 = name config
+  let names = filter (== name0) $ map Cache.name $ apps config
+  when (length names /= 1) $
     Error.throw $
       Error.ConfigError "Field `name` in config.json must exist and be single in list `apps.name`"

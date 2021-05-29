@@ -13,31 +13,31 @@ getUpdates :: Maybe UpdateId -> TimeOut -> Query
 getUpdates moffset timeout = "timeout" <:> timeout ++ "offset" <:?> moffset
 
 sendMessage :: MError m => Update.Update -> [Label] -> m (API.API, Query)
-sendMessage (cid, en) btns = do
-  api <- getAPI en
-  qu <- case en of
-    Update.Message m ->
+sendMessage (chatId, entity) btns = do
+  api <- getAPI entity
+  query <- case entity of
+    Update.Message message ->
       return $
         if null btns
-          then "text" <:> m
-          else "text" <:> m ++ "reply_markup" <:> Encode.keyboard btns
+          then "text" <:> message
+          else "text" <:> message ++ "reply_markup" <:> Encode.keyboard btns
     Update.Command _ -> Error.throw $ Error.QueryError "Unable to send command to user"
-    Update.Sticker fid -> return $ "sticker" <:> fid
-    Update.Animation fid -> return $ "animation" <:> fid
-    Update.Photo fid mc -> return $ "photo" <:> fid ++ "caption" <:?> mc
-    Update.Video fid mc -> return $ "video" <:> fid ++ "caption" <:?> mc
-    Update.Document fid mc -> return $ "document" <:> fid ++ "caption" <:?> mc
-    Update.Poll _ q os -> return $ "question" <:> q ++ "options" <:> Encode.pollOptions os
-    Update.Contact pn fn mln mvc ->
+    Update.Sticker fileId -> return $ "sticker" <:> fileId
+    Update.Animation fileId -> return $ "animation" <:> fileId
+    Update.Photo fileId mcaption -> return $ "photo" <:> fileId ++ "caption" <:?> mcaption
+    Update.Video fileId mcaption -> return $ "video" <:> fileId ++ "caption" <:?> mcaption
+    Update.Document fileId mcaption -> return $ "document" <:> fileId ++ "caption" <:?> mcaption
+    Update.Poll _ question options -> return $ "question" <:> question ++ "options" <:> Encode.pollOptions options
+    Update.Contact phoneNumber firstName mlastName mvCard ->
       return $
-        "phone_number" <:> pn
-          ++ "first_name" <:> fn
-          ++ "last_name" <:?> mln
-          ++ "vcard" <:?> mvc
+        "phone_number" <:> phoneNumber
+          ++ "first_name" <:> firstName
+          ++ "last_name" <:?> mlastName
+          ++ "vcard" <:?> mvCard
     Update.Location x y -> return $ "latitude" <:> x ++ "longitude" <:> y
-    Update.Forward _ mid -> return $ "from_chat_id" <:> cid ++ "message_id" <:> mid
-    Update.Other mid -> return $ "from_chat_id" <:> cid ++ "message_id" <:> mid
-  return (api, "chat_id" <:> cid ++ qu)
+    Update.Forward _ messageId -> return $ "from_chat_id" <:> chatId ++ "message_id" <:> messageId
+    Update.Other messageId -> return $ "from_chat_id" <:> chatId ++ "message_id" <:> messageId
+  return (api, "chat_id" <:> chatId ++ query)
 
   where
   getAPI :: MError m => Update.Entity -> m API.API

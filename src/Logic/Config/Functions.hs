@@ -17,16 +17,16 @@ import System.IO.Error (isDoesNotExistError)
 readConfig :: MIOError m => m Config
 readConfig = do
   bs <- L.readFile pathConfig `Error.catchEIO` handler
-  c <- Parse.eDecode bs
-  checkMinLogLevel c
-  checkRepeatNumber c
-  checkUniqueNames c
-  checkExistAndSingleName c
-  return c
+  config <- Parse.eDecode bs
+  checkMinLogLevel config
+  checkRepeatNumber config
+  checkUniqueNames config
+  checkExistAndSingleName config
+  return config
   where
     handler :: IOException -> Error.Error
-    handler e
-      | isDoesNotExistError e = Error.ConfigError "Configuration file not found!"
+    handler err
+      | isDoesNotExistError err = Error.ConfigError "Configuration file not found!"
       | otherwise = Error.ConfigError "Error reading configuration file"
 
 pathConfig :: FilePath

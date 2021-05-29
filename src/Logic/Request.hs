@@ -18,7 +18,7 @@ import qualified Network.HTTP.Simple as HTTP
 -- | Low level wrapper for request
 send :: (MLog m, MIOError m) => HTTP.Request -> Bool -> m LBS
 send request save = do
-  response <- resp
+  response <- getResponse
   let status = HTTP.getResponseStatusCode response
   if status == 200
     then do
@@ -33,35 +33,35 @@ send request save = do
       Log.errorM $ show response
       Error.throw $ Error.QueryError "Request failed with error"
   where
-    resp :: (MLog m, MIOError m) => m (HTTP.Response LBS)
-    resp = do
-      er <- Error.toEither $ Error.liftEIO (HTTP.httpLBS request)
-      case er of
+    getResponse :: (MLog m, MIOError m) => m (HTTP.Response LBS)
+    getResponse = do
+      err <- Error.toEither $ Error.liftEIO (HTTP.httpLBS request)
+      case err of
         Left Error.Exit -> do
           -- Exit from application by user choise
           Error.throw Error.Exit
-        Left e -> do
+        Left _ -> do
           Log.errorM "Network connection error. Timeout 3 sec..."
-          Log.errorM $ show e
+          Log.errorM $ show err
           Error.liftEIO $ threadDelay 3000000 -- liftEIO for correct catch async exceptions
-          resp
-        Right r -> return r
+          getResponse
+        Right response -> return response
 
 -- | High level wrapper for API request
 api :: (IAPI api, MCache m, MIOError m, MLog m) => api -> HTTP.Query -> Bool -> m LBS
-api a query save = do
+api api0 query save = do
   host <- Cache.getHost
   token <- Cache.getToken
-  let path = API.getPath token a
+  let path = API.getPath token api0
   let request = build host path query
   send request save
 
 build :: Cache.Host -> Path -> HTTP.Query -> HTTP.Request
-build h path query =
+build host path query =
   HTTP.setRequestSecure True $
     HTTP.setRequestMethod "POST" $
       HTTP.setRequestPort 443 $
-        HTTP.setRequestHost (BC.pack h) $
+        HTTP.setRequestHost (BC.pack host) $
           HTTP.setRequestPath (BC.pack path) $
             HTTP.setRequestBodyURLEncoded
               (map (\(a, Just b) -> (a, b)) query)

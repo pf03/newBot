@@ -29,7 +29,8 @@ getLogSettings :: MonadState State m => m Log.Settings
 getLogSettings = gets logSettings
 
 setLogSettings :: MonadState State m => Log.ColorScheme -> Log.Enable -> Log.FuncName -> m ()
-setLogSettings cs en fn = modify $ \s -> s {logSettings = Log.Settings cs en fn}
+setLogSettings colorScheme logEnable funcName = modify $ \state -> 
+  state {logSettings = Log.Settings colorScheme logEnable funcName }
 
 getLogConfig :: MonadState State m => m Log.Config
 getLogConfig = gets configLog
@@ -38,14 +39,14 @@ getCache :: MonadState State m => m Cache.Cache
 getCache = gets cache
 
 setCache :: MonadState State m => Cache.Cache -> m ()
-setCache c = modify $ \s -> s {cache = c}
+setCache cache0 = modify $ \state -> state {cache = cache0}
 
 writeCache :: (MCache m, MIOError m, MonadState State m, MonadIO m) => m ()
 writeCache = do
-  ch <- Cache.getCacheChanged
-  when ch $ do
-    s <- get
-    saveState s
+  cacheChanged <- Cache.getCacheChanged
+  when cacheChanged $ do
+    state <- get
+    saveState state
     Cache.resetCacheChanged
 
 -----------------------------State <-> Config----------------------------------
@@ -56,47 +57,48 @@ readState :: MIOError m => m State
 readState = configToState <$> Config.readConfig
 
 saveState :: MIOError m => State -> m ()
-saveState s = do
+saveState state = do
   config <- Config.readConfig
-  let newConfig = fromState config s
+  let newConfig = fromState config state
   Error.liftEIO $ L.writeFile Config.pathConfig (Aeson.encodePretty newConfig)
 
 configToState :: Config.Config -> State
 configToState config =
-  let ca = head $ filter (\ca0 -> Cache.name ca0 == Config.name config) (Config.apps config)
-      c =
+  let configApp0 = head $ filter (\configApp1 -> Cache.name configApp1 == Config.name config) (Config.apps config)
+      cache0 =
         Cache.Cache
-          { Cache.configApp = ca,
+          { Cache.configApp = configApp0,
             Cache.configText = Config.text config,
             Cache.changed = False,
             Cache.defaultRepeatNumber = Config.defaultRepeatNumber config
           }
    in State
-        { cache = c,
+        { cache = cache0,
           configLog = Config.log config,
           logSettings = Log.defaultSettings
         }
 
 configToStates :: Config.Config -> [State]
 configToStates config =
-  let cas = filter Cache.enable (Config.apps config)
-   in for cas $ \ca ->
-        let c =
+  let configApps = filter Cache.enable (Config.apps config)
+   in for configApps $ \configApp0 ->
+        let cache0 =
               Cache.Cache
-                { Cache.configApp = ca,
+                { Cache.configApp = configApp0,
                   Cache.configText = Config.text config,
                   Cache.changed = False,
                   Cache.defaultRepeatNumber = Config.defaultRepeatNumber config
                 }
          in State
-              { cache = c,
+              { cache = cache0,
                 configLog = Config.log config,
                 logSettings = Log.defaultSettings
               }
 
 fromState :: Config.Config -> State -> Config.Config
-fromState config st = config {Config.apps = newConfigApps}
+fromState config state = config {Config.apps = newConfigApps}
   where
-    configApps = Config.apps config
-    c = cache st
-    newConfigApps = [Cache.configApp c] <> filter (\ca -> Cache.name ca /= Cache.name (Cache.configApp c)) configApps
+    configApps0 = Config.apps config
+    cache0 = cache state
+    newConfigApps = [Cache.configApp cache0] <> 
+      filter (\configApp0 -> Cache.name configApp0 /= Cache.name (Cache.configApp cache0)) configApps0

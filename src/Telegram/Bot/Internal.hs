@@ -22,7 +22,7 @@ getUpdateId = do
 
 getUpdates :: MTrans m => Maybe UpdateId -> m ([Update.Update], Maybe UpdateId)
 getUpdates mUpdateId = do
-  Log.setSettings Color.Cyan True $ template "getUpdates, muid = {0}" [show mUpdateId]
+  Log.setSettings Color.Cyan True $ template "getUpdates, mUpdateId = {0}" [show mUpdateId]
   Log.send
   response <- Request.api API.GetUpdates (Query.getUpdates (fmap (+ 1) mUpdateId) 25) True
   Log.receive

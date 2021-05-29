@@ -10,11 +10,11 @@ import Telegram.Parse.Internal (parseUpdateIds, parseUpdates)
 import qualified Telegram.Update as Update
 
 updateId :: MError m => Object -> m (Maybe UpdateId)
-updateId o = do
-  ids <- parseE parseUpdateIds o
-  case ids of
+updateId object = do
+  updateIds <- parseE parseUpdateIds object
+  case updateIds of
     [] -> return Nothing
-    _ -> return $ Just $ maximum ids
+    _ -> return $ Just $ maximum updateIds
 
 updates :: MError m => Object -> m [Update.Update]
 updates = parseE parseUpdates

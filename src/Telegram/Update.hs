@@ -39,7 +39,7 @@ instance IUpdate Update where
   setMessage :: Update -> Message -> Update
   setMessage (cid, Message _) message = (cid, Message message)
   setMessage (cid, Command _) message = (cid, Message message)
-  setMessage u _ = u
+  setMessage update _ = update
 
   getMessage :: Update -> Maybe Message
   getMessage (_, Message message) = Just message

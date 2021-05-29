@@ -14,35 +14,35 @@ import qualified Interface.MError.Exports as Error
 
 -- Quitting the Parser monad
 parseE :: MError m => (Object -> Parser a) -> Object -> m a
-parseE f o = Error.catchEither (parseEither f o) Error.ParseError
+parseE f object = Error.catchEither (parseEither f object) Error.ParseError
 
 parseJSONo :: FromJSON a => Object -> Parser a
 parseJSONo = parseJSON . Object
 
 -- | Wrapper for working with optional field
 mwithItem :: Key -> (Object -> Parser a) -> Object -> Parser (Maybe a)
-mwithItem k f o = do
-  mo <- o .:? pack k
-  case mo of
+mwithItem key f object = do
+  mobject1 <- object .:? pack key
+  case mobject1 of
     Nothing -> return Nothing
-    Just o1 -> Just <$> f o1
+    Just object1 -> Just <$> f object1
 
 -- | Wrapper for working with internal lists
 withArrayItem :: Key -> (Object -> Parser a) -> Object -> Parser [a]
-withArrayItem k f o = do
-  arr <- o .: pack k
+withArrayItem key f object = do
+  arr <- object .: pack key
   mapM f arr
 
 -- | Wrapper for working with internal optional lists
 mwithArrayItem :: Key -> (Object -> Parser a) -> Object -> Parser (Maybe [a])
-mwithArrayItem k f o = do
-  marr <- o .:? pack k
+mwithArrayItem key f object = do
+  marr <- object .:? pack key
   case marr of
     Nothing -> return Nothing
     Just arr -> Just <$> mapM f arr
 
 -- | Wrapper for working with internal arrays with optional elements
 withArraymItem :: Key -> (Object -> Parser (Maybe a)) -> Object -> Parser [a]
-withArraymItem k f o = do
-  ma <- withArrayItem k f o
-  return $ fmap fromJust . filter isJust $ ma
+withArraymItem key f object = do
+  maList <- withArrayItem key f object
+  return $ fmap fromJust . filter isJust $ maList

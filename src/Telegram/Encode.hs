@@ -12,4 +12,4 @@ keyboard strs = encode $ object ["keyboard" .= Array (fromList [Array $ fromList
     arr = map (\str -> object ["text" .= str])
 
 pollOptions :: [String] -> LBS
-pollOptions ops = encode $ Array $ fromList (map (String . pack) ops)
+pollOptions options = encode $ Array $ fromList (map (String . pack) options)

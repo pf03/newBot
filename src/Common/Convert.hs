@@ -32,17 +32,17 @@ instance Convert Value where
 instance Convert Object where
   convert = convert . encode
 
-jc :: Convert a => a -> Maybe BC.ByteString
-jc = Just . convert
+jconvert :: Convert a => a -> Maybe BC.ByteString
+jconvert = Just . convert
 
 (<:>) :: Convert a => String -> a -> Query
-(<:>) key value = [(convert key, jc value)]
+(<:>) key value = [(convert key, jconvert value)]
 
 infixr 7 <:>
 
 (<:?>) :: Convert a => String -> Maybe a -> Query
 (<:?>) key mvalue = case mvalue of
   Nothing -> []
-  Just value -> [(convert key, jc value)]
+  Just value -> [(convert key, jconvert value)]
 
 infixr 7 <:?>

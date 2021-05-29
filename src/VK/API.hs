@@ -18,9 +18,9 @@ type Version = String
 
 -----------------------------Instance------------------------------------------
 instance IAPI API where
-  apiName (API apiGroup an) = (toLower g : gs) ++ "." ++ (toLower n : ns)
+  apiName (API apiGroup apiName) = (toLower g : gs) ++ "." ++ (toLower n : ns)
     where
       (g : gs) = show apiGroup
-      (n : ns) = show an
+      (n : ns) = show apiName
 
   getPath _ api = "/method/" ++ IAPI.apiName api
