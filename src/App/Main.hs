@@ -4,8 +4,8 @@ import qualified Logic.Bot as Bot (application)
 import qualified Interface.MCache.Exports as Cache
 import Interface.Class ( MTrans)
 import qualified Transformer.Exports as Transformer
-import qualified Telegram.Bot.Types as Telegram
-import qualified VK.Bot.Types as VK
+import qualified Messenger.Bot.Telegram.Types as Telegram
+import qualified Messenger.Bot.VK.Types as VK
 
 main_ :: IO ()
 main_ = do

@@ -8,7 +8,7 @@ import qualified Interface.MCache.Exports as Cache
 import qualified Interface.MError.Exports as Error
 import Network.HTTP.Simple (Query)
 import qualified VK.Encode as Encode (keyboard)
-import qualified VK.Update as Update
+import qualified Messenger.Update.VK.Types as Update
 
 getLongPollServerQuery :: MCache m => m Query
 getLongPollServerQuery = do

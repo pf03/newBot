@@ -8,7 +8,7 @@ import Data.Text (pack)
 import qualified Logic.Logic as Logic
 import Parse.Internal (mwithArrayItem, parseJSONo, withArraymItem)
 import Text.Read (readEither)
-import qualified VK.Update as Update
+import qualified Messenger.Update.VK.Types as Update
 
 parseUpdateId :: Object -> Parser (Maybe UpdateId)
 parseUpdateId object = do

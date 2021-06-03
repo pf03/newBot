@@ -1,11 +1,11 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
-module Telegram.API where
+module Messenger.API.Telegram.Types where
 
 import Data.Char (toLower)
 import Interface.Class (IAPI)
-import qualified Interface.Messenger.IAPI as IAPI
+import qualified Messenger.API.Class as Class
 
 -----------------------------Types---------------------------------------------
 data API
@@ -28,4 +28,4 @@ instance IAPI API where
   apiName api =
     let (x : xs) = show api
      in toLower x : xs
-  getPath token api = "/bot" ++ token ++ "/" ++ IAPI.apiName api
+  getPath token api = "/bot" ++ token ++ "/" ++ Class.apiName api

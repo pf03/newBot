@@ -1,11 +1,11 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
-module VK.API where
+module Messenger.API.VK.Types where
 
 import Data.Char (toLower)
 import Interface.Class ( IAPI )
-import qualified Interface.Messenger.IAPI as IAPI (IAPI (..))
+import qualified Messenger.API.Class as Class
 
 -----------------------------Types---------------------------------------------
 data API = API APIGroup APIName
@@ -23,4 +23,4 @@ instance IAPI API where
       (g : gs) = show apiGroup
       (n : ns) = show apiName
 
-  getPath _ api = "/method/" ++ IAPI.apiName api
+  getPath _ api = "/method/" ++ Class.apiName api

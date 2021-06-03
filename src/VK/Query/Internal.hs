@@ -6,8 +6,8 @@ import Common.Convert((<:>), jconvert)
 import Data.Either (rights)
 import Network.HTTP.Simple (Query, QueryItem)
 import qualified VK.Encode as Encode (contentUrl)
-import qualified VK.Update as Update
-import qualified VK.API as API
+import qualified Messenger.Update.VK.Types as Update
+import qualified Messenger.API.VK.Types as API
 import qualified Interface.MCache.Exports as Cache
 
 defaultQuery :: Cache.Token -> UserId -> API.Version -> Query

@@ -7,7 +7,7 @@ import Data.Aeson ( Object )
 import Interface.Class (MError)
 import Parse.Internal (parseE)
 import Parse.Telegram.Internal (parseUpdateIds, parseUpdates)
-import qualified Telegram.Update as Update
+import qualified Messenger.Update.Telegram.Types as Update
 
 updateId :: MError m => Object -> m (Maybe UpdateId)
 updateId object = do

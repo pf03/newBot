@@ -1,4 +1,4 @@
-module VK.Bot.Internal where
+module Messenger.Bot.VK.Instances where
 
 import Common.Types ( Path, Label )
 import Common.Functions ( template)
@@ -10,10 +10,10 @@ import qualified Interface.MError.Exports as Error
 import qualified Interface.MLog.Exports as Log
 import qualified Logic.Request as Request
 import qualified System.Console.ANSI as Color (Color (..))
-import qualified VK.API as API
+import qualified Messenger.API.VK.Types as API
 import qualified Parse.VK.Exports as Parse
 import qualified VK.Query.Functions as Query
-import qualified VK.Update as Update
+import qualified Messenger.Update.VK.Types as Update
 import Prelude hiding (init)
 
 -- Initialization - get last updateId, server name, key for getUpdates request

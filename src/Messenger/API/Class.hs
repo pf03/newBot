@@ -1,4 +1,4 @@
-module Interface.Messenger.IAPI where
+module Messenger.API.Class where
 
 import Common.Types (Path)
 import Interface.MCache.Types (Token)

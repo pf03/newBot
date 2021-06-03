@@ -5,7 +5,7 @@ import Data.Aeson (Object)
 import Interface.Class (MError)
 import Parse.Internal (parseE)
 import Parse.VK.Internal (parseInit, parseUpdateId, parseUpdates)
-import qualified VK.Update as Update
+import qualified Messenger.Update.VK.Types as Update
 
 init :: MError m => Object -> m Update.Init
 init = parseE parseInit

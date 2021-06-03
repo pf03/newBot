@@ -7,7 +7,7 @@ import Common.Functions (template)
 import Interface.Class (IBot, MTrans)
 import qualified Interface.MCache.Exports as Cache
 import qualified Interface.MLog.Exports as Log
-import qualified Interface.Messenger.IBot as IBot
+import qualified Messenger.Bot.Class as Bot
 import qualified Logic.Logic as Logic
 import qualified System.Console.ANSI as Color (Color (..))
 import Prelude hiding (init)
@@ -17,7 +17,7 @@ import Control.Monad ( replicateM_ )
 application :: (MTrans m, IBot pointer init _update) => pointer -> m ()
 application pointer = do
   Log.setSettings Color.Blue True "application"
-  init <- IBot.getInit pointer
+  init <- Bot.getInit pointer
   longPolling pointer init
   
 
@@ -25,7 +25,7 @@ application pointer = do
 longPolling :: (MTrans m, IBot pointer init update) => pointer -> init -> m ()
 longPolling pointer init = do
   Log.setSettings Color.Cyan True "longPolling"
-  (updates, newInit) <- IBot.getUpdates init
+  (updates, newInit) <- Bot.getUpdates init
   calcSendMessages updates
   writeCache newInit
   longPolling pointer newInit
@@ -34,12 +34,12 @@ longPolling pointer init = do
 calcSendMessages :: (MTrans m, IBot _pointer _init update) => [update] -> m ()
 calcSendMessages = mapM_ $ \update -> do
   (newUpdate, btns, repeatNumber) <- Logic.evalAnswer update
-  replicateM_ repeatNumber $ IBot.sendMessage newUpdate btns
+  replicateM_ repeatNumber $ Bot.sendMessage newUpdate btns
 
 writeCache :: (MTrans m, IBot _pointer init _update) => init -> m ()
 writeCache init = do
   mUpdateId <- Cache.getmUpdateId
-  let newmUpdateId = IBot.getmUpdateId init
+  let newmUpdateId = Bot.getmUpdateId init
   Cache.setmUpdateId newmUpdateId
   Log.infoM $ template "Update updateId in file from {0} to {1}" [show mUpdateId, show newmUpdateId]
   Log.infoM "Update config in file..."

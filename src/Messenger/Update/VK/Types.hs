@@ -3,13 +3,13 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE DeriveGeneric #-}
 
-module VK.Update where
+module Messenger.Update.VK.Types where
 
 import GHC.Generics (Generic)
 import Data.Aeson ( FromJSON, ToJSON )
 import Common.Types ( ChatId, Command, IntId, ItemName, Key, Message, Url )
 import Interface.Class ( IUpdate ) 
-import qualified Interface.Messenger.IUpdate as Update 
+import qualified Messenger.Update.Class as Class 
 
 -----------------------------Types---------------------------------------------
 type Update = (ChatId, Entity)

@@ -1,11 +1,11 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
 
-module Interface.Messenger.IBot where
+module Messenger.Bot.Class where
 
 import Common.Types (Label, UpdateId)
 import Interface.MTrans (MTrans)
-import Interface.Messenger.IUpdate (IUpdate)
+import Messenger.Update.Class (IUpdate)
 
 class (IUpdate update) => IBot pointer init update | pointer -> init, init -> update, update -> pointer where
   -- Initial bot request to messenger server that returns the initialization data

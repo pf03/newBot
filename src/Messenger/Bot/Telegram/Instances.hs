@@ -1,4 +1,4 @@
-module Telegram.Bot.Internal  where
+module Messenger.Bot.Telegram.Instances  where
 
 import Common.Types (Label, UpdateId)
 import Common.Functions (template)
@@ -8,10 +8,10 @@ import qualified Interface.MCache.Exports as Cache
 import qualified Interface.MLog.Exports as Log
 import qualified Logic.Request as Request
 import qualified System.Console.ANSI as Color (Color (..))
-import qualified Telegram.API as API
+import qualified Messenger.API.Telegram.Types as API
 import qualified Parse.Telegram.Exports as Parse
 import qualified Telegram.Query as Query
-import qualified Telegram.Update as Update
+import qualified Messenger.Update.Telegram.Types as Update
 
 
 -- Initialization - get last updateId for getUpdates request

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b42cb7c98f8645e45e3a2271d82de1e1a53c7286b78ddc9921c346d517ed94ee
+-- hash: 6244e30226cdf236c1b95ea32898e75c20387d2b593926cbbbec05b811fd23b4
 
 name:           bot
 version:        0.1.0.0
@@ -42,9 +42,6 @@ library
       Interface.MError.Exports
       Interface.MError.Functions
       Interface.MError.Types
-      Interface.Messenger.IAPI
-      Interface.Messenger.IBot
-      Interface.Messenger.IUpdate
       Interface.MLog.Class
       Interface.MLog.Exports
       Interface.MLog.Functions
@@ -57,6 +54,17 @@ library
       Logic.Config.Types
       Logic.Logic
       Logic.Request
+      Messenger.API.Class
+      Messenger.API.Telegram.Types
+      Messenger.API.VK.Types
+      Messenger.Bot.Class
+      Messenger.Bot.Telegram.Instances
+      Messenger.Bot.Telegram.Types
+      Messenger.Bot.VK.Instances
+      Messenger.Bot.VK.Types
+      Messenger.Update.Class
+      Messenger.Update.Telegram.Types
+      Messenger.Update.VK.Types
       Parse.Functions
       Parse.Internal
       Parse.Telegram.Exports
@@ -65,24 +73,16 @@ library
       Parse.VK.Exports
       Parse.VK.Functions
       Parse.VK.Internal
-      Telegram.API
-      Telegram.Bot.Internal
-      Telegram.Bot.Types
       Telegram.Encode
       Telegram.Query
-      Telegram.Update
       Transformer.Exports
       Transformer.Functions
       Transformer.Instances
       Transformer.Internal
       Transformer.Types
-      VK.API
-      VK.Bot.Internal
-      VK.Bot.Types
       VK.Encode
       VK.Query.Functions
       VK.Query.Internal
-      VK.Update
   other-modules:
       Paths_bot
   hs-source-dirs:

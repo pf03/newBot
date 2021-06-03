@@ -4,13 +4,13 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
-module Telegram.Bot.Types (Pointer (..)) where
+module Messenger.Bot.Telegram.Types (Pointer (..)) where
 
 import Common.Types ( Label, UpdateId )
 import Interface.Class (IBot, IUpdate, MTrans)
-import qualified Interface.Messenger.IBot as IBot
-import qualified Telegram.Bot.Internal as Internal
-import qualified Telegram.Update as Update
+import qualified Messenger.Bot.Class as Class
+import qualified Messenger.Bot.Telegram.Instances as Instances
+import qualified Messenger.Update.Telegram.Types as Update
 
 -----------------------------Types---------------------------------------------
 data Pointer = Pointer
@@ -23,14 +23,14 @@ newtype WrapUpdate = WrapUpdate Update.Update deriving newtype (IUpdate)
 -----------------------------Instance------------------------------------------
 instance IBot Pointer Init WrapUpdate where
   getInit :: MTrans m => Pointer -> m Init
-  getInit _ = Init <$> Internal.getUpdateId
+  getInit _ = Init <$> Instances.getUpdateId
 
   getmUpdateId :: Init -> Maybe UpdateId
   getmUpdateId (Init mUpdateId) = mUpdateId
 
   getUpdates :: MTrans m => Init -> m ([WrapUpdate], Init)
   getUpdates (Init mUpdateId) = do
-    (updates, newmUpdateId) <- Internal.getUpdates mUpdateId
+    (updates, newmUpdateId) <- Instances.getUpdates mUpdateId
     return (WrapUpdate <$> updates, Init newmUpdateId)
   sendMessage :: MTrans m => WrapUpdate -> [Label] -> m ()
-  sendMessage (WrapUpdate update) btns = Internal.sendMessage update btns
+  sendMessage (WrapUpdate update) btns = Instances.sendMessage update btns

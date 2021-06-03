@@ -4,7 +4,7 @@ where
 import Common.Types ( IntId, LBS )
 import Data.Aeson ( encode, object, Value(Array), KeyValue((.=)) )
 import GHC.Exts (IsList (fromList))
-import VK.Update ( GroupId, OwnerId ) 
+import Messenger.Update.VK.Types ( GroupId, OwnerId ) 
 
 keyboard :: [String] -> LBS
 keyboard strs =

@@ -4,7 +4,7 @@ import Common.Functions (template)
 import Common.Types ( ChatId, Command(..), Label, Message )
 import Interface.Class (IUpdate, MCache)
 import qualified Interface.MCache.Exports as Cache
-import qualified Interface.Messenger.IUpdate as Update
+import qualified Messenger.Update.Class as Update
 
 toMessageCommand :: String -> Either Message Command
 toMessageCommand str =

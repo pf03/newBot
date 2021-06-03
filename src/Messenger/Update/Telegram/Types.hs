@@ -2,11 +2,11 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
-module Telegram.Update where
+module Messenger.Update.Telegram.Types where
 
 import Common.Types (ChatId, Command, FileId, IntId, Message, StrId)
 import Interface.Class ( IUpdate ) 
-import qualified Interface.Messenger.IUpdate as IUpdate
+import qualified Messenger.Update.Class as Class
 
 -----------------------------Types---------------------------------------------
 -- Update matches one element of the root json array

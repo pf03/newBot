@@ -1,4 +1,4 @@
-module Interface.Messenger.IUpdate where
+module Messenger.Update.Class where
 
 import Common.Types (ChatId, Command, Message)
 

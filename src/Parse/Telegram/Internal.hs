@@ -9,7 +9,7 @@ import Data.Aeson (Object, (.:), (.:?))
 import Data.Aeson.Types (Parser)
 import qualified Logic.Logic as Logic
 import Parse.Internal (mwithArrayItem, mwithItem, withArrayItem, withArraymItem)
-import qualified Telegram.Update as Update
+import qualified Messenger.Update.Telegram.Types as Update
 
 type OResultItem = Object
 

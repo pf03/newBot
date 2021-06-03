@@ -5,9 +5,9 @@ import Common.Convert ((<:>), (<:?>))
 import Interface.Class (MError)
 import qualified Interface.MError.Exports as Error
 import Network.HTTP.Simple (Query)
-import qualified Telegram.API as API
+import qualified Messenger.API.Telegram.Types as API
 import qualified Telegram.Encode as Encode
-import qualified Telegram.Update as Update
+import qualified Messenger.Update.Telegram.Types as Update
 
 getUpdatesQuery :: Maybe UpdateId -> TimeOut -> Query
 getUpdatesQuery moffset timeout = "timeout" <:> timeout ++ "offset" <:?> moffset

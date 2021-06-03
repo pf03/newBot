@@ -4,13 +4,13 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
-module VK.Bot.Types (Pointer (..)) where
+module Messenger.Bot.VK.Types (Pointer (..)) where
 
 import Common.Types (Label, UpdateId)
 import Interface.Class (IBot, IUpdate, MTrans)
-import qualified Interface.Messenger.IBot as IBot
-import qualified VK.Bot.Internal as Internal
-import qualified VK.Update as Update
+import qualified Messenger.Bot.Class as Class
+import qualified Messenger.Bot.VK.Instances as Instances
+import qualified Messenger.Update.VK.Types as Update
 import Prelude hiding (init)
 -----------------------------Types---------------------------------------------
 data Pointer = Pointer
@@ -23,15 +23,15 @@ newtype WrapUpdate = WrapUpdate Update.Update deriving newtype (IUpdate)
 -----------------------------Instance------------------------------------------
 instance IBot Pointer WrapInit WrapUpdate where
   getInit :: MTrans m => Pointer -> m WrapInit
-  getInit _ = WrapInit <$> Internal.getInit
+  getInit _ = WrapInit <$> Instances.getInit
 
   getmUpdateId :: WrapInit -> Maybe UpdateId
   getmUpdateId (WrapInit init) = Just $ Update.ts init
 
   getUpdates :: MTrans m => WrapInit -> m ([WrapUpdate], WrapInit)
   getUpdates (WrapInit init) = do
-    (updates, newInit) <- Internal.getUpdates init
+    (updates, newInit) <- Instances.getUpdates init
     return (WrapUpdate <$> updates, WrapInit newInit)
 
   sendMessage :: MTrans m => WrapUpdate -> [Label] -> m ()
-  sendMessage (WrapUpdate update) = Internal.sendMessage update
+  sendMessage (WrapUpdate update) = Instances.sendMessage update
