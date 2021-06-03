@@ -11,7 +11,7 @@ import qualified Interface.Messenger.IBot as IBot
 import qualified Logic.Logic as Logic
 import qualified System.Console.ANSI as Color (Color (..))
 import Prelude hiding (init)
-import Control.Monad (forM_)
+import Control.Monad ( replicateM_ )
 
 -- | Run bot application
 application :: (MTrans m, IBot pointer init _update) => pointer -> m ()
@@ -26,15 +26,15 @@ longPolling :: (MTrans m, IBot pointer init update) => pointer -> init -> m ()
 longPolling pointer init = do
   Log.setSettings Color.Cyan True "longPolling"
   (updates, newInit) <- IBot.getUpdates init
-  calcSendMesages updates
+  calcSendMessages updates
   writeCache newInit
   longPolling pointer newInit
 
 -- | Response to all users
-calcSendMesages :: (MTrans m, IBot _pointer _init update) => [update] -> m ()
-calcSendMesages = mapM_ $ \update -> do
-  list <- Logic.answer update
-  forM_ list $ uncurry IBot.sendMessage
+calcSendMessages :: (MTrans m, IBot _pointer _init update) => [update] -> m ()
+calcSendMessages = mapM_ $ \update -> do
+  (newUpdate, btns, repeatNumber) <- Logic.evalAnswer update
+  replicateM_ repeatNumber $ IBot.sendMessage newUpdate btns
 
 writeCache :: (MTrans m, IBot _pointer init _update) => init -> m ()
 writeCache init = do

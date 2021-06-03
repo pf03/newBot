@@ -7,7 +7,7 @@ module VK.Update where
 
 import GHC.Generics (Generic)
 import Data.Aeson ( FromJSON, ToJSON )
-import Common.Types (ChatId, Command, IntId, ItemName, Key, Message, Url)
+import Common.Types ( ChatId, Command, IntId, ItemName, Key, Message, Url )
 import Interface.Class ( IUpdate ) 
 import qualified Interface.Messenger.IUpdate as Update 
 

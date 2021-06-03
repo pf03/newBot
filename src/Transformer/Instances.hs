@@ -83,11 +83,11 @@ configToStates config =
    in for configApps $ \configApp0 ->
         let cache0 =
               Cache.Cache
-                { Cache.configApp = configApp0,
-                  Cache.configText = Config.text config,
-                  Cache.changed = False,
-                  Cache.defaultRepeatNumber = Config.defaultRepeatNumber config
-                }
+              { Cache.configApp = configApp0,
+                Cache.configText = Config.text config,
+                Cache.changed = False,
+                Cache.defaultRepeatNumber = Config.defaultRepeatNumber config
+              }
          in State
               { cache = cache0,
                 configLog = Config.log config,
