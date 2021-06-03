@@ -16,8 +16,8 @@ import qualified Interface.Messenger.IAPI as API
 import qualified Network.HTTP.Simple as HTTP
 
 -- | Low level wrapper for request
-send :: (MLog m, MIOError m) => HTTP.Request -> Bool -> m LBS
-send request save = do
+sendRequest :: (MLog m, MIOError m) => HTTP.Request -> Bool -> m LBS
+sendRequest request save = do
   response <- getResponse
   let status = HTTP.getResponseStatusCode response
   if status == 200
@@ -48,16 +48,16 @@ send request save = do
         Right response -> return response
 
 -- | High level wrapper for API request
-api :: (IAPI api, MCache m, MIOError m, MLog m) => api -> HTTP.Query -> Bool -> m LBS
-api api0 query save = do
+sendApiRequest :: (IAPI api, MCache m, MIOError m, MLog m) => api -> HTTP.Query -> Bool -> m LBS
+sendApiRequest api query save = do
   host <- Cache.getHost
   token <- Cache.getToken
-  let path = API.getPath token api0
-  let request = build host path query
-  send request save
+  let path = API.getPath token api
+  let request = buildRequest host path query
+  sendRequest request save
 
-build :: Cache.Host -> Path -> HTTP.Query -> HTTP.Request
-build host path query =
+buildRequest :: Cache.Host -> Path -> HTTP.Query -> HTTP.Request
+buildRequest host path query =
   HTTP.setRequestSecure True $
     HTTP.setRequestMethod "POST" $
       HTTP.setRequestPort 443 $

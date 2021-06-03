@@ -22,8 +22,8 @@ getInit = do
   Log.setSettings Color.Blue True "getInit"
   let api = API.API API.Groups API.GetLongPollServer
   Log.send
-  query <- Query.getLongPollServer 
-  json <- Request.api api query False
+  query <- Query.getLongPollServerQuery 
+  json <- Request.sendApiRequest api query False
   Log.receive
   object <- Parse.getObject json
   Log.receiveData "object" object
@@ -38,11 +38,11 @@ getInit = do
 getUpdates :: MTrans m => Update.Init -> m ([Update.Update], Update.Init)
 getUpdates init@(Update.Init server _ ts) = do
   Log.setSettings Color.Cyan True "getUpdates"
-  let query = Query.longPoll init 25
+  let query = Query.longPollQuery init 25
   (host, path) <- parseServer server
-  let request = Request.build host path query
+  let request = Request.buildRequest host path query
   Log.send
-  json <- Request.send request True -- long polling
+  json <- Request.sendRequest request True -- long polling
   Log.receive
   object <- Parse.getObject json
   Log.receiveData "object" object
@@ -58,10 +58,10 @@ sendMessage :: MTrans m => Update.Update -> [Label] -> m ()
 sendMessage update btns = do
   Log.setSettings Color.Yellow True "sendMessage"
   Log.send
-  query <- Query.sendMessage update btns
+  query <- Query.sendMessageQuery update btns
   Log.debugM update
   Log.receiveData "query" query
-  json <- Request.api (API.API API.Messages API.Send) query False
+  json <- Request.sendApiRequest (API.API API.Messages API.Send) query False
   Log.receive
   object <- Parse.getObject json
   Log.receiveData "object" object

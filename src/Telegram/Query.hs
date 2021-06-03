@@ -1,4 +1,4 @@
-module Telegram.Query (getUpdates, sendMessage) where
+module Telegram.Query where
 
 import Common.Types (Label, TimeOut, UpdateId)
 import Common.Convert ((<:>), (<:?>))
@@ -9,11 +9,11 @@ import qualified Telegram.API as API
 import qualified Telegram.Encode as Encode
 import qualified Telegram.Update as Update
 
-getUpdates :: Maybe UpdateId -> TimeOut -> Query
-getUpdates moffset timeout = "timeout" <:> timeout ++ "offset" <:?> moffset
+getUpdatesQuery :: Maybe UpdateId -> TimeOut -> Query
+getUpdatesQuery moffset timeout = "timeout" <:> timeout ++ "offset" <:?> moffset
 
-sendMessage :: MError m => Update.Update -> [Label] -> m (API.API, Query)
-sendMessage (chatId, entity) btns = do
+sendMessageQuery :: MError m => Update.Update -> [Label] -> m (API.API, Query)
+sendMessageQuery (chatId, entity) btns = do
   api <- getAPI entity
   query <- case entity of
     Update.Message message ->

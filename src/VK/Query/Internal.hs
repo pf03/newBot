@@ -10,24 +10,24 @@ import qualified VK.Update as Update
 import qualified VK.API as API
 import qualified Interface.MCache.Exports as Cache
 
-queryDefault :: Cache.Token -> UserId -> API.Version -> Query
-queryDefault token userId version = "peer_id" <:> userId ++ "access_token" <:> token ++ "v" <:> version
+defaultQuery :: Cache.Token -> UserId -> API.Version -> Query
+defaultQuery token userId version = "peer_id" <:> userId ++ "access_token" <:> token ++ "v" <:> version
 
-queryMessage :: Message -> Query
-queryMessage message = "message" <:> message
+messageQuery :: Message -> Query
+messageQuery message = "message" <:> message
 
-queryAttachments :: [Update.Attachment] -> Query
-queryAttachments attachments = rights eStrQueryItem ++ queryStr
+attachmentsQuery :: [Update.Attachment] -> Query
+attachmentsQuery attachments = rights eStrQueryItem ++ queryStr
   where
     queryStr = if null str then [] else "attachment" <:> str
     str = safeTail $ foldl helper "" eStrQueryItem
-    eStrQueryItem = map queryAttachment attachments
+    eStrQueryItem = map attachmentQuery attachments
     helper :: String -> Either String QueryItem -> String
     helper value1 (Left value2) = template "{0},{1}" [value1, value2]
     helper value _ = value
 
-queryAttachment :: Update.Attachment -> Either String QueryItem
-queryAttachment attachment =
+attachmentQuery :: Update.Attachment -> Either String QueryItem
+attachmentQuery attachment =
   case attachment of
     Update.Sticker stikerId -> Right ("sticker_id", jconvert stikerId)
     Update.Link url -> Right ("content_source", jconvert $ Encode.contentUrl url)
