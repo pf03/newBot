@@ -1,14 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Telegram.Parse.Internal where
+module Parse.Telegram.Internal where
 
 import Common.Types (ChatId, UpdateId)
 import Control.Applicative (Alternative ((<|>)))
 import Data.Aeson (Object, (.:), (.:?))
 import Data.Aeson.Types (Parser)
 import qualified Logic.Logic as Logic
-import Logic.Parse.Internal (mwithArrayItem, mwithItem, withArrayItem, withArraymItem)
+import Parse.Internal (mwithArrayItem, mwithItem, withArrayItem, withArraymItem)
 import qualified Telegram.Update as Update
 
 type OResultItem = Object

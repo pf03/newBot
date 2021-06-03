@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 
-module Logic.Parse.Internal where
+module Parse.Internal where
 
 import Common.Types ( Key ) 
 import Data.Aeson ( (.:), (.:?), FromJSON(parseJSON), Object, Value(Object) )

@@ -1,4 +1,4 @@
-module VK.Parse.Internal where
+module Parse.VK.Internal where
 
 import Common.Types (UpdateId, UserId)
 import Data.Aeson (Object, (.:), (.:?))
@@ -6,7 +6,7 @@ import Data.Aeson.Types (Parser)
 import Data.Maybe (fromMaybe)
 import Data.Text (pack)
 import qualified Logic.Logic as Logic
-import Logic.Parse.Internal (mwithArrayItem, parseJSONo, withArraymItem)
+import Parse.Internal (mwithArrayItem, parseJSONo, withArraymItem)
 import Text.Read (readEither)
 import qualified VK.Update as Update
 

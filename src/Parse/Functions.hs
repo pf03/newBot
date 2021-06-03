@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 
-module Logic.Parse.Functions where
+module Parse.Functions where
 
 import Common.Types (LBS)
 import Data.Aeson (FromJSON, Object, Value, eitherDecode)

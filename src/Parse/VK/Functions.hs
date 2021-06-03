@@ -1,10 +1,10 @@
-module VK.Parse.Functions where
+module Parse.VK.Functions where
 
 import Common.Types (UpdateId)
 import Data.Aeson (Object)
 import Interface.Class (MError)
-import Logic.Parse.Internal (parseE)
-import VK.Parse.Internal (parseInit, parseUpdateId, parseUpdates)
+import Parse.Internal (parseE)
+import Parse.VK.Internal (parseInit, parseUpdateId, parseUpdates)
 import qualified VK.Update as Update
 
 init :: MError m => Object -> m Update.Init

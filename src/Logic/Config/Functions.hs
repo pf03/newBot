@@ -11,7 +11,7 @@ import Logic.Config.Internal
     checkUniqueNames,
   )
 import Logic.Config.Types (Config)
-import qualified Logic.Parse.Functions as Parse (eDecode)
+import qualified Parse.Functions as Parse (eDecode)
 import System.IO.Error (isDoesNotExistError)
 
 readConfig :: MIOError m => m Config
