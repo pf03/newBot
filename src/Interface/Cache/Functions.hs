@@ -1,25 +1,19 @@
 module Interface.Cache.Functions where
 
-import Common.Types (ChatId, UpdateId)
+import Common.Types ( UpdateId, ChatId, Host, Changed )
 import qualified Data.Map.Internal as M
 import Interface.Cache.Class (MCache (..))
-import Interface.Cache.Types
-  ( App,
-    Cache (changed, configApp, configText, defaultRepeatNumber),
-    Changed,
-    ConfigApp (app, groupId, host, repeatNumber, token, updateId, version),
-    ConfigText,
-    Host,
-  )
+import Interface.Cache.Types ( Cache(..) )
+import qualified Interface.Cache.Config.Types as Config
 
 getCacheChanged :: MCache m => m Changed
-getCacheChanged = getsCache changed
+getCacheChanged = getsCache cacheChanged
 
 setCacheChanged :: MCache m => m ()
-setCacheChanged = modifyCache $ \cache -> cache {changed = True}
+setCacheChanged = modifyCache $ \cache -> cache {cacheChanged = True}
 
 resetCacheChanged :: MCache m => m ()
-resetCacheChanged = modifyCache $ \cache -> cache {changed = False}
+resetCacheChanged = modifyCache $ \cache -> cache {cacheChanged = False}
 
 getsCache :: MCache m => (Cache -> a) -> m a
 getsCache f = f <$> getCache
@@ -29,47 +23,47 @@ modifyCache f = do
   cache <- getCache
   setCache $ f cache
 
-getConfigApp :: MCache m => m ConfigApp
-getConfigApp = getsCache configApp
+getConfigApp :: MCache m => m Config.ConfigApp
+getConfigApp = getsCache cacheConfigApp
 
 getHost :: MCache m => m Host
-getHost = host <$> getConfigApp
+getHost = Config.appHost <$> getConfigApp
 
 getToken :: MCache m => m Host
-getToken = token <$> getConfigApp
+getToken = Config.appToken <$> getConfigApp
 
 getGroupId :: MCache m => m Int
-getGroupId = groupId <$> getConfigApp
+getGroupId = Config.appGroupId <$> getConfigApp
 
-getApp :: MCache m => m App
-getApp = app <$> getConfigApp
+getApp :: MCache m => m Config.App
+getApp = Config.app <$> getConfigApp
 
 getAPIVersion :: MCache m => m String
-getAPIVersion = version <$> getConfigApp
+getAPIVersion = Config.appVersion <$> getConfigApp
 
-setConfigApp :: MCache m => ConfigApp -> m ()
-setConfigApp ca = modifyCache $ \cache -> cache {configApp = ca}
+setConfigApp :: MCache m => Config.ConfigApp -> m ()
+setConfigApp configApp = modifyCache $ \cache -> cache {cacheConfigApp = configApp}
 
-getConfigText :: MCache m => m ConfigText
-getConfigText = getsCache configText
+getConfigText :: MCache m => m Config.ConfigText
+getConfigText = getsCache cacheConfigText
 
 getmUpdateId :: MCache m => m (Maybe UpdateId)
-getmUpdateId = updateId <$> getConfigApp
+getmUpdateId = Config.appUpdateId <$> getConfigApp
 
 -- updateId and repeatNumber only can be changed
 setmUpdateId :: MCache m => Maybe UpdateId -> m ()
 setmUpdateId mUpdateId = do
   setCacheChanged
-  configApp0 <- getConfigApp
-  setConfigApp configApp0 {updateId = mUpdateId}
+  configApp <- getConfigApp
+  setConfigApp configApp {Config.appUpdateId = mUpdateId}
 
 getRepeatNumbers :: MCache m => m (M.Map ChatId Int)
-getRepeatNumbers = repeatNumber <$> getConfigApp
+getRepeatNumbers = Config.appRepeatNumber <$> getConfigApp
 
 setRepeatNumbers :: MCache m => M.Map ChatId Int -> m ()
 setRepeatNumbers repeatNumbers = do
-  configApp0 <- getConfigApp
-  setConfigApp configApp0 {repeatNumber = repeatNumbers}
+  configApp <- getConfigApp
+  setConfigApp configApp {Config.appRepeatNumber = repeatNumbers}
 
 getmRepeatNumber :: MCache m => ChatId -> m (Maybe Int)
 getmRepeatNumber chatId = M.lookup chatId <$> getRepeatNumbers
@@ -78,7 +72,7 @@ getRepeatNumber :: MCache m => ChatId -> m Int
 getRepeatNumber chatId = do
   mrepeatNumber <- getmRepeatNumber chatId
   case mrepeatNumber of
-    Nothing -> getsCache defaultRepeatNumber
+    Nothing -> getsCache cacheDefaultRepeatNumber
     Just repeatNumber0 -> return repeatNumber0
 
 setRepeatNumber :: MCache m => ChatId -> Int -> m ()

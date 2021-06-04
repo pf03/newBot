@@ -3,7 +3,7 @@
 
 module Logic.Request where
 
-import Common.Types (LBS, Path)
+import Common.Types ( Path, LBS, Host )
 import Control.Concurrent (threadDelay)
 import Control.Monad.State.Lazy (when)
 import qualified Data.ByteString.Char8 as BC
@@ -56,7 +56,7 @@ sendApiRequest api query save = do
   let request = buildRequest host path query
   sendRequest request save
 
-buildRequest :: Cache.Host -> Path -> HTTP.Query -> HTTP.Request
+buildRequest :: Host -> Path -> HTTP.Query -> HTTP.Request
 buildRequest host path query =
   HTTP.setRequestSecure True $
     HTTP.setRequestMethod "POST" $

@@ -37,3 +37,9 @@ type Url = String
 type ItemName = String
 
 type TimeOut = Int -- time out long polling
+
+type Token = String
+
+type Host = String
+
+type Changed = Bool

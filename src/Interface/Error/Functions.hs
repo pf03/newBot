@@ -1,9 +1,10 @@
 module Interface.Error.Functions where
 
+import Common.Functions ( template )
 import qualified Control.Exception as E
 import Control.Monad.Except ( MonadIO(liftIO) ) 
 import Interface.Error.Class ( MError(..), MIOError ) 
-import Interface.Error.Types ( Error(SomeError, Exit, IOError) )
+import Interface.Error.Types ( Error(ConfigError, Exit, IOError, SomeError) )
 import Control.Concurrent.Async ( AsyncCancelled )
 
 -----------------------------MError--------------------------------------------
@@ -45,3 +46,6 @@ liftEIO m = do
     iohandler err = return . Left . IOError . show $ err
     otherhandler :: E.SomeException -> IO (Either Error a)
     otherhandler err = return . Left . SomeError . show $ err
+
+throwConfig :: (MError m) => String -> [String] -> m a
+throwConfig str args = throw $ ConfigError $ template str args

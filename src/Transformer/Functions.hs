@@ -11,7 +11,7 @@ import Transformer.Types (Transformer)
 run :: Show a => Transformer a -> IO ()
 run m = runExceptT_ $ do
   config <- runConfig
-  if Config.forks config
+  if Config.configForks config
     then do
       let states = configToStates config
       liftIO $

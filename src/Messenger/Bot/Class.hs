@@ -4,7 +4,7 @@
 module Messenger.Bot.Class where
 
 import Common.Types (Label, UpdateId)
-import MTrans (MTrans)
+import Interface.MTrans (MTrans)
 import Messenger.Update.Class (IUpdate)
 
 class (IUpdate update) => IBot pointer init update | pointer -> init, init -> update, update -> pointer where

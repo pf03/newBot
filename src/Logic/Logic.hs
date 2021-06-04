@@ -4,6 +4,7 @@ import Common.Functions (template)
 import Common.Types ( ChatId, Command(..), Label, Message )
 import Class (IUpdate, MCache)
 import qualified Interface.Cache.Exports as Cache
+import qualified Interface.Cache.Config.Exports as Config
 import qualified Messenger.Update.Class as Update
 
 toMessageCommand :: String -> Either Message Command
@@ -35,7 +36,7 @@ evalAnswer update = do
 
 evalCommandAnswer :: (MCache m) => ChatId -> Command -> m (Message, [Label])
 evalCommandAnswer chatId command = do
-  Cache.ConfigText helpText repeatText unknownText buttonText <- Cache.getConfigText
+  Config.ConfigText helpText repeatText unknownText buttonText <- Cache.getConfigText
   repeatNumber <- Cache.getRepeatNumber chatId
   case command of
     Help -> return (helpText, [])

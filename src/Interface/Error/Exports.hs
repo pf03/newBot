@@ -6,6 +6,7 @@ import Interface.Error.Functions as Functions
     catchEither,
     liftE,
     liftEIO,
+    throwConfig,
     toEither,
   )
 import Interface.Error.Types as Types (Error (..))

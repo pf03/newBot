@@ -1,6 +1,7 @@
 module Main where
 
 import qualified Logic.App as App (application)
+import qualified Interface.Cache.Config.Exports as Config
 import qualified Interface.Cache.Exports as Cache
 import Class ( MTrans)
 import qualified Transformer.Exports as Transformer
@@ -18,5 +19,5 @@ switchApplication :: MTrans m => m ()
 switchApplication = do
   app <- Cache.getApp
   case app of
-    Cache.VK -> App.application VK.Pointer
-    Cache.Telegram -> App.application Telegram.Pointer
+    Config.VK -> App.application VK.Pointer
+    Config.Telegram -> App.application Telegram.Pointer

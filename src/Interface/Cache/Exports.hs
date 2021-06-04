@@ -23,12 +23,4 @@ import Interface.Cache.Functions as Functions
     setRepeatNumbers,
     setmUpdateId,
   )
-import Interface.Cache.Types as Types
-  ( App (..),
-    Cache (..),
-    Changed,
-    ConfigApp (..),
-    ConfigText (..),
-    Host,
-    Token,
-  )
+import Interface.Cache.Types as Types ( Cache(..) )

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9b2ed7b3d69e7dff186f79180faba0184c8371954f7adff4eb2006f739921a97
+-- hash: 8fe0977d3b46bb58b1d7a7a47400bea53d138dad1a36b675c22f4ce85777851d
 
 name:           bot
 version:        0.1.0.0
@@ -49,6 +49,7 @@ library
       Interface.Log.Functions
       Interface.Log.Test
       Interface.Log.Types
+      Interface.MTrans
       Logic.App
       Logic.Logic
       Logic.Request
@@ -68,7 +69,6 @@ library
       Messenger.Update.Class
       Messenger.Update.Telegram.Types
       Messenger.Update.VK.Types
-      MTrans
       Parse.Functions
       Parse.Internal
       Parse.Telegram.Exports

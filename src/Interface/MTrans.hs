@@ -1,4 +1,4 @@
-module MTrans where
+module Interface.MTrans where
 
 import Interface.Cache.Class as Cache (MIOCache)
 import Interface.Error.Class as Error (MIOError)

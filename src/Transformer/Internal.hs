@@ -16,13 +16,13 @@ runConfig = do
     Log.critical Log.defaultConfig logSettings "Error config read while run the transfomer:"
     Log.critical Log.defaultConfig logSettings $ show err
     Error.throw err
-  let logConfig = Config.log config
+  let logConfig = Config.configLog config
   Log.info logConfig logSettings "Config read successfully..."
   return config
 
 showValue :: Show a => Config.Config -> State -> Transformer a -> ExceptT Error.Error IO ()
 showValue config state m = do
-  let logConfig = Config.log config
+  let logConfig = Config.configLog config
   (a, _) <- Error.catch (runStateT (getTransformer m) state) $ \err -> do
     Log.error logConfig logSettings "Application error: "
     Log.error logConfig logSettings $ show err

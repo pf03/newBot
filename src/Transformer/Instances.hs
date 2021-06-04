@@ -63,42 +63,43 @@ saveState state = do
 
 configToState :: Config.Config -> State
 configToState config =
-  let configApp0 = head $ filter (\configApp1 -> Cache.name configApp1 == Config.name config) (Config.apps config)
+  let configApp0 = head $ 
+        filter (\configApp1 -> Config.appName configApp1 == Config.configName config) (Config.configApps config)
       cache0 =
         Cache.Cache
-          { Cache.configApp = configApp0,
-            Cache.configText = Config.text config,
-            Cache.changed = False,
-            Cache.defaultRepeatNumber = Config.defaultRepeatNumber config
+          { Cache.cacheConfigApp = configApp0,
+            Cache.cacheConfigText = Config.configText config,
+            Cache.cacheChanged = False,
+            Cache.cacheDefaultRepeatNumber = Config.configDefaultRepeatNumber config
           }
    in State
         { cache = cache0,
-          configLog = Config.log config,
+          configLog = Config.configLog config,
           logSettings = Log.defaultSettings
         }
 
 configToStates :: Config.Config -> [State]
 configToStates config =
-  let configApps = filter Cache.enable (Config.apps config)
+  let configApps = filter Config.appEnable (Config.configApps config)
    in for configApps $ \configApp0 ->
         let cache0 =
               Cache.Cache
-              { Cache.configApp = configApp0,
-                Cache.configText = Config.text config,
-                Cache.changed = False,
-                Cache.defaultRepeatNumber = Config.defaultRepeatNumber config
+              { Cache.cacheConfigApp = configApp0,
+                Cache.cacheConfigText = Config.configText config,
+                Cache.cacheChanged = False,
+                Cache.cacheDefaultRepeatNumber = Config.configDefaultRepeatNumber config
               }
          in State
               { cache = cache0,
-                configLog = Config.log config,
+                configLog = Config.configLog config,
                 logSettings = Log.defaultSettings
               }
 
 fromState :: Config.Config -> State -> Config.Config
-fromState config state = config {Config.apps = newConfigApps}
+fromState config state = config {Config.configApps = newConfigApps}
   where
-    configApps0 = Config.apps config
+    configApps0 = Config.configApps config
     cache0 = cache state
     newConfigApps =
-      [Cache.configApp cache0]
-        <> filter (\configApp0 -> Cache.name configApp0 /= Cache.name (Cache.configApp cache0)) configApps0
+      [Cache.cacheConfigApp cache0]
+        <> filter (\configApp0 -> Config.appName configApp0 /= Config.appName (Cache.cacheConfigApp cache0)) configApps0

@@ -1,6 +1,6 @@
 module Messenger.Bot.VK.Instances where
 
-import Common.Types ( Path, Label )
+import Common.Types ( Label, Path, Host )
 import Common.Functions ( template)
 import Data.List.Split (splitOn)
 import Data.Maybe (fromMaybe)
@@ -67,7 +67,7 @@ sendMessage update btns = do
   Log.receiveData "object" object
 
 -- "https://lp.vk.com/wh777777777" -> "lp.vk.com" "/wh777777777"
-parseServer :: MError m => String -> m (Cache.Host, Path)
+parseServer :: MError m => String -> m (Host, Path)
 parseServer url = do
   let err =
         Error.QueryError $
