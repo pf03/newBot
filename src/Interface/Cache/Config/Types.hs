@@ -2,11 +2,19 @@
 
 module Interface.Cache.Config.Types where
 
-import Data.Aeson ( FromJSON, ToJSON )
+import Common.Types (ChatId, Host, Token, UpdateId)
+import Data.Aeson
+  ( FromJSON (parseJSON),
+    Options (fieldLabelModifier),
+    ToJSON (toJSON),
+    defaultOptions,
+    genericParseJSON,
+    genericToJSON,
+  )
+import Data.Char (toLower)
+import qualified Data.Map.Internal as M
 import GHC.Generics (Generic)
 import qualified Interface.Log.Exports as Log
-import Common.Types ( UpdateId, ChatId, Host, Token )
-import qualified Data.Map.Internal as M
 
 data App = Telegram | VK deriving (Show, Generic, Eq)
 
@@ -15,8 +23,7 @@ instance ToJSON App
 instance FromJSON App
 
 data Config = Config
-  {
-    configForks :: Bool,
+  { configForks :: Bool,
     configName :: String,
     configDefaultRepeatNumber :: Int,
     configApps :: [ConfigApp],
@@ -25,18 +32,16 @@ data Config = Config
   }
   deriving (Show, Generic)
 
-instance ToJSON Config
-instance FromJSON Config
+instance FromJSON Config where
+  parseJSON = genericParseJSON $ deletePrefixOptions 6
 
--- убрать лишние префиксы и привести к camelCase для FromJSON и toJSON
--- instance FromJSON Config where
---     parseJSON = genericParseJSON defaultOptions {
---         fieldLabelModifier = drop 1 }
+instance ToJSON Config where
+  toJSON = genericToJSON $ deletePrefixOptions 6
 
 data ConfigApp = ConfigApp
   { appEnable :: Bool,
-    appName:: String,
-    app :: App,
+    appName :: String,
+    appApp :: App,
     appHost :: Host,
     appToken :: Token,
     appUpdateId :: Maybe UpdateId,
@@ -46,9 +51,11 @@ data ConfigApp = ConfigApp
   }
   deriving (Show, Generic)
 
-instance FromJSON ConfigApp
+instance FromJSON ConfigApp where
+  parseJSON = genericParseJSON $ deletePrefixOptions 3
 
-instance ToJSON ConfigApp
+instance ToJSON ConfigApp where
+  toJSON = genericToJSON $ deletePrefixOptions 3
 
 data ConfigText = ConfigText
   { textHelp :: String,
@@ -58,6 +65,16 @@ data ConfigText = ConfigText
   }
   deriving (Show, Generic)
 
-instance FromJSON ConfigText
+instance FromJSON ConfigText where
+  parseJSON = genericParseJSON $ deletePrefixOptions 4
 
-instance ToJSON ConfigText
+instance ToJSON ConfigText where
+  toJSON = genericToJSON $ deletePrefixOptions 4
+
+deletePrefixOptions :: Int -> Options
+deletePrefixOptions n = defaultOptions {fieldLabelModifier = deletePrefix n}
+
+deletePrefix :: Int -> String -> String
+deletePrefix n str = case drop n str of
+  x : xs -> toLower x : xs
+  [] -> []

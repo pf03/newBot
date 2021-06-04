@@ -36,7 +36,7 @@ getGroupId :: MCache m => m Int
 getGroupId = Config.appGroupId <$> getConfigApp
 
 getApp :: MCache m => m Config.App
-getApp = Config.app <$> getConfigApp
+getApp = Config.appApp <$> getConfigApp
 
 getAPIVersion :: MCache m => m String
 getAPIVersion = Config.appVersion <$> getConfigApp

@@ -1,7 +1,7 @@
 module Interface.Cache.Config.Internal where
 
 import Class (MError)
-import Common.Functions (checkUnique, template)
+import Common.Functions (checkUnique)
 import Control.Monad (forM_, unless, when)
 import qualified Data.Map.Internal as M
 import Interface.Cache.Config.Types

@@ -1,11 +1,7 @@
-{-# LANGUAGE DeriveGeneric #-}
-
 module Interface.Cache.Types where
 
 import Common.Types ( Changed )
-import Data.Aeson (FromJSON, ToJSON)
-import GHC.Generics (Generic)
-import qualified Interface.Log.Exports as Log
+-- import GHC.Generics (Generic)
 import qualified Interface.Cache.Config.Types as Config
 
 data Cache = Cache
@@ -14,4 +10,4 @@ data Cache = Cache
     cacheDefaultRepeatNumber :: Int,
     cacheChanged :: Changed
   }
-  deriving (Show, Generic)
+  deriving (Show)

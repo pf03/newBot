@@ -1,4 +1,4 @@
-module Common.Color where
+module Interface.Log.Color where
 
 import Common.Functions (ifJust, template)
 import Control.Monad.IO.Class (MonadIO (..))

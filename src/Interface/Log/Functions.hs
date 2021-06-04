@@ -1,6 +1,6 @@
 module Interface.Log.Functions where
 
-import qualified Common.Color as Color
+import qualified Interface.Log.Color as Color
 import Common.Convert (Convert (convert))
 import Common.Functions (putStrLnT, template)
 import Control.Monad (when)
