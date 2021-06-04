@@ -3,14 +3,14 @@ module Messenger.Bot.Telegram.Instances  where
 import Common.Types (Label, UpdateId)
 import Common.Functions (template)
 import Control.Applicative (Alternative ((<|>)))
-import Interface.Class ( MTrans )
-import qualified Interface.MCache.Exports as Cache
-import qualified Interface.MLog.Exports as Log
+import Class ( MTrans )
+import qualified Interface.Cache.Exports as Cache
+import qualified Interface.Log.Exports as Log
 import qualified Logic.Request as Request
 import qualified System.Console.ANSI as Color (Color (..))
 import qualified Messenger.API.Telegram.Types as API
 import qualified Parse.Telegram.Exports as Parse
-import qualified Telegram.Query as Query
+import qualified Logic.Telegram.Query as Query
 import qualified Messenger.Update.Telegram.Types as Update
 
 

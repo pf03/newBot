@@ -9,11 +9,11 @@ import Control.Monad.State.Lazy (MonadIO, MonadState (get), gets, modify, when)
 import qualified Data.Aeson.Encode.Pretty as Aeson
 import qualified Data.ByteString.Lazy as L
 import GHC.Generics (Generic)
-import Interface.Class (MCache, MIOError)
-import qualified Interface.MCache.Exports as Cache
-import qualified Interface.MError.Exports as Error
-import qualified Interface.MLog.Exports as Log
-import qualified Logic.Config.Exports as Config
+import Class (MCache, MIOError)
+import qualified Interface.Cache.Exports as Cache
+import qualified Interface.Error.Exports as Error
+import qualified Interface.Log.Exports as Log
+import qualified Interface.Cache.Config.Exports as Config
 
 -- We cannot replace State to Types.hs due to cyclic dependencies
 -- This is the internal structure of Transformer, which is not visible for the external user

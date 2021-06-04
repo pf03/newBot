@@ -4,7 +4,7 @@
 module Messenger.API.VK.Types where
 
 import Data.Char (toLower)
-import Interface.Class ( IAPI )
+import Class ( IAPI )
 import qualified Messenger.API.Class as Class
 
 -----------------------------Types---------------------------------------------

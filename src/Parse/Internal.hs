@@ -7,8 +7,8 @@ import Data.Aeson ( (.:), (.:?), FromJSON(parseJSON), Object, Value(Object) )
 import Data.Aeson.Types (Parser, parseEither)
 import Data.Maybe (fromJust, isJust)
 import Data.Text (pack)
-import Interface.Class (MError)
-import qualified Interface.MError.Exports as Error
+import Class (MError)
+import qualified Interface.Error.Exports as Error
 
 --All functions in Parser monad are internal
 

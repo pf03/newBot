@@ -5,7 +5,7 @@
 module Messenger.Update.Telegram.Types where
 
 import Common.Types (ChatId, Command, FileId, IntId, Message, StrId)
-import Interface.Class ( IUpdate ) 
+import Class ( IUpdate ) 
 import qualified Messenger.Update.Class as Class
 
 -----------------------------Types---------------------------------------------

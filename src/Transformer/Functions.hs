@@ -3,7 +3,7 @@ module Transformer.Functions where
 import Control.Concurrent (threadDelay)
 import Control.Concurrent.Async (forConcurrently_)
 import Control.Monad.State.Lazy (MonadIO (liftIO))
-import qualified Logic.Config.Exports as Config
+import qualified Interface.Cache.Config.Exports as Config
 import Transformer.Instances (configToState, configToStates)
 import Transformer.Internal (runConfig, runExceptT_, showValue)
 import Transformer.Types (Transformer)

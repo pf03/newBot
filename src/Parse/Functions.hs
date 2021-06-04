@@ -4,8 +4,8 @@ module Parse.Functions where
 
 import Common.Types (LBS)
 import Data.Aeson (FromJSON, Object, Value, eitherDecode)
-import Interface.Class (MError)
-import qualified Interface.MError.Exports as Error
+import Class (MError)
+import qualified Interface.Error.Exports as Error
 
 getObject :: MError m => LBS -> m Object
 getObject bs = Error.catchEither (eitherDecode bs) Error.ParseError

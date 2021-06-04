@@ -4,15 +4,15 @@ import Common.Types ( Path, Label )
 import Common.Functions ( template)
 import Data.List.Split (splitOn)
 import Data.Maybe (fromMaybe)
-import Interface.Class ( MTrans, MError )
-import qualified Interface.MCache.Exports as Cache
-import qualified Interface.MError.Exports as Error
-import qualified Interface.MLog.Exports as Log
+import Class ( MTrans, MError )
+import qualified Interface.Cache.Exports as Cache
+import qualified Interface.Error.Exports as Error
+import qualified Interface.Log.Exports as Log
 import qualified Logic.Request as Request
 import qualified System.Console.ANSI as Color (Color (..))
 import qualified Messenger.API.VK.Types as API
 import qualified Parse.VK.Exports as Parse
-import qualified VK.Query.Functions as Query
+import qualified Logic.VK.Query.Functions as Query
 import qualified Messenger.Update.VK.Types as Update
 import Prelude hiding (init)
 

@@ -4,7 +4,7 @@ module Parse.Telegram.Functions where
 
 import Common.Types ( UpdateId )
 import Data.Aeson ( Object )
-import Interface.Class (MError)
+import Class (MError)
 import Parse.Internal (parseE)
 import Parse.Telegram.Internal (parseUpdateIds, parseUpdates)
 import qualified Messenger.Update.Telegram.Types as Update

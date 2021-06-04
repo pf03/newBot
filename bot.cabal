@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 6244e30226cdf236c1b95ea32898e75c20387d2b593926cbbbec05b811fd23b4
+-- hash: 9b2ed7b3d69e7dff186f79180faba0184c8371954f7adff4eb2006f739921a97
 
 name:           bot
 version:        0.1.0.0
@@ -27,33 +27,36 @@ source-repository head
 
 library
   exposed-modules:
-      App.LogTest
-      App.Main
+      Class
       Common.Color
       Common.Convert
       Common.Functions
       Common.Types
-      Interface.Class
-      Interface.MCache.Class
-      Interface.MCache.Exports
-      Interface.MCache.Functions
-      Interface.MCache.Types
-      Interface.MError.Class
-      Interface.MError.Exports
-      Interface.MError.Functions
-      Interface.MError.Types
-      Interface.MLog.Class
-      Interface.MLog.Exports
-      Interface.MLog.Functions
-      Interface.MLog.Types
-      Interface.MTrans
-      Logic.Bot
-      Logic.Config.Exports
-      Logic.Config.Functions
-      Logic.Config.Internal
-      Logic.Config.Types
+      Interface.Cache.Class
+      Interface.Cache.Config.Exports
+      Interface.Cache.Config.Functions
+      Interface.Cache.Config.Internal
+      Interface.Cache.Config.Types
+      Interface.Cache.Exports
+      Interface.Cache.Functions
+      Interface.Cache.Types
+      Interface.Error.Class
+      Interface.Error.Exports
+      Interface.Error.Functions
+      Interface.Error.Types
+      Interface.Log.Class
+      Interface.Log.Exports
+      Interface.Log.Functions
+      Interface.Log.Test
+      Interface.Log.Types
+      Logic.App
       Logic.Logic
       Logic.Request
+      Logic.Telegram.Encode
+      Logic.Telegram.Query
+      Logic.VK.Encode
+      Logic.VK.Query.Functions
+      Logic.VK.Query.Internal
       Messenger.API.Class
       Messenger.API.Telegram.Types
       Messenger.API.VK.Types
@@ -65,6 +68,7 @@ library
       Messenger.Update.Class
       Messenger.Update.Telegram.Types
       Messenger.Update.VK.Types
+      MTrans
       Parse.Functions
       Parse.Internal
       Parse.Telegram.Exports
@@ -73,16 +77,11 @@ library
       Parse.VK.Exports
       Parse.VK.Functions
       Parse.VK.Internal
-      Telegram.Encode
-      Telegram.Query
       Transformer.Exports
       Transformer.Functions
       Transformer.Instances
       Transformer.Internal
       Transformer.Types
-      VK.Encode
-      VK.Query.Functions
-      VK.Query.Internal
   other-modules:
       Paths_bot
   hs-source-dirs:

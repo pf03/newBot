@@ -7,7 +7,7 @@
 module Messenger.Bot.VK.Types (Pointer (..)) where
 
 import Common.Types (Label, UpdateId)
-import Interface.Class (IBot, IUpdate, MTrans)
+import Class (IBot, IUpdate, MTrans)
 import qualified Messenger.Bot.Class as Class
 import qualified Messenger.Bot.VK.Instances as Instances
 import qualified Messenger.Update.VK.Types as Update

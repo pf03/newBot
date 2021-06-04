@@ -2,10 +2,10 @@ module Transformer.Internal where
 
 import Control.Monad.Except (ExceptT, runExceptT)
 import Control.Monad.State.Lazy (StateT (runStateT), void)
-import Interface.Class (MIOError)
-import qualified Interface.MError.Exports as Error
-import qualified Interface.MLog.Exports as Log
-import qualified Logic.Config.Exports as Config
+import Class (MIOError)
+import qualified Interface.Error.Exports as Error
+import qualified Interface.Log.Exports as Log
+import qualified Interface.Cache.Config.Exports as Config
 import qualified System.Console.ANSI as Color
 import Transformer.Instances (State)
 import Transformer.Types (Transformer (getTransformer))

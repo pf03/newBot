@@ -8,10 +8,10 @@ import Control.Concurrent (threadDelay)
 import Control.Monad.State.Lazy (when)
 import qualified Data.ByteString.Char8 as BC
 import qualified Data.ByteString.Lazy as L
-import Interface.Class (IAPI, MCache, MIOError, MLog)
-import qualified Interface.MCache.Exports as Cache
-import qualified Interface.MError.Exports as Error
-import qualified Interface.MLog.Exports as Log
+import Class (IAPI, MCache, MIOError, MLog)
+import qualified Interface.Cache.Exports as Cache
+import qualified Interface.Error.Exports as Error
+import qualified Interface.Log.Exports as Log
 import qualified Messenger.API.Class as API
 import qualified Network.HTTP.Simple as HTTP
 
