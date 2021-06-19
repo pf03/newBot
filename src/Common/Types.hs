@@ -5,9 +5,7 @@
 
 module Common.Types where
 
-import Common.Convert
-import qualified Data.ByteString.Char8 as BC
-import qualified Data.ByteString.Lazy.Char8 as LC
+import Common.Convert ( Convert )
 import GHC.Generics (Generic)
 import Data.Aeson ( FromJSON, ToJSON, ToJSONKey, FromJSONKey )
 import Data.String ( IsString )

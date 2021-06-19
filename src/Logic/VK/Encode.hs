@@ -1,13 +1,12 @@
-module Logic.VK.Encode
-where
+module Logic.VK.Encode where
 
-import Common.Convert ( LBS ) 
+import qualified Data.ByteString.Lazy.Char8 as LC
 import Common.Types ( Url, IntId, Label ) --( IntId, Label )
 import Data.Aeson ( encode, object, Value(Array), KeyValue((.=)) )
 import GHC.Exts (IsList (fromList))
 import Messenger.Update.VK.Types ( GroupId, OwnerId ) 
 
-keyboard :: [Label] -> LBS
+keyboard :: [Label] -> LC.ByteString
 keyboard strs =
   encode $
     object
@@ -26,7 +25,7 @@ keyboard strs =
               "label" .= str
             ]
       ]
-contentUrl :: Url -> LBS
+contentUrl :: Url -> LC.ByteString
 contentUrl str =
   encode $
     object
@@ -34,7 +33,7 @@ contentUrl str =
         "url" .= str
       ]
 
-contentMessage :: OwnerId -> GroupId -> IntId -> LBS
+contentMessage :: OwnerId -> GroupId -> IntId -> LC.ByteString
 contentMessage ownerId peerId messageId =
   encode $
     object

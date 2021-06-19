@@ -11,17 +11,13 @@ import Data.Text (pack)
 import Data.Text.Encoding (encodeUtf8)
 import Network.HTTP.Simple (Query)
 
-type BS = BC.ByteString
-
-type LBS = LC.ByteString
-
 class Convert a where
-  convert :: a -> BS
+  convert :: a -> BC.ByteString
 
 instance Convert String where
   convert = encodeUtf8 . pack -- encodeUtf8 for correct cyrillic encoding
 
-instance Convert LBS where
+instance Convert LC.ByteString where
   convert = BC.pack . LC.unpack
 
 instance Convert Int where

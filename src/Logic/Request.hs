@@ -3,7 +3,7 @@
 
 module Logic.Request where
 
-import Common.Convert ( LBS )
+import qualified Data.ByteString.Lazy.Char8 as LC
 import Common.Types ( Host(..), Path(..) )
 import Control.Concurrent (threadDelay)
 import Control.Monad.State.Lazy (when)
@@ -17,7 +17,7 @@ import qualified Messenger.API.Class as API
 import qualified Network.HTTP.Simple as HTTP
 
 -- | Low level wrapper for request
-sendRequest :: (MLog m, MIOError m) => HTTP.Request -> Bool -> m LBS
+sendRequest :: (MLog m, MIOError m) => HTTP.Request -> Bool -> m LC.ByteString
 sendRequest request save = do
   response <- getResponse
   let status = HTTP.getResponseStatusCode response
@@ -34,7 +34,7 @@ sendRequest request save = do
       Log.errorM $ show response
       Error.throw $ Error.QueryError "Request failed with error"
   where
-    getResponse :: (MLog m, MIOError m) => m (HTTP.Response LBS)
+    getResponse :: (MLog m, MIOError m) => m (HTTP.Response LC.ByteString)
     getResponse = do
       err <- Error.toEither $ Error.liftEIO (HTTP.httpLBS request)
       case err of
@@ -49,7 +49,7 @@ sendRequest request save = do
         Right response -> return response
 
 -- | High level wrapper for API request
-sendApiRequest :: (IAPI api, MCache m, MIOError m, MLog m) => api -> HTTP.Query -> Bool -> m LBS
+sendApiRequest :: (IAPI api, MCache m, MIOError m, MLog m) => api -> HTTP.Query -> Bool -> m LC.ByteString
 sendApiRequest api query save = do
   host <- Cache.getHost
   token <- Cache.getToken
