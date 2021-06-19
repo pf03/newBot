@@ -3,6 +3,7 @@
 
 module Messenger.API.VK.Types where
 
+import Common.Types ( Path(Path) )
 import Data.Char (toLower)
 import Class ( IAPI )
 import qualified Messenger.API.Class as Class
@@ -23,4 +24,4 @@ instance IAPI API where
       (g : gs) = show apiGroup
       (n : ns) = show apiName
 
-  getPath _ api = "/method/" ++ Class.apiName api
+  getPath _ api = Path $ "/method/" ++ Class.apiName api

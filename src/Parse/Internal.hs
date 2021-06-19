@@ -2,7 +2,7 @@
 
 module Parse.Internal where
 
-import Common.Types ( Key ) 
+import Common.Types ( Key(..) )
 import Data.Aeson ( (.:), (.:?), FromJSON(parseJSON), Object, Value(Object) )
 import Data.Aeson.Types (Parser, parseEither)
 import Data.Maybe (fromJust, isJust)
@@ -21,7 +21,7 @@ parseJSONo = parseJSON . Object
 
 -- | Wrapper for working with optional field
 mwithItem :: Key -> (Object -> Parser a) -> Object -> Parser (Maybe a)
-mwithItem key f object = do
+mwithItem (Key key) f object = do
   mobject1 <- object .:? pack key
   case mobject1 of
     Nothing -> return Nothing
@@ -29,13 +29,13 @@ mwithItem key f object = do
 
 -- | Wrapper for working with internal lists
 withArrayItem :: Key -> (Object -> Parser a) -> Object -> Parser [a]
-withArrayItem key f object = do
+withArrayItem (Key key) f object = do
   arr <- object .: pack key
   mapM f arr
 
 -- | Wrapper for working with internal optional lists
 mwithArrayItem :: Key -> (Object -> Parser a) -> Object -> Parser (Maybe [a])
-mwithArrayItem key f object = do
+mwithArrayItem (Key key) f object = do
   marr <- object .:? pack key
   case marr of
     Nothing -> return Nothing

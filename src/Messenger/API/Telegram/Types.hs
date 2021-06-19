@@ -3,8 +3,9 @@
 
 module Messenger.API.Telegram.Types where
 
+import Common.Types ( Token(Token), Path(Path) )
 import Data.Char (toLower)
-import Class (IAPI)
+import Messenger.API.Class ( IAPI )
 import qualified Messenger.API.Class as Class
 
 -----------------------------Types---------------------------------------------
@@ -28,4 +29,4 @@ instance IAPI API where
   apiName api =
     let (x : xs) = show api
      in toLower x : xs
-  getPath token api = "/bot" ++ token ++ "/" ++ Class.apiName api
+  getPath (Token token) api = Path $ "/bot" ++ token ++ "/" ++ Class.apiName api

@@ -2,7 +2,7 @@
 
 module Parse.Functions where
 
-import Common.Types (LBS)
+import Common.Convert (LBS)
 import Data.Aeson (FromJSON, Object, Value, eitherDecode)
 import Class (MError)
 import qualified Interface.Error.Exports as Error

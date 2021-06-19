@@ -1,6 +1,6 @@
 module Messenger.Bot.VK.Instances where
 
-import Common.Types ( Label, Path, Host )
+import Common.Types ( Host(..), Label, Path(..) )
 import Common.Functions ( template)
 import Data.List.Split (splitOn)
 import Data.Maybe (fromMaybe)
@@ -9,7 +9,7 @@ import qualified Interface.Cache.Exports as Cache
 import qualified Interface.Error.Exports as Error
 import qualified Interface.Log.Exports as Log
 import qualified Logic.Request as Request
-import qualified System.Console.ANSI as Color (Color (..))
+import qualified System.Console.ANSI as Color
 import qualified Messenger.API.VK.Types as API
 import qualified Parse.VK.Exports as Parse
 import qualified Logic.VK.Query.Functions as Query
@@ -80,6 +80,6 @@ parseServer url = do
         else do
           let strs1 = splitOn "/" str
           case strs1 of
-            [host, path] -> return (host, '/' : path)
+            [host, path] -> return (Host host, Path $ '/' : path)
             _ -> Error.throw err
     _ -> Error.throw err

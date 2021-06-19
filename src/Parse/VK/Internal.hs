@@ -1,6 +1,6 @@
 module Parse.VK.Internal where
 
-import Common.Types (UpdateId, UserId)
+import Common.Types ( ItemName(ItemName), ChatId(ChatId), UpdateId )
 import Data.Aeson (Object, (.:), (.:?))
 import Data.Aeson.Types (Parser)
 import Data.Maybe (fromMaybe)
@@ -35,12 +35,12 @@ parseUpdate object = do
   case updateType of
     "message_new" -> do
       object1 <- object .: "object"
-      userId <- object1 .: "user_id" :: Parser UserId
+      userId <- object1 .: "user_id"
       body <- object1 .: "body"
       let eMessageCommand = Logic.toMessageCommand body
       mAttachments <- mwithArrayItem "attachments" parseAttachment object1
       let attachments = fromMaybe [] mAttachments
-      return $ Just (userId, Update.Entity eMessageCommand attachments)
+      return $ Just (ChatId userId, Update.Entity eMessageCommand attachments)
     _ -> return Nothing
 
 parseAttachment :: Object -> Parser Update.Attachment
@@ -56,13 +56,13 @@ parseAttachment object = do
     "link" -> parseLink object
     _ -> fail "Unknown attachment"
 
-parseAttachmentItem :: String -> Object -> Parser Update.Attachment
-parseAttachmentItem str object = do
-  item <- object .: pack str
+parseAttachmentItem :: ItemName -> Object -> Parser Update.Attachment
+parseAttachmentItem (ItemName itemName) object = do
+  item <- object .: pack itemName
   itemId <- item .: "id"
   ownerId <- item .: "owner_id"
   accessKey <- item .: "access_key"
-  return $ Update.Item str ownerId itemId accessKey
+  return $ Update.Item (ItemName itemName) ownerId itemId accessKey
 
 parseSticker :: Object -> Parser Update.Attachment
 parseSticker object = do

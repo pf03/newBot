@@ -7,7 +7,7 @@ module Messenger.Update.VK.Types where
 
 import GHC.Generics (Generic)
 import Data.Aeson ( FromJSON, ToJSON )
-import Common.Types ( ChatId, Command, IntId, ItemName, Key, Message, Url )
+import Common.Types ( ItemName, Url,IntId,UserId, Key,ChatId, UpdateId,Command, Message )
 import Class ( IUpdate ) 
 import qualified Messenger.Update.Class as Class 
 
@@ -30,7 +30,7 @@ type OwnerId = Int
 
 type GroupId = Int
 
-data Init = Init {server :: String, key :: String, ts :: Int} deriving (Show, Generic)
+data Init = Init {server :: String, key :: String, ts :: UpdateId} deriving (Show, Generic)
 
 instance FromJSON Init
 

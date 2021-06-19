@@ -1,7 +1,7 @@
 module Logic.VK.Query.Functions where
 
 import qualified Logic.VK.Query.Internal as Internal
-import Common.Types ( TimeOut, Label )
+import Common.Types ( Token(Token), TimeOut, Label ) 
 import Common.Convert((<:>)) 
 import Class (MError, MCache)
 import qualified Interface.Cache.Exports as Cache
@@ -13,7 +13,7 @@ import qualified Messenger.Update.VK.Types as Update
 getLongPollServerQuery :: MCache m => m Query
 getLongPollServerQuery = do
   groupId <- Cache.getGroupId
-  token <- Cache.getToken
+  Token token <- Cache.getToken
   version <- Cache.getAPIVersion
   return $ "group_id" <:> groupId
     ++ "access_token" <:> token

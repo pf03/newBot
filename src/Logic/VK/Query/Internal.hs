@@ -1,6 +1,6 @@
 module Logic.VK.Query.Internal where
 
-import Common.Types ( UserId, Message, Token )
+import Common.Types( Token(..), ItemName(ItemName), Key(Key), ChatId, Message )
 import Common.Functions(template, safeTail) 
 import Common.Convert((<:>), jconvert) 
 import Data.Either (rights)
@@ -9,8 +9,8 @@ import qualified Logic.VK.Encode as Encode (contentUrl)
 import qualified Messenger.Update.VK.Types as Update
 import qualified Messenger.API.VK.Types as API
 
-defaultQuery :: Token -> UserId -> API.Version -> Query
-defaultQuery token userId version = "peer_id" <:> userId ++ "access_token" <:> token ++ "v" <:> version
+defaultQuery :: Token -> ChatId -> API.Version -> Query
+defaultQuery (Token token) userId version = "peer_id" <:> userId ++ "access_token" <:> token ++ "v" <:> version
 
 messageQuery :: Message -> Query
 messageQuery message = "message" <:> message
@@ -32,6 +32,6 @@ attachmentQuery attachment =
     Update.Link url -> Right ("content_source", jconvert $ Encode.contentUrl url)
     Update.Audio ownerId objectId -> Left $ template "audio{0}_{1}" [show ownerId, show objectId]
     Update.Wall ownerId objectId -> Left $ template "wall{0}_{1}" [show ownerId, show objectId]
-    Update.Item itemName ownerId objectId accessKey ->
+    Update.Item (ItemName itemName) ownerId objectId (Key accessKey) ->
       Left $
         template "{3}{0}_{1}_{2}" [show ownerId, show objectId, accessKey, itemName]

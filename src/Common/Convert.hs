@@ -3,13 +3,17 @@
 
 module Common.Convert where
 
-import Common.Types (BS, LBS)
+-- import Common.Types (BS, LBS)
 import Data.Aeson (Object, Value, encode)
 import qualified Data.ByteString.Char8 as BC
 import qualified Data.ByteString.Lazy.Char8 as LC
 import Data.Text (pack)
 import Data.Text.Encoding (encodeUtf8)
 import Network.HTTP.Simple (Query)
+
+type BS = BC.ByteString
+
+type LBS = LC.ByteString
 
 class Convert a where
   convert :: a -> BS

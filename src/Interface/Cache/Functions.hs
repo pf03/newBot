@@ -1,12 +1,12 @@
 module Interface.Cache.Functions where
 
-import Common.Types ( UpdateId, ChatId, Host, Changed )
+import Common.Types (Host, Token, ChatId, UpdateId )
 import qualified Data.Map.Internal as M
 import Interface.Cache.Class (MCache (..))
 import Interface.Cache.Types ( Cache(..) )
 import qualified Interface.Cache.Config.Types as Config
 
-getCacheChanged :: MCache m => m Changed
+getCacheChanged :: MCache m => m Bool
 getCacheChanged = getsCache cacheChanged
 
 setCacheChanged :: MCache m => m ()
@@ -29,7 +29,7 @@ getConfigApp = getsCache cacheConfigApp
 getHost :: MCache m => m Host
 getHost = Config.appHost <$> getConfigApp
 
-getToken :: MCache m => m Host
+getToken :: MCache m => m Token
 getToken = Config.appToken <$> getConfigApp
 
 getGroupId :: MCache m => m Int

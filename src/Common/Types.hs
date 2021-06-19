@@ -1,45 +1,48 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Common.Types where
 
+import Common.Convert
 import qualified Data.ByteString.Char8 as BC
 import qualified Data.ByteString.Lazy.Char8 as LC
+import GHC.Generics (Generic)
+import Data.Aeson ( FromJSON, ToJSON, ToJSONKey, FromJSONKey )
+import Data.String ( IsString )
 
-type BS = BC.ByteString
+newtype Path = Path String deriving newtype (Show, FromJSON, ToJSON)
 
-type LBS = LC.ByteString
+newtype Message = Message String deriving newtype (Show, FromJSON, ToJSON, Convert)
 
-type Path = String
-
-type Message = String
-
-type Label = String
+newtype Label = Label String deriving newtype (Show, FromJSON, ToJSON)
 
 data Command = Help | Repeat | Start | Unknown String | Button Int deriving (Show, Eq)
 
-type UpdateId = Int
+newtype UpdateId = UpdateId Int deriving newtype (Show, FromJSON, ToJSON, Convert, Num, Read, Ord, Eq)
 
-type ChatId = Int
+newtype ChatId = ChatId Int deriving newtype (Show, FromJSON, ToJSON, ToJSONKey, FromJSONKey, Convert, Ord, Eq)
 
-type Key = String
+newtype Key = Key String deriving newtype (Show, FromJSON, ToJSON, IsString)
 
-type UserId = Int
+newtype UserId = UserId Int deriving newtype (Show, FromJSON, ToJSON, Convert)
 
-type IntId = Int
+newtype IntId = IntId Int deriving newtype (Show, FromJSON, ToJSON, Convert)
 
-type StrId = String
+newtype StrId = StrId String deriving newtype (Show, FromJSON, ToJSON, Convert)
 
-type FileId = String
+newtype FileId = FileId String deriving newtype (Show, FromJSON, ToJSON, Convert)
 
-type Url = String
+newtype Url = Url String deriving newtype (Show, FromJSON, ToJSON)
 
-type ItemName = String
+newtype ItemName = ItemName String deriving newtype (Show, FromJSON, ToJSON, IsString)
 
-type TimeOut = Int -- time out long polling
+-- time out for long polling
+newtype TimeOut = TimeOut Int deriving newtype (Show, Num, Convert)
 
-type Token = String
+newtype Token = Token String deriving newtype (Show, FromJSON, ToJSON)
 
-type Host = String
+newtype Host = Host String deriving newtype (Show, FromJSON, ToJSON)
 
-type Changed = Bool
+-- type Changed = Bool

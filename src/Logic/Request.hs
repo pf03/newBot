@@ -3,7 +3,8 @@
 
 module Logic.Request where
 
-import Common.Types ( Path, LBS, Host )
+import Common.Convert ( LBS )
+import Common.Types ( Host(..), Path(..) )
 import Control.Concurrent (threadDelay)
 import Control.Monad.State.Lazy (when)
 import qualified Data.ByteString.Char8 as BC
@@ -57,7 +58,7 @@ sendApiRequest api query save = do
   sendRequest request save
 
 buildRequest :: Host -> Path -> HTTP.Query -> HTTP.Request
-buildRequest host path query =
+buildRequest (Host host) (Path path) query =
   HTTP.setRequestSecure True $
     HTTP.setRequestMethod "POST" $
       HTTP.setRequestPort 443 $

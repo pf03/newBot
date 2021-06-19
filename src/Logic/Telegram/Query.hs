@@ -1,6 +1,6 @@
 module Logic.Telegram.Query where
 
-import Common.Types (Label, TimeOut, UpdateId)
+import Common.Types ( TimeOut, FileId(FileId), UpdateId, Label ) --(Label, TimeOut, UpdateId)
 import Common.Convert ((<:>), (<:?>))
 import Class (MError)
 import qualified Interface.Error.Exports as Error
@@ -22,7 +22,7 @@ sendMessageQuery (chatId, entity) btns = do
           then "text" <:> message
           else "text" <:> message ++ "reply_markup" <:> Encode.keyboard btns
     Update.Command _ -> Error.throw $ Error.QueryError "Unable to send command to user"
-    Update.Sticker fileId -> return $ "sticker" <:> fileId
+    Update.Sticker (FileId fileId) -> return $ "sticker" <:> fileId
     Update.Animation fileId -> return $ "animation" <:> fileId
     Update.Photo fileId mcaption -> return $ "photo" <:> fileId ++ "caption" <:?> mcaption
     Update.Video fileId mcaption -> return $ "video" <:> fileId ++ "caption" <:?> mcaption

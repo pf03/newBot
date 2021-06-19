@@ -1,12 +1,13 @@
 module Logic.VK.Encode
 where
 
-import Common.Types ( IntId, LBS )
+import Common.Convert ( LBS ) 
+import Common.Types ( Url, IntId, Label ) --( IntId, Label )
 import Data.Aeson ( encode, object, Value(Array), KeyValue((.=)) )
 import GHC.Exts (IsList (fromList))
 import Messenger.Update.VK.Types ( GroupId, OwnerId ) 
 
-keyboard :: [String] -> LBS
+keyboard :: [Label] -> LBS
 keyboard strs =
   encode $
     object
@@ -15,7 +16,7 @@ keyboard strs =
         "buttons" .= Array (fromList [Array $ fromList (_buttons strs)])
       ] 
   where
-  _buttons :: [String] -> [Value]
+  _buttons :: [Label] -> [Value]
   _buttons = map $ \str ->
     object
       [ "action"
@@ -25,7 +26,7 @@ keyboard strs =
               "label" .= str
             ]
       ]
-contentUrl :: String -> LBS
+contentUrl :: Url -> LBS
 contentUrl str =
   encode $
     object
