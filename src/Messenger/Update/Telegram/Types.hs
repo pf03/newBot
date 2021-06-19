@@ -1,9 +1,13 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Messenger.Update.Telegram.Types where
 
+import Common.Convert ( Convert )
+import Data.Aeson ( FromJSON, ToJSON )
 import Common.Types (ChatId, Command, FileId, IntId, Message, StrId)
 import Class ( IUpdate ) 
 import qualified Messenger.Update.Class as Class
@@ -12,7 +16,7 @@ import qualified Messenger.Update.Class as Class
 -- Update matches one element of the root json array
 type Update = (ChatId, Entity)
 
-type Caption = String
+newtype Caption = Caption String deriving newtype (Show, FromJSON, ToJSON, Convert)
 
 data Entity
   = Message Message

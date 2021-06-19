@@ -3,7 +3,6 @@
 
 module Common.Convert where
 
--- import Common.Types (BS, LBS)
 import Data.Aeson (Object, Value, encode)
 import qualified Data.ByteString.Char8 as BC
 import qualified Data.ByteString.Lazy.Char8 as LC

@@ -2,9 +2,12 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Messenger.Update.VK.Types where
 
+import Common.Convert ( Convert )
 import GHC.Generics (Generic)
 import Data.Aeson ( FromJSON, ToJSON )
 import Common.Types ( ItemName, Url,IntId,UserId, Key,ChatId, UpdateId,Command, Message )
@@ -24,11 +27,11 @@ data Attachment
   | Link Url
   deriving (Show)
 
-type StickerId = Int
+newtype StickerId = StickerId Int deriving newtype (Show, FromJSON, ToJSON, Convert)
 
-type OwnerId = Int
+newtype OwnerId = OwnerId Int deriving newtype (Show, FromJSON, ToJSON, Convert)
 
-type GroupId = Int
+newtype GroupId = GroupId Int deriving newtype (Show, FromJSON, ToJSON, Convert)
 
 data Init = Init {server :: String, key :: String, ts :: UpdateId} deriving (Show, Generic)
 
