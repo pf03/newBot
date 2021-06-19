@@ -1,9 +1,8 @@
 module Interface.Cache.Config.Functions where
 
+import Class (MIOError)
 import Control.Exception (IOException)
 import qualified Data.ByteString.Lazy as L
-import Class (MIOError)
-import qualified Interface.Error.Exports as Error
 import Interface.Cache.Config.Internal
   ( checkExistAndSingleName,
     checkMinLogLevel,
@@ -11,6 +10,7 @@ import Interface.Cache.Config.Internal
     checkUniqueNames,
   )
 import Interface.Cache.Config.Types (Config)
+import qualified Interface.Error.Exports as Error
 import qualified Parse.Functions as Parse (eDecode)
 import System.IO.Error (isDoesNotExistError)
 

@@ -2,9 +2,9 @@
 
 module Parse.Functions where
 
-import qualified Data.ByteString.Lazy.Char8 as LC
-import Data.Aeson (FromJSON, Object, Value, eitherDecode)
 import Class (MError)
+import Data.Aeson (FromJSON, Object, Value, eitherDecode)
+import qualified Data.ByteString.Lazy.Char8 as LC
 import qualified Interface.Error.Exports as Error
 
 getObject :: MError m => LC.ByteString -> m Object

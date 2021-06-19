@@ -2,12 +2,12 @@
 
 module Parse.Internal where
 
-import Common.Types ( Key(..) )
-import Data.Aeson ( (.:), (.:?), FromJSON(parseJSON), Object, Value(Object) )
+import Class (MError)
+import Common.Types (Key (..))
+import Data.Aeson (FromJSON (parseJSON), Object, Value (Object), (.:), (.:?))
 import Data.Aeson.Types (Parser, parseEither)
 import Data.Maybe (fromJust, isJust)
 import Data.Text (pack)
-import Class (MError)
 import qualified Interface.Error.Exports as Error
 
 --All functions in Parser monad are internal

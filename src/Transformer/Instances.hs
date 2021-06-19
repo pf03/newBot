@@ -4,16 +4,16 @@
 
 module Transformer.Instances where
 
+import Class (MCache, MIOError)
 import Common.Functions (for)
 import Control.Monad.State.Lazy (MonadIO, MonadState (get), gets, modify, when)
 import qualified Data.Aeson.Encode.Pretty as Aeson
 import qualified Data.ByteString.Lazy as L
 import GHC.Generics (Generic)
-import Class (MCache, MIOError)
+import qualified Interface.Cache.Config.Exports as Config
 import qualified Interface.Cache.Exports as Cache
 import qualified Interface.Error.Exports as Error
 import qualified Interface.Log.Exports as Log
-import qualified Interface.Cache.Config.Exports as Config
 
 -- We cannot replace State to Types.hs due to cyclic dependencies
 -- This is the internal structure of Transformer, which is not visible for the external user
@@ -63,8 +63,9 @@ saveState state = do
 
 configToState :: Config.Config -> State
 configToState config =
-  let configApp0 = head $ 
-        filter (\configApp1 -> Config.appName configApp1 == Config.configName config) (Config.configApps config)
+  let configApp0 =
+        head $
+          filter (\configApp1 -> Config.appName configApp1 == Config.configName config) (Config.configApps config)
       cache0 =
         Cache.Cache
           { Cache.cacheConfigApp = configApp0,
@@ -84,11 +85,11 @@ configToStates config =
    in for configApps $ \configApp0 ->
         let cache0 =
               Cache.Cache
-              { Cache.cacheConfigApp = configApp0,
-                Cache.cacheConfigText = Config.configText config,
-                Cache.cacheChanged = False,
-                Cache.cacheDefaultRepeatNumber = Config.configDefaultRepeatNumber config
-              }
+                { Cache.cacheConfigApp = configApp0,
+                  Cache.cacheConfigText = Config.configText config,
+                  Cache.cacheChanged = False,
+                  Cache.cacheDefaultRepeatNumber = Config.configDefaultRepeatNumber config
+                }
          in State
               { cache = cache0,
                 configLog = Config.configLog config,

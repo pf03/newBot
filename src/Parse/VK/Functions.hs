@@ -1,11 +1,11 @@
 module Parse.VK.Functions where
 
+import Class (MError)
 import Common.Types (UpdateId)
 import Data.Aeson (Object)
-import Class (MError)
+import qualified Messenger.Update.VK.Types as Update
 import Parse.Internal (parseE)
 import Parse.VK.Internal (parseInit, parseUpdateId, parseUpdates)
-import qualified Messenger.Update.VK.Types as Update
 
 init :: MError m => Object -> m Update.Init
 init = parseE parseInit

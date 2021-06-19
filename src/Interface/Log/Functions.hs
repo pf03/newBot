@@ -1,6 +1,5 @@
 module Interface.Log.Functions where
 
-import qualified Interface.Log.Color as Color
 import Common.Convert (Convert (convert))
 import Common.Functions (putStrLnT, template)
 import Control.Monad (when)
@@ -10,6 +9,7 @@ import Data.Aeson.Types (ToJSON)
 import qualified Data.ByteString as B
 import Data.Char (toUpper)
 import Interface.Log.Class (MLog (..))
+import qualified Interface.Log.Color as Color
 import Interface.Log.Types
   ( ColorScheme,
     Config (..),
@@ -49,6 +49,7 @@ logM m = do
   return a
 
 -- * An exception has been made for debug information - it can be of any type Show a, not just a String
+
 debugM :: (MLog m, Show a) => a -> m ()
 debugM a = messageM Debug (show a)
 

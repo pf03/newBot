@@ -1,9 +1,8 @@
 module Logic.Telegram.Encode where
 
-import qualified Data.ByteString.Lazy.Char8 as LC
-import Common.Types ( Label ) --(LBS)
--- import Common.Convert ( LBS )
+import Common.Types (Label)
 import Data.Aeson (KeyValue ((.=)), Value (Array, String), encode, object)
+import qualified Data.ByteString.Lazy.Char8 as LC
 import Data.Text (pack)
 import GHC.Exts (IsList (fromList))
 

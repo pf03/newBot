@@ -1,23 +1,24 @@
 module Logic.VK.Query.Functions where
 
-import qualified Logic.VK.Query.Internal as Internal
-import Common.Types ( Token(Token), TimeOut, Label ) 
-import Common.Convert((<:>)) 
-import Class (MError, MCache)
+import Class (MCache, MError)
+import Common.Convert ((<:>))
+import Common.Types (Label, TimeOut, Token (Token))
 import qualified Interface.Cache.Exports as Cache
 import qualified Interface.Error.Exports as Error
-import Network.HTTP.Simple (Query)
 import qualified Logic.VK.Encode as Encode (keyboard)
+import qualified Logic.VK.Query.Internal as Internal
 import qualified Messenger.Update.VK.Types as Update
+import Network.HTTP.Simple (Query)
 
 getLongPollServerQuery :: MCache m => m Query
 getLongPollServerQuery = do
   groupId <- Cache.getGroupId
   Token token <- Cache.getToken
   version <- Cache.getAPIVersion
-  return $ "group_id" <:> groupId
-    ++ "access_token" <:> token
-    ++ "v" <:> version
+  return $
+    "group_id" <:> groupId
+      ++ "access_token" <:> token
+      ++ "v" <:> version
 
 longPollQuery :: Update.Init -> TimeOut -> Query
 longPollQuery ini timeout =

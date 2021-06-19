@@ -1,9 +1,10 @@
 {-# LANGUAGE FlexibleInstances #-}
+
 module Interface.Cache.Class where
 
 import Control.Monad.IO.Class (MonadIO)
-import Interface.Cache.Types ( Cache )
 import Control.Monad.Trans.State.Lazy (State, get, put)
+import Interface.Cache.Types (Cache)
 
 class Monad m => MCache m where
   getCache :: m Cache

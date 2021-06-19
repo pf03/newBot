@@ -1,10 +1,10 @@
 module Logic.VK.Encode where
 
+import Common.Types (IntId, Label, Url) --( IntId, Label )
+import Data.Aeson (KeyValue ((.=)), Value (Array), encode, object)
 import qualified Data.ByteString.Lazy.Char8 as LC
-import Common.Types ( Url, IntId, Label ) --( IntId, Label )
-import Data.Aeson ( encode, object, Value(Array), KeyValue((.=)) )
 import GHC.Exts (IsList (fromList))
-import Messenger.Update.VK.Types ( GroupId, OwnerId ) 
+import Messenger.Update.VK.Types (GroupId, OwnerId)
 
 keyboard :: [Label] -> LC.ByteString
 keyboard strs =
@@ -13,18 +13,18 @@ keyboard strs =
       [ "one_time" .= True,
         "inline" .= False,
         "buttons" .= Array (fromList [Array $ fromList (_buttons strs)])
-      ] 
-  where
-  _buttons :: [Label] -> [Value]
-  _buttons = map $ \str ->
-    object
-      [ "action"
-          .= object
-            [ "type" .= ("text" :: String),
-              "payload" .= ("{}" :: String),
-              "label" .= str
-            ]
-      ]
+      ]  where
+    _buttons :: [Label] -> [Value]
+    _buttons = map $ \str ->
+      object
+        [ "action"
+            .= object
+              [ "type" .= ("text" :: String),
+                "payload" .= ("{}" :: String),
+                "label" .= str
+              ]
+        ]
+
 contentUrl :: Url -> LC.ByteString
 contentUrl str =
   encode $

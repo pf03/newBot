@@ -1,19 +1,19 @@
 module Messenger.Bot.VK.Instances where
 
-import Common.Types ( Host(..), Label, Path(..) )
-import Common.Functions ( template)
+import Class (MError, MTrans)
+import Common.Functions (template)
+import Common.Types (Host (..), Label, Path (..))
 import Data.List.Split (splitOn)
 import Data.Maybe (fromMaybe)
-import Class ( MTrans, MError )
 import qualified Interface.Cache.Exports as Cache
 import qualified Interface.Error.Exports as Error
 import qualified Interface.Log.Exports as Log
 import qualified Logic.Request as Request
-import qualified System.Console.ANSI as Color
-import qualified Messenger.API.VK.Types as API
-import qualified Parse.VK.Exports as Parse
 import qualified Logic.VK.Query.Functions as Query
+import qualified Messenger.API.VK.Types as API
 import qualified Messenger.Update.VK.Types as Update
+import qualified Parse.VK.Exports as Parse
+import qualified System.Console.ANSI as Color
 import Prelude hiding (init)
 
 -- Initialization - get last updateId, server name, key for getUpdates request
@@ -22,7 +22,7 @@ getInit = do
   Log.setSettings Color.Blue True "getInit"
   let api = API.API API.Groups API.GetLongPollServer
   Log.send
-  query <- Query.getLongPollServerQuery 
+  query <- Query.getLongPollServerQuery
   json <- Request.sendApiRequest api query False
   Log.receive
   object <- Parse.getObject json

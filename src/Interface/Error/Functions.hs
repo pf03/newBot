@@ -1,11 +1,11 @@
 module Interface.Error.Functions where
 
-import Common.Functions ( template )
+import Common.Functions (template)
+import Control.Concurrent.Async (AsyncCancelled)
 import qualified Control.Exception as E
-import Control.Monad.Except ( MonadIO(liftIO) ) 
-import Interface.Error.Class ( MError(..), MIOError ) 
-import Interface.Error.Types ( Error(ConfigError, Exit, IOError, SomeError) )
-import Control.Concurrent.Async ( AsyncCancelled )
+import Control.Monad.Except (MonadIO (liftIO))
+import Interface.Error.Class (MError (..), MIOError)
+import Interface.Error.Types (Error (ConfigError, Exit, IOError, SomeError))
 
 -----------------------------MError--------------------------------------------
 liftE :: MError m => Either Error a -> m a

@@ -18,4 +18,4 @@ class (IUpdate update) => IBot pointer init update | pointer -> init, init -> up
   getUpdates :: MTrans m => init -> m ([update], init)
 
   -- Send response to messenger server using received updates
-  sendMessage :: MTrans m => update -> [Label]  -> m ()
+  sendMessage :: MTrans m => update -> [Label] -> m ()

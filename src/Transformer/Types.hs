@@ -6,9 +6,9 @@
 
 module Transformer.Types where
 
+import Class (MCache, MError, MIOCache, MIOError, MLog, MTrans)
 import Control.Monad.State.Lazy (MonadIO, MonadState, MonadTrans (lift), StateT (..))
 import Control.Monad.Trans.Except (ExceptT, catchE, throwE)
-import Class (MCache, MError, MIOCache, MIOError, MLog, MTrans)
 import qualified Interface.Cache.Exports as Cache
 import qualified Interface.Error.Exports as Error
 import qualified Interface.Log.Exports as Log

@@ -1,15 +1,15 @@
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Messenger.Update.Telegram.Types where
 
-import Common.Convert ( Convert )
-import Data.Aeson ( FromJSON, ToJSON )
+import Class (IUpdate)
+import Common.Convert (Convert)
 import Common.Types (ChatId, Command, FileId, IntId, Message, StrId)
-import Class ( IUpdate ) 
+import Data.Aeson (FromJSON, ToJSON)
 import qualified Messenger.Update.Class as Class
 
 -----------------------------Types---------------------------------------------

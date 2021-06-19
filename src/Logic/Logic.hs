@@ -1,10 +1,10 @@
 module Logic.Logic where
 
-import Common.Functions (template)
-import Common.Types ( ChatId, Command(..), Label(..), Message(..) )
 import Class (IUpdate, MCache)
-import qualified Interface.Cache.Exports as Cache
+import Common.Functions (template)
+import Common.Types (ChatId, Command (..), Label (..), Message (..))
 import qualified Interface.Cache.Config.Exports as Config
+import qualified Interface.Cache.Exports as Cache
 import qualified Messenger.Update.Class as Update
 
 toMessageCommand :: String -> Either Message Command
@@ -28,8 +28,8 @@ evalAnswer :: (MCache m, IUpdate update) => update -> m (update, [Label], Int)
 evalAnswer update = do
   let chatId = Update.getChatId update
   repeatNumber <- Cache.getRepeatNumber chatId
-  case Update.getCommand update of 
-    Just command -> do 
+  case Update.getCommand update of
+    Just command -> do
       (message, btns) <- evalCommandAnswer chatId command
       return (Update.setMessage update message, btns, 1)
     Nothing -> return (update, [], repeatNumber)
@@ -44,5 +44,5 @@ evalCommandAnswer chatId command = do
     Repeat -> return (Message $ template repeatText [show repeatNumber], map (Label . ('/' :) . show) [1 :: Int .. 5])
     Button n -> do
       Cache.setRepeatNumber chatId n
-      return (Message $ template buttonText [show repeatNumber, show n],[])
-    Unknown com -> return (Message $ template unknownText [com],[])
+      return (Message $ template buttonText [show repeatNumber, show n], [])
+    Unknown com -> return (Message $ template unknownText [com], [])

@@ -1,13 +1,13 @@
 module Logic.VK.Query.Internal where
 
-import Common.Types( Token(..), ItemName(ItemName), Key(Key), ChatId, Message )
-import Common.Functions(template, safeTail) 
-import Common.Convert((<:>), jconvert) 
+import Common.Convert (jconvert, (<:>))
+import Common.Functions (safeTail, template)
+import Common.Types (ChatId, ItemName (ItemName), Key (Key), Message, Token (..))
 import Data.Either (rights)
-import Network.HTTP.Simple (Query, QueryItem)
 import qualified Logic.VK.Encode as Encode (contentUrl)
-import qualified Messenger.Update.VK.Types as Update
 import qualified Messenger.API.VK.Types as API
+import qualified Messenger.Update.VK.Types as Update
+import Network.HTTP.Simple (Query, QueryItem)
 
 defaultQuery :: Token -> ChatId -> API.Version -> Query
 defaultQuery (Token token) userId version = "peer_id" <:> userId ++ "access_token" <:> token ++ "v" <:> version

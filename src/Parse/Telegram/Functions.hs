@@ -2,12 +2,12 @@
 
 module Parse.Telegram.Functions where
 
-import Common.Types ( UpdateId )
-import Data.Aeson ( Object )
 import Class (MError)
+import Common.Types (UpdateId)
+import Data.Aeson (Object)
+import qualified Messenger.Update.Telegram.Types as Update
 import Parse.Internal (parseE)
 import Parse.Telegram.Internal (parseUpdateIds, parseUpdates)
-import qualified Messenger.Update.Telegram.Types as Update
 
 updateId :: MError m => Object -> m (Maybe UpdateId)
 updateId object = do

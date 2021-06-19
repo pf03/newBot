@@ -1,12 +1,12 @@
 module Main where
 
-import qualified Logic.App as App (application)
+import Class (MTrans)
 import qualified Interface.Cache.Config.Exports as Config
 import qualified Interface.Cache.Exports as Cache
-import Class ( MTrans)
-import qualified Transformer.Exports as Transformer
+import qualified Logic.App as App (application)
 import qualified Messenger.Bot.Telegram.Types as Telegram
 import qualified Messenger.Bot.VK.Types as VK
+import qualified Transformer.Exports as Transformer
 
 main :: IO ()
 main = do

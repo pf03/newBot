@@ -1,13 +1,15 @@
 module Logic.Telegram.Query where
 
-import Common.Types ( TimeOut, FileId(FileId), UpdateId, Label ) --(Label, TimeOut, UpdateId)
-import Common.Convert ((<:>), (<:?>))
+--(Label, TimeOut, UpdateId)
+
 import Class (MError)
+import Common.Convert ((<:>), (<:?>))
+import Common.Types (FileId (FileId), Label, TimeOut, UpdateId)
 import qualified Interface.Error.Exports as Error
-import Network.HTTP.Simple (Query)
-import qualified Messenger.API.Telegram.Types as API
 import qualified Logic.Telegram.Encode as Encode
+import qualified Messenger.API.Telegram.Types as API
 import qualified Messenger.Update.Telegram.Types as Update
+import Network.HTTP.Simple (Query)
 
 getUpdatesQuery :: Maybe UpdateId -> TimeOut -> Query
 getUpdatesQuery moffset timeout = "timeout" <:> timeout ++ "offset" <:?> moffset
@@ -38,18 +40,17 @@ sendMessageQuery (chatId, entity) btns = do
     Update.Forward _ messageId -> return $ "from_chat_id" <:> chatId ++ "message_id" <:> messageId
     Update.Other messageId -> return $ "from_chat_id" <:> chatId ++ "message_id" <:> messageId
   return (api, "chat_id" <:> chatId ++ query)
-
   where
-  getAPI :: MError m => Update.Entity -> m API.API
-  getAPI Update.Message {} = return API.SendMessage
-  getAPI Update.Command {} = Error.throw $ Error.QueryError "Unable to send command to user"
-  getAPI Update.Sticker {} = return API.SendSticker
-  getAPI Update.Animation {} = return API.SendAnimation
-  getAPI Update.Photo {} = return API.SendPhoto
-  getAPI Update.Video {} = return API.SendVideo
-  getAPI Update.Document {} = return API.SendDocument
-  getAPI Update.Poll {} = return API.SendPoll
-  getAPI Update.Contact {} = return API.SendContact
-  getAPI Update.Location {} = return API.SendLocation
-  getAPI Update.Forward {} = return API.ForwardMessage
-  getAPI Update.Other {} = return API.CopyMessage
+    getAPI :: MError m => Update.Entity -> m API.API
+    getAPI Update.Message {} = return API.SendMessage
+    getAPI Update.Command {} = Error.throw $ Error.QueryError "Unable to send command to user"
+    getAPI Update.Sticker {} = return API.SendSticker
+    getAPI Update.Animation {} = return API.SendAnimation
+    getAPI Update.Photo {} = return API.SendPhoto
+    getAPI Update.Video {} = return API.SendVideo
+    getAPI Update.Document {} = return API.SendDocument
+    getAPI Update.Poll {} = return API.SendPoll
+    getAPI Update.Contact {} = return API.SendContact
+    getAPI Update.Location {} = return API.SendLocation
+    getAPI Update.Forward {} = return API.ForwardMessage
+    getAPI Update.Other {} = return API.CopyMessage

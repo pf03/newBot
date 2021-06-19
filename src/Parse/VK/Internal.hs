@@ -1,14 +1,14 @@
 module Parse.VK.Internal where
 
-import Common.Types ( ItemName(ItemName), ChatId(ChatId), UpdateId )
+import Common.Types (ChatId (ChatId), ItemName (ItemName), UpdateId)
 import Data.Aeson (Object, (.:), (.:?))
 import Data.Aeson.Types (Parser)
 import Data.Maybe (fromMaybe)
 import Data.Text (pack)
 import qualified Logic.Logic as Logic
+import qualified Messenger.Update.VK.Types as Update
 import Parse.Internal (mwithArrayItem, parseJSONo, withArraymItem)
 import Text.Read (readEither)
-import qualified Messenger.Update.VK.Types as Update
 
 parseUpdateId :: Object -> Parser (Maybe UpdateId)
 parseUpdateId object = do

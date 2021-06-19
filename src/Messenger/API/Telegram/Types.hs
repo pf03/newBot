@@ -3,9 +3,9 @@
 
 module Messenger.API.Telegram.Types where
 
-import Common.Types ( Token(Token), Path(Path) )
+import Common.Types (Path (Path), Token (Token))
 import Data.Char (toLower)
-import Messenger.API.Class ( IAPI )
+import Messenger.API.Class (IAPI)
 import qualified Messenger.API.Class as Class
 
 -----------------------------Types---------------------------------------------

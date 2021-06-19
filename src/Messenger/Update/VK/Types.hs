@@ -1,18 +1,18 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE InstanceSigs #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 
 module Messenger.Update.VK.Types where
 
-import Common.Convert ( Convert )
+import Class (IUpdate)
+import Common.Convert (Convert)
+import Common.Types (ChatId, Command, IntId, ItemName, Key, Message, UpdateId, Url)
+import Data.Aeson (FromJSON, ToJSON)
 import GHC.Generics (Generic)
-import Data.Aeson ( FromJSON, ToJSON )
-import Common.Types ( ItemName, Url,IntId,UserId, Key,ChatId, UpdateId,Command, Message )
-import Class ( IUpdate ) 
-import qualified Messenger.Update.Class as Class 
+import qualified Messenger.Update.Class as Class
 
 -----------------------------Types---------------------------------------------
 type Update = (ChatId, Entity)

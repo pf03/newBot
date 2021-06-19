@@ -6,12 +6,13 @@
 
 module Messenger.Bot.VK.Types (Pointer (..)) where
 
-import Common.Types (Label, UpdateId)
 import Class (IBot, IUpdate, MTrans)
+import Common.Types (Label, UpdateId)
 import qualified Messenger.Bot.Class as Class
 import qualified Messenger.Bot.VK.Instances as Instances
 import qualified Messenger.Update.VK.Types as Update
 import Prelude hiding (init)
+
 -----------------------------Types---------------------------------------------
 data Pointer = Pointer
 

@@ -3,15 +3,15 @@
 
 module Logic.App where
 
-import Common.Functions (template)
 import Class (IBot, MTrans)
+import Common.Functions (template)
+import Control.Monad (replicateM_)
 import qualified Interface.Cache.Exports as Cache
 import qualified Interface.Log.Exports as Log
-import qualified Messenger.Bot.Class as Bot
 import qualified Logic.Logic as Logic
+import qualified Messenger.Bot.Class as Bot
 import qualified System.Console.ANSI as Color (Color (..))
 import Prelude hiding (init)
-import Control.Monad ( replicateM_ )
 
 -- | Run bot application
 application :: (MTrans m, IBot pointer init _update) => pointer -> m ()
@@ -19,7 +19,6 @@ application pointer = do
   Log.setSettings Color.Blue True "application"
   init <- Bot.getInit pointer
   longPolling pointer init
-  
 
 -- | Long polling loop
 longPolling :: (MTrans m, IBot pointer init update) => pointer -> init -> m ()

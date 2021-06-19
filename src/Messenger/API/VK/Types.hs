@@ -3,9 +3,9 @@
 
 module Messenger.API.VK.Types where
 
-import Common.Types ( Path(Path) )
+import Class (IAPI)
+import Common.Types (Path (Path))
 import Data.Char (toLower)
-import Class ( IAPI )
 import qualified Messenger.API.Class as Class
 
 -----------------------------Types---------------------------------------------

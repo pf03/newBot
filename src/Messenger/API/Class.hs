@@ -1,6 +1,6 @@
 module Messenger.API.Class where
 
-import Common.Types ( Path, Token )
+import Common.Types (Path, Token)
 
 class IAPI api where
   apiName :: api -> String

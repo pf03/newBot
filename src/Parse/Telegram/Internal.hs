@@ -8,8 +8,8 @@ import Control.Applicative (Alternative ((<|>)))
 import Data.Aeson (Object, (.:), (.:?))
 import Data.Aeson.Types (Parser)
 import qualified Logic.Logic as Logic
-import Parse.Internal (mwithArrayItem, mwithItem, withArrayItem, withArraymItem)
 import qualified Messenger.Update.Telegram.Types as Update
+import Parse.Internal (mwithArrayItem, mwithItem, withArrayItem, withArraymItem)
 
 type OResultItem = Object
 

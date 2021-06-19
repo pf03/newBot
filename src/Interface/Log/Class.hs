@@ -2,9 +2,9 @@ module Interface.Log.Class where
 
 import Interface.Log.Types
   ( ColorScheme,
+    Config,
     Enable,
     FuncName,
-    Config,
     Level,
     Settings,
   )

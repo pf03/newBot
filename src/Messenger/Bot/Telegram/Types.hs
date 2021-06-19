@@ -6,8 +6,8 @@
 
 module Messenger.Bot.Telegram.Types (Pointer (..)) where
 
-import Common.Types ( Label, UpdateId )
 import Class (IBot, IUpdate, MTrans)
+import Common.Types (Label, UpdateId)
 import qualified Messenger.Bot.Class as Class
 import qualified Messenger.Bot.Telegram.Instances as Instances
 import qualified Messenger.Update.Telegram.Types as Update

@@ -3,13 +3,13 @@
 
 module Logic.Request where
 
-import qualified Data.ByteString.Lazy.Char8 as LC
-import Common.Types ( Host(..), Path(..) )
+import Class (IAPI, MCache, MIOError, MLog)
+import Common.Types (Host (..), Path (..))
 import Control.Concurrent (threadDelay)
 import Control.Monad.State.Lazy (when)
 import qualified Data.ByteString.Char8 as BC
 import qualified Data.ByteString.Lazy as L
-import Class (IAPI, MCache, MIOError, MLog)
+import qualified Data.ByteString.Lazy.Char8 as LC
 import qualified Interface.Cache.Exports as Cache
 import qualified Interface.Error.Exports as Error
 import qualified Interface.Log.Exports as Log

@@ -23,4 +23,4 @@ import Interface.Cache.Functions as Functions
     setRepeatNumbers,
     setmUpdateId,
   )
-import Interface.Cache.Types as Types ( Cache(..) )
+import Interface.Cache.Types as Types (Cache (..))
