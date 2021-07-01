@@ -5,7 +5,7 @@ import Common.Convert ((<:>))
 import Common.Types (Label, TimeOut, Token (Token))
 import qualified Interface.Cache.Exports as Cache
 import qualified Interface.Error.Exports as Error
-import qualified Logic.VK.Encode as Encode (keyboard)
+import qualified Logic.VK.Encode as Encode
 import qualified Logic.VK.Query.Internal as Internal
 import qualified Messenger.Update.VK.Types as Update
 import Network.HTTP.Simple (Query)
@@ -36,6 +36,6 @@ sendMessageQuery (chatId, Update.Entity eMessageCommand attachments) btns = do
     Left message -> do
       let defaultQuery = Internal.defaultQuery token chatId version
       let messageQuery = "message" <:> message
-      let buttonsQuery = if null btns then [] else "keyboard" <:> Encode.keyboard btns
+      let buttonsQuery = if null btns then [] else "keyboard" <:> Encode.encodeKeyboard btns
       let attachmentsQuery = Internal.attachmentsQuery attachments
       return $ defaultQuery ++ messageQuery ++ buttonsQuery ++ attachmentsQuery

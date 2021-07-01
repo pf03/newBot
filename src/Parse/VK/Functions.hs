@@ -5,13 +5,13 @@ import Common.Types (UpdateId)
 import Data.Aeson (Object)
 import qualified Messenger.Update.VK.Types as Update
 import Parse.Internal (parseE)
-import Parse.VK.Internal (parseInit, parseUpdateId, parseUpdates)
+import qualified Parse.VK.Internal as Internal
 
-init :: MError m => Object -> m Update.Init
-init = parseE parseInit
+parseInit :: MError m => Object -> m Update.Init
+parseInit = parseE Internal.parseInit
 
-updateId :: MError m => Object -> m (Maybe UpdateId)
-updateId = parseE parseUpdateId
+parseUpdateId :: MError m => Object -> m (Maybe UpdateId)
+parseUpdateId = parseE Internal.parseUpdateId
 
-updates :: MError m => Object -> m [Update.Update]
-updates = parseE parseUpdates
+parseUpdates :: MError m => Object -> m [Update.Update]
+parseUpdates = parseE Internal.parseUpdates

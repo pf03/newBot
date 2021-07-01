@@ -7,14 +7,14 @@ import Common.Types (UpdateId)
 import Data.Aeson (Object)
 import qualified Messenger.Update.Telegram.Types as Update
 import Parse.Internal (parseE)
-import Parse.Telegram.Internal (parseUpdateIds, parseUpdates)
+import qualified Parse.Telegram.Internal as Internal
 
-updateId :: MError m => Object -> m (Maybe UpdateId)
-updateId object = do
-  updateIds <- parseE parseUpdateIds object
+parseUpdateId :: MError m => Object -> m (Maybe UpdateId)
+parseUpdateId object = do
+  updateIds <- parseE Internal.parseUpdateIds object
   case updateIds of
     [] -> return Nothing
     _ -> return $ Just $ maximum updateIds
 
-updates :: MError m => Object -> m [Update.Update]
-updates = parseE parseUpdates
+parseUpdates :: MError m => Object -> m [Update.Update]
+parseUpdates = parseE Internal.parseUpdates

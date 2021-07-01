@@ -6,8 +6,8 @@ import qualified Data.ByteString.Lazy.Char8 as LC
 import GHC.Exts (IsList (fromList))
 import Messenger.Update.VK.Types (GroupId, OwnerId)
 
-keyboard :: [Label] -> LC.ByteString
-keyboard strs =
+encodeKeyboard :: [Label] -> LC.ByteString
+encodeKeyboard strs =
   encode $
     object
       [ "one_time" .= True,
@@ -25,16 +25,16 @@ keyboard strs =
               ]
         ]
 
-contentUrl :: Url -> LC.ByteString
-contentUrl str =
+encodeContentUrl :: Url -> LC.ByteString
+encodeContentUrl str =
   encode $
     object
       [ "type" .= ("url" :: String),
         "url" .= str
       ]
 
-contentMessage :: OwnerId -> GroupId -> IntId -> LC.ByteString
-contentMessage ownerId peerId messageId =
+encodeContentMessage :: OwnerId -> GroupId -> IntId -> LC.ByteString
+encodeContentMessage ownerId peerId messageId =
   encode $
     object
       [ "type" .= ("message" :: String),

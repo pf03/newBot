@@ -22,14 +22,14 @@ sendMessageQuery (chatId, entity) btns = do
       return $
         if null btns
           then "text" <:> message
-          else "text" <:> message ++ "reply_markup" <:> Encode.keyboard btns
+          else "text" <:> message ++ "reply_markup" <:> Encode.encodeKeyboard btns
     Update.Command _ -> Error.throw $ Error.QueryError "Unable to send command to user"
     Update.Sticker (FileId fileId) -> return $ "sticker" <:> fileId
     Update.Animation fileId -> return $ "animation" <:> fileId
     Update.Photo fileId mcaption -> return $ "photo" <:> fileId ++ "caption" <:?> mcaption
     Update.Video fileId mcaption -> return $ "video" <:> fileId ++ "caption" <:?> mcaption
     Update.Document fileId mcaption -> return $ "document" <:> fileId ++ "caption" <:?> mcaption
-    Update.Poll _ question options -> return $ "question" <:> question ++ "options" <:> Encode.pollOptions options
+    Update.Poll _ question options -> return $ "question" <:> question ++ "options" <:> Encode.encodePollOptions options
     Update.Contact phoneNumber firstName mlastName mvCard ->
       return $
         "phone_number" <:> phoneNumber

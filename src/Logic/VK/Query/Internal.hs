@@ -4,7 +4,7 @@ import Common.Convert (jconvert, (<:>))
 import Common.Functions (safeTail, template)
 import Common.Types (ChatId, ItemName (ItemName), Key (Key), Message, Token (..))
 import Data.Either (rights)
-import qualified Logic.VK.Encode as Encode (contentUrl)
+import qualified Logic.VK.Encode as Encode
 import qualified Messenger.API.VK.Types as API
 import qualified Messenger.Update.VK.Types as Update
 import Network.HTTP.Simple (Query, QueryItem)
@@ -29,7 +29,7 @@ attachmentQuery :: Update.Attachment -> Either String QueryItem
 attachmentQuery attachment =
   case attachment of
     Update.Sticker stikerId -> Right ("sticker_id", jconvert stikerId)
-    Update.Link url -> Right ("content_source", jconvert $ Encode.contentUrl url)
+    Update.Link url -> Right ("content_source", jconvert $ Encode.encodeContentUrl url)
     Update.Audio ownerId objectId -> Left $ template "audio{0}_{1}" [show ownerId, show objectId]
     Update.Wall ownerId objectId -> Left $ template "wall{0}_{1}" [show ownerId, show objectId]
     Update.Item (ItemName itemName) ownerId objectId (Key accessKey) ->

@@ -27,7 +27,7 @@ getInit = do
   Log.writeReceiving
   object <- Parse.getObject json
   Log.writeReceivingData "object" object
-  init@(Update.Init server key _) <- Parse.init object
+  init@(Update.Init server key _) <- Parse.parseInit object
   Log.writeReceivingData "init" init
   mupdateIdFromFile <- Cache.getmUpdateId
   case mupdateIdFromFile of
@@ -46,10 +46,10 @@ getUpdates init@(Update.Init server _ ts) = do
   Log.writeReceiving
   object <- Parse.getObject json
   Log.writeReceivingData "object" object
-  mUpdateId <- Parse.updateId object
+  mUpdateId <- Parse.parseUpdateId object
   let newInit = init {Update.ts = fromMaybe ts mUpdateId}
   Log.writeReceivingData "mUpdateId" mUpdateId
-  updates <- Parse.updates object
+  updates <- Parse.parseUpdates object
   Log.writeReceivingData "updates" updates
   return (updates, newInit)
 

@@ -28,9 +28,9 @@ getUpdates mUpdateId = do
   Log.writeReceiving
   object <- Parse.getObject response
   Log.writeReceivingData "object" object
-  newmUpdateId <- Parse.updateId object
+  newmUpdateId <- Parse.parseUpdateId object
   Log.writeReceivingData "newmUpdateId" newmUpdateId
-  updates <- Parse.updates object
+  updates <- Parse.parseUpdates object
   Log.writeReceivingData "update" updates
   return (updates, newmUpdateId <|> mUpdateId)
 
@@ -55,5 +55,5 @@ reset = do
   json <- Request.sendApiRequest API.GetUpdates (Query.getUpdatesQuery mUpdateId 0) True
   Log.writeReceiving
   object <- Parse.getObject json
-  newmUpdateId <- Parse.updateId object
+  newmUpdateId <- Parse.parseUpdateId object
   Log.writeReceivingData "mnewuid" newmUpdateId
