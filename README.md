@@ -1,7 +1,7 @@
 # BOT
 *** 
 
-## ORDER OF LAUNCH AND TESTING (tested only for Windows)
+## ORDER OF LAUNCH AND TESTING
 
 1.	Run commands:
    * `git clone https://github.com/pf03/newBot.git`
@@ -62,7 +62,7 @@ Purpose of `config.json` fields:
 
 * `/help` - info about bot commands;
 * `/start` - the same as `/help`;
-* `/repeat` - send keboard to edit repeat number for current user;
+* `/repeat` - send keyboard to edit repeat number for current user;
 * `Buttons /1 ... /5` - edit repeat number for current user;
 ***
 

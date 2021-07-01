@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c4e14d5614a5c85b7a2d397c716b62042a09b65b207563ba1c47a74b27a9e5ba
+-- hash: 89147bd53ee5070dbb65e23078dfc1f91d91d1842536eb6fa8301f87b1760a67
 
 name:           bot
 version:        0.1.0.0
@@ -79,8 +79,8 @@ library
       Parse.VK.Internal
       Transformer.Exports
       Transformer.Functions
-      Transformer.Instances
       Transformer.Internal
+      Transformer.State
       Transformer.Types
   other-modules:
       Paths_bot

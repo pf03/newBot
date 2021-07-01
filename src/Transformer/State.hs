@@ -2,7 +2,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 
-module Transformer.Instances where
+module Transformer.State where
 
 import Class (MCache, MIOError)
 import Common.Functions (for)

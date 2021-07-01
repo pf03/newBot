@@ -12,17 +12,17 @@ import Control.Monad.Trans.Except (ExceptT, catchE, throwE)
 import qualified Interface.Cache.Exports as Cache
 import qualified Interface.Error.Exports as Error
 import qualified Interface.Log.Exports as Log
-import qualified Transformer.Instances as Instances
+import qualified Transformer.State as State
 
 -----------------------------Types---------------------------------------------
-newtype Transformer a = Transformer {getTransformer :: StateT Instances.State (ExceptT Error.Error IO) a}
-  deriving newtype (Functor, Applicative, Monad, MonadFail, MonadIO, MonadState Instances.State)
+newtype Transformer a = Transformer {getTransformer :: StateT State.State (ExceptT Error.Error IO) a}
+  deriving newtype (Functor, Applicative, Monad, MonadFail, MonadIO, MonadState State.State)
 
 -----------------------------Instances-----------------------------------------
 instance MLog Transformer where
-  getSettings = Transformer Instances.getLogSettings
-  setSettings colorScheme logEnable funcName = Transformer $ Instances.setLogSettings colorScheme logEnable funcName
-  getConfig = Transformer Instances.getLogConfig
+  getSettings = Transformer State.getLogSettings
+  setSettings colorScheme logEnable funcName = Transformer $ State.setLogSettings colorScheme logEnable funcName
+  getConfig = Transformer State.getLogConfig
   message logConfig logSettings logLevel str = Transformer $ Log.messageIO logConfig logSettings logLevel str
 
 instance MError Transformer where
@@ -35,10 +35,10 @@ instance MError Transformer where
 instance MIOError Transformer
 
 instance MCache Transformer where
-  getCache = Transformer Instances.getCache
-  setCache cache = Transformer . Instances.setCache $ cache
+  getCache = Transformer State.getCache
+  setCache cache = Transformer . State.setCache $ cache
 
 instance MIOCache Transformer where
-  writeCache = Instances.writeCache
+  writeCache = State.writeCache
 
 instance MTrans Transformer
