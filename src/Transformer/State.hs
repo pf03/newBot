@@ -50,19 +50,19 @@ writeCache = do
 
 -----------------------------State <-> Config----------------------------------
 readStates :: MIOError m => m [State]
-readStates = configToStates <$> Config.readConfig
+readStates = getStatesFromConfig <$> Config.readConfig
 
 readState :: MIOError m => m State
-readState = configToState <$> Config.readConfig
+readState = getStateFromConfig <$> Config.readConfig
 
 saveState :: MIOError m => State -> m ()
 saveState state = do
   config <- Config.readConfig
-  let newConfig = fromState config state
+  let newConfig = setStateToConfig config state
   Error.liftEIO $ L.writeFile Config.pathConfig (Aeson.encodePretty newConfig)
 
-configToState :: Config.Config -> State
-configToState config =
+getStateFromConfig :: Config.Config -> State
+getStateFromConfig config =
   let configApp0 =
         head $
           filter (\configApp1 -> Config.appName configApp1 == Config.configName config) (Config.configApps config)
@@ -79,8 +79,8 @@ configToState config =
           logSettings = Log.defaultSettings
         }
 
-configToStates :: Config.Config -> [State]
-configToStates config =
+getStatesFromConfig :: Config.Config -> [State]
+getStatesFromConfig config =
   let configApps = filter Config.appEnable (Config.configApps config)
    in for configApps $ \configApp0 ->
         let cache0 =
@@ -96,8 +96,8 @@ configToStates config =
                 logSettings = Log.defaultSettings
               }
 
-fromState :: Config.Config -> State -> Config.Config
-fromState config state = config {Config.configApps = newConfigApps}
+setStateToConfig :: Config.Config -> State -> Config.Config
+setStateToConfig config state = config {Config.configApps = newConfigApps}
   where
     configApps0 = Config.configApps config
     cache0 = cache state

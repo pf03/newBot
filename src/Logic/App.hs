@@ -40,6 +40,6 @@ writeCache init = do
   mUpdateId <- Cache.getmUpdateId
   let newmUpdateId = Bot.getmUpdateId init
   Cache.setmUpdateId newmUpdateId
-  Log.infoM $ template "Update updateId in file from {0} to {1}" [show mUpdateId, show newmUpdateId]
-  Log.infoM "Update config in file..."
+  Log.writeInfoM $ template "Update updateId in file from {0} to {1}" [show mUpdateId, show newmUpdateId]
+  Log.writeInfoM "Update config in file..."
   Cache.writeCache

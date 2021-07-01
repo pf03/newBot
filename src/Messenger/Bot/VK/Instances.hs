@@ -21,14 +21,14 @@ getInit :: MTrans m => m Update.Init
 getInit = do
   Log.setSettings Color.Blue True "getInit"
   let api = API.API API.Groups API.GetLongPollServer
-  Log.send
+  Log.writeSending
   query <- Query.getLongPollServerQuery
   json <- Request.sendApiRequest api query False
-  Log.receive
+  Log.writeReceiving
   object <- Parse.getObject json
-  Log.receiveData "object" object
+  Log.writeReceivingData "object" object
   init@(Update.Init server key _) <- Parse.init object
-  Log.receiveData "init" init
+  Log.writeReceivingData "init" init
   mupdateIdFromFile <- Cache.getmUpdateId
   case mupdateIdFromFile of
     Nothing -> return init
@@ -41,30 +41,30 @@ getUpdates init@(Update.Init server _ ts) = do
   let query = Query.longPollQuery init 25
   (host, path) <- parseServer server
   let request = Request.buildRequest host path query
-  Log.send
+  Log.writeSending
   json <- Request.sendRequest request True -- long polling
-  Log.receive
+  Log.writeReceiving
   object <- Parse.getObject json
-  Log.receiveData "object" object
+  Log.writeReceivingData "object" object
   mUpdateId <- Parse.updateId object
   let newInit = init {Update.ts = fromMaybe ts mUpdateId}
-  Log.receiveData "mUpdateId" mUpdateId
+  Log.writeReceivingData "mUpdateId" mUpdateId
   updates <- Parse.updates object
-  Log.receiveData "updates" updates
+  Log.writeReceivingData "updates" updates
   return (updates, newInit)
 
 -- Send response to a single user
 sendMessage :: MTrans m => Update.Update -> [Label] -> m ()
 sendMessage update btns = do
   Log.setSettings Color.Yellow True "sendMessage"
-  Log.send
+  Log.writeSending
   query <- Query.sendMessageQuery update btns
-  Log.debugM update
-  Log.receiveData "query" query
+  Log.writeDebugM update
+  Log.writeReceivingData "query" query
   json <- Request.sendApiRequest (API.API API.Messages API.Send) query False
-  Log.receive
+  Log.writeReceiving
   object <- Parse.getObject json
-  Log.receiveData "object" object
+  Log.writeReceivingData "object" object
 
 -- "https://lp.vk.com/wh777777777" -> "lp.vk.com" "/wh777777777"
 parseServer :: MError m => String -> m (Host, Path)

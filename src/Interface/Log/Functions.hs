@@ -21,9 +21,9 @@ import Prelude hiding (error)
 
 -----------------------------MLog----------------------------------------------
 setColorScheme :: MLog m => ColorScheme -> m ()
-setColorScheme newcs = do
+setColorScheme newColorScheme = do
   Settings _ logEnable funcName0 <- getSettings
-  setSettings newcs logEnable funcName0
+  setSettings newColorScheme logEnable funcName0
 
 getConfigSettings :: MLog m => m (Config, Settings)
 getConfigSettings = do
@@ -42,82 +42,82 @@ defaultSettings = Settings Black True ""
 defaultConfig :: Config
 defaultConfig = Config {colorEnable = False, terminalEnable = True, fileEnable = False, minLevel = 0}
 
-logM :: (MLog m, Show a) => m a -> m a
-logM m = do
+withLogM :: (MLog m, Show a) => m a -> m a
+withLogM m = do
   a <- m
-  debugM a
+  writeDebugM a
   return a
 
 -- * An exception has been made for debug information - it can be of any type Show a, not just a String
 
-debugM :: (MLog m, Show a) => a -> m ()
-debugM a = messageM Debug (show a)
+writeDebugM :: (MLog m, Show a) => a -> m ()
+writeDebugM a = writeMessageM Debug (show a)
 
-infoM :: MLog m => String -> m ()
-infoM = messageM Info
+writeInfoM :: MLog m => String -> m ()
+writeInfoM = writeMessageM Info
 
-infoCM :: MLog m => ColorScheme -> String -> m ()
-infoCM colorScheme str = do
+writeInfoCM :: MLog m => ColorScheme -> String -> m ()
+writeInfoCM colorScheme str = do
   setColorScheme colorScheme
-  infoM str
+  writeInfoM str
 
-warnM :: MLog m => String -> m ()
-warnM = messageM Warn
+writeWarnM :: MLog m => String -> m ()
+writeWarnM = writeMessageM Warn
 
-errorM :: MLog m => String -> m ()
-errorM = messageM Error
+writeErrorM :: MLog m => String -> m ()
+writeErrorM = writeMessageM Error
 
-criticalM :: MLog m => String -> m ()
-criticalM = messageM Critical
+writeCriticalM :: MLog m => String -> m ()
+writeCriticalM = writeMessageM Critical
 
-messageM :: MLog m => Level -> String -> m ()
-messageM level str = do
+writeMessageM :: MLog m => Level -> String -> m ()
+writeMessageM level str = do
   (config, settings) <- getConfigSettings
-  message config settings level str
+  writeMessage config settings level str
 
 -- Additional functions for debug
 getFuncName :: MLog m => m String
 getFuncName = funcName <$> getSettings
 
-send :: MLog m => m ()
-send = do
+writeSending :: MLog m => m ()
+writeSending = do
   funcName0 <- getFuncName
-  infoM $ template "Query {0} sent......" [funcName0]
+  writeInfoM $ template "Query {0} sent......" [funcName0]
 
-receive :: MLog m => m ()
-receive = do
+writeReceiving :: MLog m => m ()
+writeReceiving = do
   funcName0 <- getFuncName
-  infoM $ template "Response {0} received......" [funcName0]
+  writeInfoM $ template "Response {0} received......" [funcName0]
 
-receiveData :: (MLog m, Show a) => String -> a -> m ()
-receiveData dataName dataValue = do
+writeReceivingData :: (MLog m, Show a) => String -> a -> m ()
+writeReceivingData dataName dataValue = do
   funcName0 <- getFuncName
-  infoM $ template "Data {1} received in {0} response......" [funcName0, dataName]
-  debugM dataValue
+  writeInfoM $ template "Data {1} received in {0} response......" [funcName0, dataName]
+  writeDebugM dataValue
 
 -----------------------------MonadIO-------------------------------------------
-debug :: (MonadIO m, Show a) => Config -> Settings -> a -> m ()
-debug logConfig logSettings a = messageIO logConfig logSettings Debug (show a)
+writeDebug :: (MonadIO m, Show a) => Config -> Settings -> a -> m ()
+writeDebug logConfig logSettings a = writeMessageIO logConfig logSettings Debug (show a)
 
-info :: MonadIO m => Config -> Settings -> String -> m ()
-info logConfig logSettings = messageIO logConfig logSettings Info
+writeInfo :: MonadIO m => Config -> Settings -> String -> m ()
+writeInfo logConfig logSettings = writeMessageIO logConfig logSettings Info
 
-warn :: MonadIO m => Config -> Settings -> String -> m ()
-warn logConfig logSettings = messageIO logConfig logSettings Warn
+writeWarn :: MonadIO m => Config -> Settings -> String -> m ()
+writeWarn logConfig logSettings = writeMessageIO logConfig logSettings Warn
 
-error :: MonadIO m => Config -> Settings -> String -> m ()
-error logConfig logSettings = messageIO logConfig logSettings Error
+writeError :: MonadIO m => Config -> Settings -> String -> m ()
+writeError logConfig logSettings = writeMessageIO logConfig logSettings Error
 
-critical :: MonadIO m => Config -> Settings -> String -> m ()
-critical logConfig logSettings = messageIO logConfig logSettings Critical
+writeCritical :: MonadIO m => Config -> Settings -> String -> m ()
+writeCritical logConfig logSettings = writeMessageIO logConfig logSettings Critical
 
 -----------------------------Default implementation----------------------------
--- The default implementation of the MLog typeclass for the IO monad.
+-- The default implementation of the MLog type class for the IO monad.
 -- In pure code, for example for testing, you can replace this implementation with another one,
 -- for example based on writerT, or empty return () implementation
 -- Info can be shown in different color schemes, and for other levels the color corresponds to the level
-messageIO :: MonadIO m => Config -> Settings -> Level -> String -> m ()
-messageIO (Config enableColor enableTerminal enableFile minLevel0) (Settings colorScheme logEnable _) level text = do
+writeMessageIO :: MonadIO m => Config -> Settings -> Level -> String -> m ()
+writeMessageIO (Config enableColor enableTerminal enableFile minLevel0) (Settings colorScheme logEnable _) level text = do
   if level < toEnum minLevel0 || not logEnable
     then return ()
     else do
@@ -125,12 +125,12 @@ messageIO (Config enableColor enableTerminal enableFile minLevel0) (Settings col
         if level == Info
           then Color.setSchemeT colorScheme
           else Color.setColorT $ getColor level
-      when enableTerminal $ putStrLnT logText
-      when enableFile $ file logText
+      when enableTerminal $ putStrLnT writeLogText
+      when enableFile $ writeFile writeLogText
       when (enableColor && enableTerminal) Color.resetColorSchemeT
   where
-    logText :: String
-    logText = map toUpper (show level) <> " " <> text
+    writeLogText :: String
+    writeLogText = map toUpper (show level) <> " " <> text
 
     getColor :: Level -> Color
     getColor Debug = Green
@@ -139,7 +139,7 @@ messageIO (Config enableColor enableTerminal enableFile minLevel0) (Settings col
     getColor Error = Yellow
     getColor Critical = Red
 
-    file :: (MonadIO m, ToJSON a) => a -> m ()
-    file str = do
+    writeFile :: (MonadIO m, ToJSON a) => a -> m ()
+    writeFile str = do
       liftIO $ B.appendFile "log.txt" $ convert . encode $ str
       liftIO $ B.appendFile "log.txt" $ convert ("\n" :: String)

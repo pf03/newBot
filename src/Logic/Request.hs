@@ -24,14 +24,14 @@ sendRequest request save = do
   if status == 200
     then do
       let jsonBody = HTTP.getResponseBody response
-      Log.debugM jsonBody
+      Log.writeDebugM jsonBody
       when save $ do
-        Log.warnM "Saving request to file"
+        Log.writeWarnM "Saving request to file"
         Error.liftEIO $ L.writeFile "data.json" jsonBody
       return jsonBody
     else do
-      Log.errorM "Request failed with error"
-      Log.errorM $ show response
+      Log.writeErrorM "Request failed with error"
+      Log.writeErrorM $ show response
       Error.throw $ Error.QueryError "Request failed with error"
   where
     getResponse :: (MLog m, MIOError m) => m (HTTP.Response LC.ByteString)
@@ -42,8 +42,8 @@ sendRequest request save = do
           -- Exit from application by user choise
           Error.throw Error.Exit
         Left _ -> do
-          Log.errorM "Network connection error. Timeout 3 sec..."
-          Log.errorM $ show err
+          Log.writeErrorM "Network connection error. Timeout 3 sec..."
+          Log.writeErrorM $ show err
           Error.liftEIO $ threadDelay 3000000 -- liftEIO for correct catch async exceptions
           getResponse
         Right response -> return response

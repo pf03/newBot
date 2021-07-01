@@ -40,7 +40,7 @@ jconvert = Just . convert
 infixr 7 <:>
 
 (<:?>) :: Convert a => String -> Maybe a -> Query
-(<:?>) key mvalue = case mvalue of
+(<:?>) key mValue = case mValue of
   Nothing -> []
   Just value -> [(convert key, jconvert value)]
 

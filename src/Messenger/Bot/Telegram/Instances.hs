@@ -22,38 +22,38 @@ getUpdateId = do
 getUpdates :: MTrans m => Maybe UpdateId -> m ([Update.Update], Maybe UpdateId)
 getUpdates mUpdateId = do
   Log.setSettings Color.Cyan True $ template "getUpdates, mUpdateId = {0}" [show mUpdateId]
-  Log.send
+  Log.writeSending
   let query = Query.getUpdatesQuery (fmap (+ 1) mUpdateId) 25
   response <- Request.sendApiRequest API.GetUpdates query True
-  Log.receive
+  Log.writeReceiving
   object <- Parse.getObject response
-  Log.receiveData "object" object
+  Log.writeReceivingData "object" object
   newmUpdateId <- Parse.updateId object
-  Log.receiveData "newmUpdateId" newmUpdateId
+  Log.writeReceivingData "newmUpdateId" newmUpdateId
   updates <- Parse.updates object
-  Log.receiveData "update" updates
+  Log.writeReceivingData "update" updates
   return (updates, newmUpdateId <|> mUpdateId)
 
 -- Send response to a single user
 sendMessage :: MTrans m => Update.Update -> [Label] -> m ()
 sendMessage update btns = do
   Log.setSettings Color.Yellow True "sendMessage"
-  Log.send
+  Log.writeSending
   (api, query) <- Query.sendMessageQuery update btns
-  Log.receiveData "(api, query)" (api, query)
+  Log.writeReceivingData "(api, query)" (api, query)
   json <- Request.sendApiRequest api query False
-  Log.receive
+  Log.writeReceiving
   object <- Parse.getObject json
-  Log.receiveData "object" object
+  Log.writeReceivingData "object" object
 
 -- Dumping messages that we cannot parse, for debugging purposes
 reset :: MTrans m => m ()
 reset = do
   mUpdateId <- Cache.getmUpdateId
   Log.setSettings Color.Cyan True $ template "reset, mUpdateId = {0}" [show mUpdateId]
-  Log.send
+  Log.writeSending
   json <- Request.sendApiRequest API.GetUpdates (Query.getUpdatesQuery mUpdateId 0) True
-  Log.receive
+  Log.writeReceiving
   object <- Parse.getObject json
   newmUpdateId <- Parse.updateId object
-  Log.receiveData "mnewuid" newmUpdateId
+  Log.writeReceivingData "mnewuid" newmUpdateId

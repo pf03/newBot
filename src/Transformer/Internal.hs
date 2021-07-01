@@ -13,22 +13,22 @@ import Transformer.Types (Transformer (getTransformer))
 runConfig :: (MIOError m) => m Config.Config
 runConfig = do
   config <- Error.catch Config.readConfig $ \err -> do
-    Log.critical Log.defaultConfig logSettings "Error config read while run the transformer:"
-    Log.critical Log.defaultConfig logSettings $ show err
+    Log.writeCritical Log.defaultConfig logSettings "Error config read while run the transformer:"
+    Log.writeCritical Log.defaultConfig logSettings $ show err
     Error.throw err
   let logConfig = Config.configLog config
-  Log.info logConfig logSettings "Config read successfully..."
+  Log.writeInfo logConfig logSettings "Config read successfully..."
   return config
 
 showValue :: Show a => Config.Config -> State.State -> Transformer a -> ExceptT Error.Error IO ()
 showValue config state m = do
   let logConfig = Config.configLog config
   (a, _) <- Error.catch (runStateT (getTransformer m) state) $ \err -> do
-    Log.error logConfig logSettings "Application error: "
-    Log.error logConfig logSettings $ show err
+    Log.writeError logConfig logSettings "Application error: "
+    Log.writeError logConfig logSettings $ show err
     Error.throw err
-  Log.info logConfig logSettings "Result: "
-  Log.info logConfig logSettings $ show a
+  Log.writeInfo logConfig logSettings "Result: "
+  Log.writeInfo logConfig logSettings $ show a
   return ()
 
 logSettings :: Log.Settings

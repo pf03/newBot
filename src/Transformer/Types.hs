@@ -23,7 +23,7 @@ instance MLog Transformer where
   getSettings = Transformer State.getLogSettings
   setSettings colorScheme logEnable funcName = Transformer $ State.setLogSettings colorScheme logEnable funcName
   getConfig = Transformer State.getLogConfig
-  message logConfig logSettings logLevel str = Transformer $ Log.messageIO logConfig logSettings logLevel str
+  writeMessage logConfig logSettings logLevel str = Transformer $ Log.writeMessageIO logConfig logSettings logLevel str
 
 instance MError Transformer where
   throw :: Error.Error -> Transformer a
