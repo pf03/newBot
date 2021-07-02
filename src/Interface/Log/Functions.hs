@@ -126,7 +126,7 @@ writeMessageIO (Config enableColor enableTerminal enableFile minLevel0) (Setting
           then Color.setSchemeT colorScheme
           else Color.setColorT $ getColor level
       when enableTerminal $ putStrLnT writeLogText
-      when enableFile $ writeFile writeLogText
+      when enableFile $ writeToFile writeLogText
       when (enableColor && enableTerminal) Color.resetColorSchemeT
   where
     writeLogText :: String
@@ -139,7 +139,7 @@ writeMessageIO (Config enableColor enableTerminal enableFile minLevel0) (Setting
     getColor Error = Yellow
     getColor Critical = Red
 
-    writeFile :: (MonadIO m, ToJSON a) => a -> m ()
-    writeFile str = do
+    writeToFile :: (MonadIO m, ToJSON a) => a -> m ()
+    writeToFile str = do
       liftIO $ B.appendFile "log.txt" $ convert . encode $ str
       liftIO $ B.appendFile "log.txt" $ convert ("\n" :: String)

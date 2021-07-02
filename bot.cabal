@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 89147bd53ee5070dbb65e23078dfc1f91d91d1842536eb6fa8301f87b1760a67
+-- hash: 7497166e87b0e680930d571970dafe9d891aa302666f22f39ab14effbb0abb5c
 
 name:           bot
 version:        0.1.0.0
@@ -111,7 +111,7 @@ executable bot-exe
   hs-source-dirs:
       app
   default-extensions: OverloadedStrings
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wall -Werror
   build-depends:
       QuickCheck
     , aeson
