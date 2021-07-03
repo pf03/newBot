@@ -17,7 +17,7 @@ import qualified System.Console.ANSI as Color
 getUpdateId :: MTrans m => m (Maybe UpdateId)
 getUpdateId = do
   Log.setSettings Color.Blue True "getUpdateId"
-  Cache.getmUpdateId
+  Cache.getMUpdateId
 
 getUpdates :: MTrans m => Maybe UpdateId -> m ([Update.Update], Maybe UpdateId)
 getUpdates mUpdateId = do
@@ -28,11 +28,11 @@ getUpdates mUpdateId = do
   Log.writeReceiving
   object <- Parse.getObject response
   Log.writeReceivingData "object" object
-  newmUpdateId <- Parse.parseUpdateId object
-  Log.writeReceivingData "newmUpdateId" newmUpdateId
+  newMUpdateId <- Parse.parseUpdateId object
+  Log.writeReceivingData "newMUpdateId" newMUpdateId
   updates <- Parse.parseUpdates object
   Log.writeReceivingData "update" updates
-  return (updates, newmUpdateId <|> mUpdateId)
+  return (updates, newMUpdateId <|> mUpdateId)
 
 -- Send response to a single user
 sendMessage :: MTrans m => Update.Update -> [Label] -> m ()
@@ -49,11 +49,11 @@ sendMessage update btns = do
 -- Dumping messages that we cannot parse, for debugging purposes
 reset :: MTrans m => m ()
 reset = do
-  mUpdateId <- Cache.getmUpdateId
+  mUpdateId <- Cache.getMUpdateId
   Log.setSettings Color.Cyan True $ template "reset, mUpdateId = {0}" [show mUpdateId]
   Log.writeSending
   json <- Request.sendApiRequest API.GetUpdates (Query.getUpdatesQuery mUpdateId 0) True
   Log.writeReceiving
   object <- Parse.getObject json
-  newmUpdateId <- Parse.parseUpdateId object
-  Log.writeReceivingData "mnewuid" newmUpdateId
+  newMUpdateId <- Parse.parseUpdateId object
+  Log.writeReceivingData "newMUpdateId" newMUpdateId

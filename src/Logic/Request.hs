@@ -39,7 +39,7 @@ sendRequest request save = do
       err <- Error.toEither $ Error.liftEIO (HTTP.httpLBS request)
       case err of
         Left Error.Exit -> do
-          -- Exit from application by user choise
+          -- Exit from application by user choice
           Error.throw Error.Exit
         Left _ -> do
           Log.writeErrorM "Network connection error. Timeout 3 sec..."

@@ -9,7 +9,7 @@ import Data.Aeson (Object, (.:), (.:?))
 import Data.Aeson.Types (Parser)
 import qualified Logic.Logic as Logic
 import qualified Messenger.Update.Telegram.Types as Update
-import Parse.Internal (mwithArrayItem, mwithItem, withArrayItem, withArraymItem)
+import Parse.Internal (mWithArrayItem, mWithItem, withArrayItem, withArrayMItem)
 
 type OResultItem = Object
 
@@ -26,38 +26,38 @@ parseChatLastMessage object = do
     _ -> return $ last updates
 
 parseUpdates :: Object -> Parser [Update.Update]
-parseUpdates = withArraymItem "result" parseUpdate
+parseUpdates = withArrayMItem "result" parseUpdate
 
 parseUpdate :: OResultItem -> Parser (Maybe Update.Update)
 parseUpdate object = do
-  mmessage <- object .:? "message" -- If there is no message field, then we ignore such an update (editing a message, a vote in a poll etc)
-  case mmessage of
+  mMessage <- object .:? "message" -- If there is no message field, then we ignore such an update (editing a message, a vote in a poll etc)
+  case mMessage of
     Nothing -> return Nothing
     Just message -> do
       chat <- message .: "chat"
       chatId <- chat .: "id"
-      mforward <- parseForward message
-      case mforward of
+      mForward <- parseForward message
+      case mForward of
         Just forward -> return . Just $ (chatId, forward)
         Nothing -> parseMessage chatId message
 
 parseMessage :: ChatId -> Object -> Parser (Maybe Update.Update)
 parseMessage chatId object = do
-  mtext <- object .:? "text"
-  case mtext of
+  mText <- object .:? "text"
+  case mText of
     Nothing -> do
-      mother <- parseOther object -- for universal response, allways Just
-      msticker <- parseSticker object
-      manimation <- parseAnimation object
-      mphoto <- parsePhoto object
-      mvideo <- parseVideo object
-      mdocument <- parseDocument object
-      mpoll <- parsePoll object
-      mcontact <- parseContact object
-      mlocation <- parseLocation object
+      mOther <- parseOther object -- for universal response, always Just
+      mSticker <- parseSticker object
+      mAnimation <- parseAnimation object
+      mPhoto <- parsePhoto object
+      mVideo <- parseVideo object
+      mDocument <- parseDocument object
+      mPoll <- parsePoll object
+      mContact <- parseContact object
+      mLocation <- parseLocation object
       -- The priority of "mother" is determined by its position in the line. If "mother" will be first, other cases will never work
-      let mentity = msticker <|> manimation <|> mphoto <|> mvideo <|> mdocument <|> mpoll <|> mcontact <|> mlocation <|> mother
-      case mentity of
+      let mEntity = mSticker <|> mAnimation <|> mPhoto <|> mVideo <|> mDocument <|> mPoll <|> mContact <|> mLocation <|> mOther
+      case mEntity of
         Nothing -> fail "Unknown entity type"
         Just entity -> return . Just $ (chatId, entity)
     Just text -> do
@@ -68,75 +68,75 @@ parseMessage chatId object = do
 
 parseForward :: OMessageItem -> Parser (Maybe Update.Entity)
 parseForward object = do
-  mforwardFrom <- object .:? "forward_from"
-  case mforwardFrom of
+  mForwardFrom <- object .:? "forward_from"
+  case mForwardFrom of
     Nothing -> return Nothing
     Just forwardFrom -> do
       forwardFromId <- forwardFrom .: "id"
       messageId <- object .: "message_id"
       return $ Just $ Update.Forward forwardFromId messageId
 
--- allways Just
+-- always Just
 parseOther :: OMessageItem -> Parser (Maybe Update.Entity)
 parseOther object = do
   messageId <- object .: "message_id"
   return $ Just $ Update.Other messageId
 
 parseSticker :: OMessageItem -> Parser (Maybe Update.Entity)
-parseSticker = mwithItem "sticker" $ \object -> do
+parseSticker = mWithItem "sticker" $ \object -> do
   fileId <- object .: "file_id"
   return $ Update.Sticker fileId
 
 parseAnimation :: OMessageItem -> Parser (Maybe Update.Entity)
-parseAnimation = mwithItem "animation" $ \object -> do
+parseAnimation = mWithItem "animation" $ \object -> do
   fileId <- object .: "file_id"
   return $ Update.Animation fileId
 
 parsePhoto :: OMessageItem -> Parser (Maybe Update.Entity)
 parsePhoto message = do
-  mphotos <- mwithArrayItem "photo" (.: "file_id") message
-  mcaption <- message .:? "caption"
-  case mphotos of
+  mPhotos <- mWithArrayItem "photo" (.: "file_id") message
+  mCaption <- message .:? "caption"
+  case mPhotos of
     Nothing -> return Nothing
-    Just photos -> return $ Just $ Update.Photo (last photos) mcaption
+    Just photos -> return $ Just $ Update.Photo (last photos) mCaption
 
 parseVideo :: OMessageItem -> Parser (Maybe Update.Entity)
 parseVideo message = do
-  mvideo <- message .:? "video"
-  case mvideo of
+  mVideo <- message .:? "video"
+  case mVideo of
     Nothing -> return Nothing
     Just video -> do
-      mcaption <- message .:? "caption"
+      mCaption <- message .:? "caption"
       fileId <- video .: "file_id"
-      return $ Just $ Update.Video fileId mcaption
+      return $ Just $ Update.Video fileId mCaption
 
 parseDocument :: OMessageItem -> Parser (Maybe Update.Entity)
 parseDocument message = do
-  mfile <- message .:? "document"
-  case mfile of
+  mFile <- message .:? "document"
+  case mFile of
     Nothing -> return Nothing
     Just file -> do
-      mcaption <- message .:? "caption"
+      mCaption <- message .:? "caption"
       fileId <- file .: "file_id"
-      return $ Just $ Update.Document fileId mcaption
+      return $ Just $ Update.Document fileId mCaption
 
 parsePoll :: OMessageItem -> Parser (Maybe Update.Entity)
-parsePoll = mwithItem "poll" $ \object -> do
+parsePoll = mWithItem "poll" $ \object -> do
   pollId <- object .: "id"
   question <- object .: "question"
   options <- withArrayItem "options" (.: "text") object
   return $ Update.Poll {..}
 
 parseContact :: OMessageItem -> Parser (Maybe Update.Entity)
-parseContact = mwithItem "contact" $ \object -> do
+parseContact = mWithItem "contact" $ \object -> do
   phoneNumber <- object .: "phone_number"
   firstName <- object .: "first_name"
-  mlastName <- object .:? "last_name"
-  mvCard <- object .:? "vcard"
+  mLastName <- object .:? "last_name"
+  mVCard <- object .:? "vcard"
   return $ Update.Contact {..}
 
 parseLocation :: OMessageItem -> Parser (Maybe Update.Entity)
-parseLocation = mwithItem "location" $ \object -> do
+parseLocation = mWithItem "location" $ \object -> do
   latitude <- object .: "latitude"
   longitude <- object .: "longitude"
   return $ Update.Location latitude longitude

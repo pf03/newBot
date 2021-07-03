@@ -35,17 +35,17 @@ catchEIO m h = do
 
 liftEIO :: MIOError m => IO a -> m a
 liftEIO m = do
-  ea <- liftIO $ (Right <$> m) `E.catch` asynchandler `E.catch` ehandler `E.catch` iohandler `E.catch` otherhandler
+  ea <- liftIO $ (Right <$> m) `E.catch` asyncHandler `E.catch` eHandler `E.catch` ioHandler `E.catch` otherHandler
   liftE ea
   where
-    asynchandler :: AsyncCancelled -> IO (Either Error a)
-    asynchandler _ = return $ Left Exit
-    ehandler :: E.AsyncException -> IO (Either Error a)
-    ehandler _ = return $ Left Exit
-    iohandler :: E.IOException -> IO (Either Error a)
-    iohandler err = return . Left . IOError . show $ err
-    otherhandler :: E.SomeException -> IO (Either Error a)
-    otherhandler err = return . Left . SomeError . show $ err
+    asyncHandler :: AsyncCancelled -> IO (Either Error a)
+    asyncHandler _ = return $ Left Exit
+    eHandler :: E.AsyncException -> IO (Either Error a)
+    eHandler _ = return $ Left Exit
+    ioHandler :: E.IOException -> IO (Either Error a)
+    ioHandler err = return . Left . IOError . show $ err
+    otherHandler :: E.SomeException -> IO (Either Error a)
+    otherHandler err = return . Left . SomeError . show $ err
 
 throwConfig :: (MError m) => String -> [String] -> m a
 throwConfig str args = throw $ ConfigError $ template str args

@@ -47,12 +47,12 @@ setConfigApp configApp = modifyCache $ \cache -> cache {cacheConfigApp = configA
 getConfigText :: MCache m => m Config.ConfigText
 getConfigText = getsCache cacheConfigText
 
-getmUpdateId :: MCache m => m (Maybe UpdateId)
-getmUpdateId = Config.appUpdateId <$> getConfigApp
+getMUpdateId :: MCache m => m (Maybe UpdateId)
+getMUpdateId = Config.appUpdateId <$> getConfigApp
 
 -- updateId and repeatNumber only can be changed
-setmUpdateId :: MCache m => Maybe UpdateId -> m ()
-setmUpdateId mUpdateId = do
+setMUpdateId :: MCache m => Maybe UpdateId -> m ()
+setMUpdateId mUpdateId = do
   setCacheChanged
   configApp <- getConfigApp
   setConfigApp configApp {Config.appUpdateId = mUpdateId}
@@ -65,13 +65,13 @@ setRepeatNumbers repeatNumbers = do
   configApp <- getConfigApp
   setConfigApp configApp {Config.appRepeatNumber = repeatNumbers}
 
-getmRepeatNumber :: MCache m => ChatId -> m (Maybe Int)
-getmRepeatNumber chatId = M.lookup chatId <$> getRepeatNumbers
+getMRepeatNumber :: MCache m => ChatId -> m (Maybe Int)
+getMRepeatNumber chatId = M.lookup chatId <$> getRepeatNumbers
 
 getRepeatNumber :: MCache m => ChatId -> m Int
 getRepeatNumber chatId = do
-  mrepeatNumber <- getmRepeatNumber chatId
-  case mrepeatNumber of
+  mRepeatNumber <- getMRepeatNumber chatId
+  case mRepeatNumber of
     Nothing -> getsCache cacheDefaultRepeatNumber
     Just repeatNumber0 -> return repeatNumber0
 

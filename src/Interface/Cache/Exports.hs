@@ -12,8 +12,8 @@ import Interface.Cache.Functions as Functions
     getRepeatNumber,
     getRepeatNumbers,
     getToken,
-    getmRepeatNumber,
-    getmUpdateId,
+    getMRepeatNumber,
+    getMUpdateId,
     getsCache,
     modifyCache,
     resetCacheChanged,
@@ -21,6 +21,6 @@ import Interface.Cache.Functions as Functions
     setConfigApp,
     setRepeatNumber,
     setRepeatNumbers,
-    setmUpdateId,
+    setMUpdateId,
   )
 import Interface.Cache.Types as Types (Cache (..))

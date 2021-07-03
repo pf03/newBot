@@ -7,13 +7,13 @@ import Data.Maybe (fromMaybe)
 import Data.Text (pack)
 import qualified Logic.Logic as Logic
 import qualified Messenger.Update.VK.Types as Update
-import Parse.Internal (mwithArrayItem, parseJSONo, withArraymItem)
+import Parse.Internal (mWithArrayItem, parseJSONo, withArrayMItem)
 import Text.Read (readEither)
 
 parseUpdateId :: Object -> Parser (Maybe UpdateId)
 parseUpdateId object = do
-  mstr <- object .:? "ts"
-  case mstr of
+  mStr <- object .:? "ts"
+  case mStr of
     Nothing -> return Nothing
     Just str -> do
       let eUpdateId = readEither str
@@ -27,7 +27,7 @@ parseInit object = do
   parseJSONo response
 
 parseUpdates :: Object -> Parser [Update.Update]
-parseUpdates = withArraymItem "updates" parseUpdate
+parseUpdates = withArrayMItem "updates" parseUpdate
 
 parseUpdate :: Object -> Parser (Maybe Update.Update)
 parseUpdate object = do
@@ -38,7 +38,7 @@ parseUpdate object = do
       userId <- object1 .: "user_id"
       body <- object1 .: "body"
       let eMessageCommand = Logic.toMessageCommand body
-      mAttachments <- mwithArrayItem "attachments" parseAttachment object1
+      mAttachments <- mWithArrayItem "attachments" parseAttachment object1
       let attachments = fromMaybe [] mAttachments
       return $ Just (ChatId userId, Update.Entity eMessageCommand attachments)
     _ -> return Nothing

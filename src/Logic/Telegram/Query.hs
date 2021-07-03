@@ -12,7 +12,7 @@ import qualified Messenger.Update.Telegram.Types as Update
 import Network.HTTP.Simple (Query)
 
 getUpdatesQuery :: Maybe UpdateId -> TimeOut -> Query
-getUpdatesQuery moffset timeout = "timeout" <:> timeout ++ "offset" <:?> moffset
+getUpdatesQuery mOffset timeout = "timeout" <:> timeout ++ "offset" <:?> mOffset
 
 sendMessageQuery :: MError m => Update.Update -> [Label] -> m (API.API, Query)
 sendMessageQuery (chatId, entity) btns = do
@@ -26,16 +26,16 @@ sendMessageQuery (chatId, entity) btns = do
     Update.Command _ -> Error.throw $ Error.QueryError "Unable to send command to user"
     Update.Sticker (FileId fileId) -> return $ "sticker" <:> fileId
     Update.Animation fileId -> return $ "animation" <:> fileId
-    Update.Photo fileId mcaption -> return $ "photo" <:> fileId ++ "caption" <:?> mcaption
-    Update.Video fileId mcaption -> return $ "video" <:> fileId ++ "caption" <:?> mcaption
-    Update.Document fileId mcaption -> return $ "document" <:> fileId ++ "caption" <:?> mcaption
+    Update.Photo fileId mCaption -> return $ "photo" <:> fileId ++ "caption" <:?> mCaption
+    Update.Video fileId mCaption -> return $ "video" <:> fileId ++ "caption" <:?> mCaption
+    Update.Document fileId mCaption -> return $ "document" <:> fileId ++ "caption" <:?> mCaption
     Update.Poll _ question options -> return $ "question" <:> question ++ "options" <:> Encode.encodePollOptions options
-    Update.Contact phoneNumber firstName mlastName mvCard ->
+    Update.Contact phoneNumber firstName mLastName mVCard ->
       return $
         "phone_number" <:> phoneNumber
           ++ "first_name" <:> firstName
-          ++ "last_name" <:?> mlastName
-          ++ "vcard" <:?> mvCard
+          ++ "last_name" <:?> mLastName
+          ++ "vcard" <:?> mVCard
     Update.Location x y -> return $ "latitude" <:> x ++ "longitude" <:> y
     Update.Forward _ messageId -> return $ "from_chat_id" <:> chatId ++ "message_id" <:> messageId
     Update.Other messageId -> return $ "from_chat_id" <:> chatId ++ "message_id" <:> messageId

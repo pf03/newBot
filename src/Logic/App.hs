@@ -37,9 +37,9 @@ calcSendMessages = mapM_ $ \update -> do
 
 writeCache :: (MTrans m, IBot _pointer init _update) => init -> m ()
 writeCache init = do
-  mUpdateId <- Cache.getmUpdateId
-  let newmUpdateId = Bot.getmUpdateId init
-  Cache.setmUpdateId newmUpdateId
-  Log.writeInfoM $ template "Update updateId in file from {0} to {1}" [show mUpdateId, show newmUpdateId]
+  mUpdateId <- Cache.getMUpdateId
+  let newMUpdateId = Bot.getMUpdateId init
+  Cache.setMUpdateId newMUpdateId
+  Log.writeInfoM $ template "Update updateId in file from {0} to {1}" [show mUpdateId, show newMUpdateId]
   Log.writeInfoM "Update config in file..."
   Cache.writeCache

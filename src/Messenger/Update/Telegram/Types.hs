@@ -30,8 +30,8 @@ data Entity
   | Contact
       { phoneNumber :: String,
         firstName :: String,
-        mlastName :: Maybe String,
-        mvCard :: Maybe String
+        mLastName :: Maybe String,
+        mVCard :: Maybe String
       }
   | Location Float Float
   | Forward ChatId IntId

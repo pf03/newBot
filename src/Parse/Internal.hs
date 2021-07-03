@@ -20,10 +20,10 @@ parseJSONo :: FromJSON a => Object -> Parser a
 parseJSONo = parseJSON . Object
 
 -- | Wrapper for working with optional field
-mwithItem :: Key -> (Object -> Parser a) -> Object -> Parser (Maybe a)
-mwithItem (Key key) f object = do
-  mobject1 <- object .:? pack key
-  case mobject1 of
+mWithItem :: Key -> (Object -> Parser a) -> Object -> Parser (Maybe a)
+mWithItem (Key key) f object = do
+  mObject1 <- object .:? pack key
+  case mObject1 of
     Nothing -> return Nothing
     Just object1 -> Just <$> f object1
 
@@ -34,15 +34,15 @@ withArrayItem (Key key) f object = do
   mapM f arr
 
 -- | Wrapper for working with internal optional lists
-mwithArrayItem :: Key -> (Object -> Parser a) -> Object -> Parser (Maybe [a])
-mwithArrayItem (Key key) f object = do
-  marr <- object .:? pack key
-  case marr of
+mWithArrayItem :: Key -> (Object -> Parser a) -> Object -> Parser (Maybe [a])
+mWithArrayItem (Key key) f object = do
+  mArr <- object .:? pack key
+  case mArr of
     Nothing -> return Nothing
     Just arr -> Just <$> mapM f arr
 
 -- | Wrapper for working with internal arrays with optional elements
-withArraymItem :: Key -> (Object -> Parser (Maybe a)) -> Object -> Parser [a]
-withArraymItem key f object = do
+withArrayMItem :: Key -> (Object -> Parser (Maybe a)) -> Object -> Parser [a]
+withArrayMItem key f object = do
   maList <- withArrayItem key f object
   return $ fmap fromJust . filter isJust $ maList

@@ -26,8 +26,8 @@ instance IBot Pointer WrapInit WrapUpdate where
   getInit :: MTrans m => Pointer -> m WrapInit
   getInit _ = WrapInit <$> Instances.getInit
 
-  getmUpdateId :: WrapInit -> Maybe UpdateId
-  getmUpdateId (WrapInit init) = Just $ Update.ts init
+  getMUpdateId :: WrapInit -> Maybe UpdateId
+  getMUpdateId (WrapInit init) = Just $ Update.ts init
 
   getUpdates :: MTrans m => WrapInit -> m ([WrapUpdate], WrapInit)
   getUpdates (WrapInit init) = do

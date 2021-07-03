@@ -29,8 +29,8 @@ getInit = do
   Log.writeReceivingData "object" object
   init@(Update.Init server key _) <- Parse.parseInit object
   Log.writeReceivingData "init" init
-  mupdateIdFromFile <- Cache.getmUpdateId
-  case mupdateIdFromFile of
+  mUpdateIdFromFile <- Cache.getMUpdateId
+  case mUpdateIdFromFile of
     Nothing -> return init
     Just updateIdFromFile -> return $ Update.Init server key updateIdFromFile
 
