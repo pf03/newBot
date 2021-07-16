@@ -14,24 +14,24 @@ import qualified System.Console.ANSI as Color (Color (..))
 import Prelude hiding (init)
 
 -- | Run bot application
-application :: (MTrans m, IBot pointer init _update) => pointer -> m ()
-application pointer = do
+runApplication :: (MTrans m, IBot pointer init _update) => pointer -> m ()
+runApplication pointer = do
   Log.setSettings Color.Blue True "application"
   init <- Bot.getInit pointer
-  longPolling pointer init
+  longPollingLoop pointer init
 
 -- | Long polling loop
-longPolling :: (MTrans m, IBot pointer init update) => pointer -> init -> m ()
-longPolling pointer init = do
+longPollingLoop :: (MTrans m, IBot pointer init update) => pointer -> init -> m ()
+longPollingLoop pointer init = do
   Log.setSettings Color.Cyan True "longPolling"
   (updates, newInit) <- Bot.getUpdates init
-  calcSendMessages updates
+  handleUpdates updates
   writeCache newInit
-  longPolling pointer newInit
+  longPollingLoop pointer newInit
 
 -- | Response to all users
-calcSendMessages :: (MTrans m, IBot _pointer _init update) => [update] -> m ()
-calcSendMessages = mapM_ $ \update -> do
+handleUpdates :: (MTrans m, IBot _pointer _init update) => [update] -> m ()
+handleUpdates = mapM_ $ \update -> do
   (newUpdate, btns, repeatNumber) <- Logic.evalAnswer update
   replicateM_ repeatNumber $ Bot.sendMessage newUpdate btns
 
