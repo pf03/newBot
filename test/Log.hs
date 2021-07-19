@@ -1,4 +1,4 @@
-module Interface.Log.Test where
+module Log where
 
 import qualified Interface.Log.Exports as Log
 import qualified System.Console.ANSI as Color

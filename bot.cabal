@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 59a166fb6258c4c6b65e3078aad9c57f8737a34c4d6ece694fd88ba5988e8cc8
+-- hash: b33f005c0cdd6a344d43b0189c1eaab8701b60a64970387ee987347cece04936
 
 name:           bot
 version:        0.1.0.0
@@ -47,7 +47,6 @@ library
       Interface.Log.Color
       Interface.Log.Exports
       Interface.Log.Functions
-      Interface.Log.Test
       Interface.Log.Types
       Interface.MTrans
       Logic.App
@@ -136,7 +135,9 @@ test-suite bot-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Color
       Lib
+      Log
       Paths_bot
   hs-source-dirs:
       test
