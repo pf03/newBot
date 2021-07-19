@@ -58,29 +58,29 @@ sendApiRequest api query save = do
   let request = buildRequest host path query
   sendRequest request save
 
-buildRequestWithInit :: HTTP.Request -> HTTP.Query -> HTTP.Request
-buildRequestWithInit initRequest query =
-  HTTP.setRequestSecure True $
-    HTTP.setRequestMethod "POST" $
-      HTTP.setRequestPort 443 $
-        HTTP.setRequestBodyURLEncoded
-          (map (\(a, Just b) -> (a, b)) query)
-          initRequest
-
 buildRequest :: Host -> Path -> HTTP.Query -> HTTP.Request
 buildRequest (Host host) (Path path) query =
-  HTTP.setRequestSecure True $
-    HTTP.setRequestMethod "POST" $
-      HTTP.setRequestPort 443 $
-        HTTP.setRequestHost (BC.pack host) $
-          HTTP.setRequestPath (BC.pack path) $
-            HTTP.setRequestBodyURLEncoded
-              (map (\(a, Just b) -> (a, b)) query)
-              HTTP.defaultRequest
+  HTTP.setRequestHost (BC.pack host) $
+    HTTP.setRequestPath (BC.pack path) $
+      HTTP.setRequestBodyURLEncoded
+        (map (\(a, Just b) -> (a, b)) query)
+        $ setRequestSettings HTTP.defaultRequest
 
-parseRequest :: MError m => String -> m HTTP.Request
-parseRequest str = do
+parseRequest :: MError m => String -> HTTP.Query -> m HTTP.Request
+parseRequest str query = do
   let eRequest = HTTP.parseRequest str :: Either SomeException HTTP.Request
-  case eRequest of
+  initRequest <- case eRequest of
     Left err -> Error.throw $ Error.QueryError (show err)
     Right request -> return request
+  return $
+    HTTP.setRequestBodyURLEncoded
+      (map (\(a, Just b) -> (a, b)) query)
+      $ setRequestSettings initRequest
+
+setRequestSettings :: HTTP.Request -> HTTP.Request
+setRequestSettings initRequest =
+  HTTP.setRequestSecure True $
+    HTTP.setRequestMethod "POST" $
+      HTTP.setRequestPort
+        443
+        initRequest

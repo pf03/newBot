@@ -36,8 +36,7 @@ getUpdates :: MTrans m => Update.Init -> m ([Update.Update], Update.Init)
 getUpdates init@(Update.Init server _ ts) = do
   Log.setSettings Color.Cyan True "getUpdates"
   let query = Query.longPollQuery init 25
-  initRequest <- Request.parseRequest server
-  let request = Request.buildRequestWithInit initRequest query
+  request <- Request.parseRequest server query
   Log.writeSending
   json <- Request.sendRequest request True -- long polling
   Log.writeReceiving
