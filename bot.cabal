@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 7497166e87b0e680930d571970dafe9d891aa302666f22f39ab14effbb0abb5c
+-- hash: 59a166fb6258c4c6b65e3078aad9c57f8737a34c4d6ece694fd88ba5988e8cc8
 
 name:           bot
 version:        0.1.0.0
@@ -96,6 +96,7 @@ library
     , base >=4.7 && <5
     , bytestring
     , containers
+    , exceptions
     , hspec
     , http-conduit
     , mtl
@@ -122,6 +123,7 @@ executable bot-exe
     , bot
     , bytestring
     , containers
+    , exceptions
     , hspec
     , http-conduit
     , mtl
@@ -150,6 +152,7 @@ test-suite bot-test
     , bot
     , bytestring
     , containers
+    , exceptions
     , hspec
     , http-conduit
     , mtl
