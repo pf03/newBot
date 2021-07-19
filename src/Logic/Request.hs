@@ -3,10 +3,11 @@
 
 module Logic.Request where
 
-import Class --(IAPI, MCache, MIOError, MLog)
+import Class (IAPI, MCache, MError, MIOError, MLog)
 import Common.Types (Host (..), Path (..))
 import Control.Concurrent (threadDelay)
-import Control.Monad.State.Lazy (when)                                      
+import Control.Monad.Catch (SomeException)
+import Control.Monad.State.Lazy (when)
 import qualified Data.ByteString.Char8 as BC
 import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString.Lazy.Char8 as LC
@@ -15,7 +16,6 @@ import qualified Interface.Error.Exports as Error
 import qualified Interface.Log.Exports as Log
 import qualified Messenger.API.Class as API
 import qualified Network.HTTP.Simple as HTTP
-import Control.Monad.Catch ( SomeException )
 
 -- | Low level wrapper for request
 sendRequest :: (MLog m, MIOError m) => HTTP.Request -> Bool -> m LC.ByteString
@@ -32,7 +32,7 @@ sendRequest request save = do
       return jsonBody
     else do
       Log.writeErrorM "Request failed with error"
-      Log.writeErrorM $ show response                                                                                              
+      Log.writeErrorM $ show response
       Error.throw $ Error.QueryError "Request failed with error"
   where
     getResponse :: (MLog m, MIOError m) => m (HTTP.Response LC.ByteString)
@@ -63,9 +63,9 @@ buildRequestWithInit initRequest query =
   HTTP.setRequestSecure True $
     HTTP.setRequestMethod "POST" $
       HTTP.setRequestPort 443 $
-            HTTP.setRequestBodyURLEncoded
-              (map (\(a, Just b) -> (a, b)) query)
-              initRequest
+        HTTP.setRequestBodyURLEncoded
+          (map (\(a, Just b) -> (a, b)) query)
+          initRequest
 
 buildRequest :: Host -> Path -> HTTP.Query -> HTTP.Request
 buildRequest (Host host) (Path path) query =
@@ -78,9 +78,9 @@ buildRequest (Host host) (Path path) query =
               (map (\(a, Just b) -> (a, b)) query)
               HTTP.defaultRequest
 
-parseRequest  :: MError m => String -> m HTTP.Request
+parseRequest :: MError m => String -> m HTTP.Request
 parseRequest str = do
   let eRequest = HTTP.parseRequest str :: Either SomeException HTTP.Request
-  case eRequest of 
+  case eRequest of
     Left err -> Error.throw $ Error.QueryError (show err)
     Right request -> return request

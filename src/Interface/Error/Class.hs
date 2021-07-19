@@ -6,7 +6,7 @@ import Control.Monad.Except (ExceptT, MonadIO (..))
 import Control.Monad.Trans.Except (catchE, throwE)
 import Interface.Error.Types (Error)
 
-class (MonadFail m) => MError m where
+class MonadFail m => MError m where
   throw :: Error -> m a
   catch :: m a -> (Error -> m a) -> m a
 
