@@ -1,7 +1,7 @@
 module Interface.Log.Functions where
 
 import Common.Convert (Convert (convert))
-import Common.Functions (putStrLnT, template)
+import Common.Functions (template)
 import Control.Monad (when)
 import Control.Monad.IO.Class (MonadIO (..))
 import Data.Aeson (encode)
@@ -125,7 +125,7 @@ writeMessageIO (Config enableColor enableTerminal enableFile minLevel0) (Setting
         if level == Info
           then Color.setSchemeT colorScheme
           else Color.setColorT $ getColor level
-      when enableTerminal $ putStrLnT writeLogText
+      when enableTerminal $ (liftIO . putStrLn) writeLogText
       when enableFile $ writeToFile writeLogText
       when (enableColor && enableTerminal) Color.resetColorSchemeT
   where

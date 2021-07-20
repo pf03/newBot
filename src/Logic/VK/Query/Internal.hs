@@ -1,7 +1,7 @@
 module Logic.VK.Query.Internal where
 
 import Common.Convert (jConvert, (<:>))
-import Common.Functions (safeTail, template)
+import Common.Functions (template)
 import Common.Types (ChatId, ItemName (ItemName), Key (Key), Message, Token (..))
 import Data.Either (rights)
 import qualified Logic.VK.Encode as Encode
@@ -24,6 +24,9 @@ attachmentsQuery attachments = rights eStrQueryItem ++ queryStr
     helper :: String -> Either String QueryItem -> String
     helper value1 (Left value2) = template "{0},{1}" [value1, value2]
     helper value _ = value
+    safeTail :: [a] -> [a]
+    safeTail [] = []
+    safeTail x = tail x
 
 attachmentQuery :: Update.Attachment -> Either String QueryItem
 attachmentQuery attachment =

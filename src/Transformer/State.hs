@@ -5,7 +5,6 @@
 module Transformer.State where
 
 import Class (MCache, MIOError)
-import Common.Functions (for)
 import Control.Monad.State.Lazy (MonadIO, MonadState (get), gets, modify, when)
 import qualified Data.Aeson.Encode.Pretty as Aeson
 import qualified Data.ByteString.Lazy as L
@@ -82,7 +81,7 @@ getStateFromConfig config =
 getStatesFromConfig :: Config.Config -> [State]
 getStatesFromConfig config =
   let configApps = filter Config.appEnable (Config.configApps config)
-   in for configApps $ \configApp0 ->
+   in flip fmap configApps $ \configApp0 ->
         let cache0 =
               Cache.Cache
                 { Cache.cacheConfigApp = configApp0,
