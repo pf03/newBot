@@ -1,7 +1,6 @@
 module Color where
 
-import Common.Functions (ifJust, template)
-import Data.Maybe (fromJust)
+import Common.Functions (template)
 import System.Console.ANSI
   ( Color (..),
     ColorIntensity (..),
@@ -14,8 +13,8 @@ import System.Console.ANSI
 -- | Set colors and write some text in those colors.
 colorCell :: ColorIntensity -> ConsoleIntensity -> (String, Maybe Color) -> (String, Maybe Color) -> IO ()
 colorCell colorIntensity consoleIntensity (colorName1, mColor1) (colorName2, mColor2) = do
-  ifJust mColor1 $ setSGR [SetColor Foreground colorIntensity (fromJust mColor1)]
-  ifJust mColor2 $ setSGR [SetColor Background colorIntensity (fromJust mColor2)]
+  maybe (return ()) (\color1 -> setSGR [SetColor Foreground colorIntensity color1]) mColor1
+  maybe (return ()) (\color2 -> setSGR [SetColor Background colorIntensity color2]) mColor2
   setSGR [SetConsoleIntensity consoleIntensity]
   putStr $ template " {0} {1} " [take 3 colorName1, take 3 colorName2]
   setSGR [Reset] -- Reset to default colour scheme

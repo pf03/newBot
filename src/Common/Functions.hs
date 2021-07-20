@@ -18,11 +18,6 @@ template str args = foldl f str $ zip ts args
       let strs = splitOn t0 str0
        in concat $ init $ foldr (\part acc0 -> part : s : acc0) [] strs
 
-ifJust :: Monad m => Maybe a -> m () -> m ()
-ifJust ma m = case ma of
-  Just _ -> m
-  _ -> return ()
-
 -- Check for unique values in list
 checkUnique :: Eq a => [a] -> Bool
 checkUnique l = let newList = filter (== True) ((==) <$> l <*> l) in length newList == length l

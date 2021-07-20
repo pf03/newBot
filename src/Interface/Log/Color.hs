@@ -1,8 +1,6 @@
 module Interface.Log.Color where
 
-import Common.Functions (ifJust)
 import Control.Monad.IO.Class (MonadIO (..))
-import Data.Maybe (fromJust)
 import System.Console.ANSI
   ( Color (..),
     ColorIntensity (..),
@@ -25,8 +23,8 @@ setColorT color = setColorSchemeT Vivid NormalIntensity (Just color) Nothing
 
 setColorSchemeT :: (MonadIO m) => ColorIntensity -> ConsoleIntensity -> Maybe Color -> Maybe Color -> m ()
 setColorSchemeT colorIntensity consoleIntensity mColor1 mColor2 = liftIO $ do
-  ifJust mColor1 $ setSGR [SetColor Foreground colorIntensity (fromJust mColor1)]
-  ifJust mColor2 $ setSGR [SetColor Background colorIntensity (fromJust mColor2)]
+  maybe (return ()) (\color1 -> setSGR [SetColor Foreground colorIntensity color1]) mColor1
+  maybe (return ()) (\color2 -> setSGR [SetColor Background colorIntensity color2]) mColor2
   setSGR [SetConsoleIntensity consoleIntensity]
 
 resetColorSchemeT :: MonadIO m => m ()
