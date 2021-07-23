@@ -1,6 +1,6 @@
 module Transformer.Internal where
 
-import Class (MIOError)
+import Class (MError)
 import Control.Monad.Except (ExceptT, runExceptT)
 import Control.Monad.State.Lazy (StateT (runStateT), void)
 import qualified Interface.Cache.Config.Exports as Config
@@ -9,8 +9,9 @@ import qualified Interface.Log.Exports as Log
 import qualified System.Console.ANSI as Color
 import qualified Transformer.State as State
 import Transformer.Types (Transformer (getTransformer))
+import Control.Monad.IO.Class
 
-runConfig :: (MIOError m) => m Config.Config
+runConfig :: (MonadIO m, MError m) => m Config.Config
 runConfig = do
   config <- Error.catch Config.readConfig $ \err -> do
     Log.writeCritical Log.defaultConfig logSettings "Error config read while run the transformer:"

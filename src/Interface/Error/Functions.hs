@@ -4,7 +4,7 @@ import Common.Functions (template)
 import Control.Concurrent.Async (AsyncCancelled)
 import qualified Control.Exception as E
 import Control.Monad.Except (MonadIO (liftIO))
-import Interface.Error.Class (MError (..), MIOError)
+import Interface.Error.Class (MError (..))
 import Interface.Error.Types (Error (ConfigError, Exit, IOError, SomeError))
 
 -----------------------------MError--------------------------------------------
@@ -23,7 +23,7 @@ toEither ma = do
   catch (Right <$> ma) $ \err -> return $ Left err
 
 -----------------------------MIOError------------------------------------------
-catchEIO :: (MIOError m, E.Exception e) => IO a -> (e -> Error) -> m a
+catchEIO :: (MonadIO m, MError m, E.Exception e) => IO a -> (e -> Error) -> m a
 catchEIO m h = do
   ea <- liftIO $ (Right <$> m) `E.catch` handler
   liftE ea
@@ -33,7 +33,7 @@ catchEIO m h = do
 
 -- * The same as previous, but errors are handled automatically, without user handlers
 
-liftEIO :: MIOError m => IO a -> m a
+liftEIO :: (MonadIO m, MError m) => IO a -> m a
 liftEIO m = do
   ea <- liftIO $ (Right <$> m) `E.catch` asyncHandler `E.catch` eHandler `E.catch` ioHandler `E.catch` otherHandler
   liftE ea

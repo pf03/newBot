@@ -4,7 +4,7 @@
 
 module Transformer.State where
 
-import Class (MCache, MIOError)
+import Class (MCache, MError)
 import Control.Monad.State.Lazy (MonadIO, MonadState (get), gets, modify, when)
 import qualified Data.Aeson.Encode.Pretty as Aeson
 import qualified Data.ByteString.Lazy as L
@@ -39,7 +39,7 @@ getCache = gets cache
 setCache :: MonadState State m => Cache.Cache -> m ()
 setCache cache0 = modify $ \state -> state {cache = cache0}
 
-writeCache :: (MCache m, MIOError m, MonadState State m, MonadIO m) => m ()
+writeCache :: (MCache m, MError m, MonadState State m, MonadIO m) => m ()
 writeCache = do
   cacheChanged <- Cache.getCacheChanged
   when cacheChanged $ do
@@ -48,13 +48,13 @@ writeCache = do
     Cache.resetCacheChanged
 
 -----------------------------State <-> Config----------------------------------
-readStates :: MIOError m => m [State]
+readStates :: (MonadIO m, MError m) => m [State]
 readStates = getStatesFromConfig <$> Config.readConfig
 
-readState :: MIOError m => m State
+readState :: (MonadIO m, MError m) => m State
 readState = getStateFromConfig <$> Config.readConfig
 
-saveState :: MIOError m => State -> m ()
+saveState :: (MonadIO m, MError m) => State -> m ()
 saveState state = do
   config <- Config.readConfig
   let newConfig = setStateToConfig config state

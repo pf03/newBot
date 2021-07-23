@@ -3,7 +3,7 @@
 
 module Logic.Request where
 
-import Class (IAPI, MCache, MError, MIOError, MLog)
+import Class (IAPI, MCache, MError, MLog)
 import Common.Types (Host (..), Path (..))
 import Control.Concurrent (threadDelay)
 import Control.Monad.Catch (SomeException)
@@ -16,9 +16,10 @@ import qualified Interface.Error.Exports as Error
 import qualified Interface.Log.Exports as Log
 import qualified Messenger.API.Class as API
 import qualified Network.HTTP.Simple as HTTP
+import Control.Monad.IO.Class (MonadIO)
 
 -- | Low level wrapper for request
-sendRequest :: (MLog m, MIOError m) => HTTP.Request -> Bool -> m LC.ByteString
+sendRequest :: (MLog m, MonadIO m, MError m) => HTTP.Request -> Bool -> m LC.ByteString
 sendRequest request save = do
   response <- getResponse
   let status = HTTP.getResponseStatusCode response
@@ -35,7 +36,7 @@ sendRequest request save = do
       Log.writeErrorM $ show response
       Error.throw $ Error.QueryError "Request failed with error"
   where
-    getResponse :: (MLog m, MIOError m) => m (HTTP.Response LC.ByteString)
+    getResponse :: (MLog m, MonadIO m, MError m) => m (HTTP.Response LC.ByteString)
     getResponse = do
       err <- Error.toEither $ Error.liftEIO (HTTP.httpLBS request)
       case err of
@@ -50,7 +51,7 @@ sendRequest request save = do
         Right response -> return response
 
 -- | High level wrapper for API request
-sendApiRequest :: (IAPI api, MCache m, MIOError m, MLog m) => api -> HTTP.Query -> Bool -> m LC.ByteString
+sendApiRequest :: (IAPI api, MCache m, MonadIO m, MError m, MLog m) => api -> HTTP.Query -> Bool -> m LC.ByteString
 sendApiRequest api query save = do
   host <- Cache.getHost
   token <- Cache.getToken
