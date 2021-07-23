@@ -16,7 +16,7 @@ import Interface.Log.Functions as Functions
     writeError,
     writeErrorM,
     writeInfo,
-    writeInfoCM,
+    writeInfoColorM,
     writeInfoM,
     writeMessageIO,
     writeMessageM,

@@ -56,8 +56,8 @@ writeDebugM a = writeMessageM Debug (show a)
 writeInfoM :: MLog m => String -> m ()
 writeInfoM = writeMessageM Info
 
-writeInfoCM :: MLog m => ColorScheme -> String -> m ()
-writeInfoCM colorScheme str = do
+writeInfoColorM :: MLog m => ColorScheme -> String -> m ()
+writeInfoColorM colorScheme str = do
   setColorScheme colorScheme
   writeInfoM str
 
