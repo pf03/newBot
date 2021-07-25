@@ -13,11 +13,6 @@ import qualified Parse.VK.Exports as Parse
 import qualified System.Console.ANSI as Color
 import Prelude hiding (init)
 
-import qualified Network.HTTP.Simple as HTTP
-import qualified Interface.Error.Exports as Error
-import Control.Exception
-import Control.Monad.IO.Class
-
 -- Initialization - get last updateId, server name, key for getUpdates request
 getInit :: MTrans m => m Update.Init
 getInit = do
@@ -53,51 +48,6 @@ getUpdates init@(Update.Init server _ ts) = do
   updates <- Parse.parseUpdates object
   Log.writeReceivingData "updates" updates
   return (updates, newInit)
-
--- Get updates from messenger server by the long polling method
--- getUpdates :: MTrans m => Update.Init -> m ([Update.Update], Update.Init)
--- getUpdates init@(Update.Init server _ ts) = do
---   Log.setSettings Color.Cyan True "getUpdates"
---   let query = Query.longPollQuery init 25
---   -- Log.writeInfoM $ show expure
---   -- request <- either throwSomeError return (Request.parseRequest1 server query)
---   request <- fromEither $ Request.parseRequest1 server query
---   Log.writeSending
---   json <- Request.sendRequest request True -- long polling
---   Log.writeReceiving
---   object <- Parse.getObject json
---   Log.writeReceivingData "object" object
---   mUpdateId <- Parse.parseUpdateId object
---   let newInit = init {Update.ts = fromMaybe ts mUpdateId}
---   Log.writeReceivingData "mUpdateId" mUpdateId
---   updates <- Parse.parseUpdates object
---   Log.writeReceivingData "updates" updates
---   return (updates, newInit)
-
---throwSomeError :: (Log.MLog m, MonadIO m) => Error.Error -> m HTTP.Request
-throwSomeError :: (Log.MLog m) => Error.Error -> m a
-throwSomeError err = do
-    Log.writeErrorM "Application error: "
-    Log.writeErrorM $ show err
-    throw err
-
-fromEither :: Log.MLog m => Either Error.Error a -> m a
-fromEither ea = do
-  either throwSomeError return ea
-
-testExPure :: IO()
-testExPure = do
-  i <- catch (return exPure) handler
-  putStrLn $ "result" <> show i 
-
-exPure :: Int 
-exPure =  do
-  throw $ Error.ConfigError "dberror foo"
-
-handler :: Error.Error -> IO Int 
-handler e = do
-  putStrLn "error handle!!"
-  return 3
 
 -- Send response to a single user
 sendMessage :: MTrans m => Update.Update -> [Label] -> m ()

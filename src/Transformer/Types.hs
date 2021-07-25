@@ -2,20 +2,17 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE InstanceSigs #-}
 
 module Transformer.Types where
 
 import Class (MCache, MIOCache, MLog, MTrans)
-import Control.Monad.State.Lazy (MonadIO, MonadState, MonadTrans (lift), StateT (..))
-import Control.Monad.Trans.Except (ExceptT, catchE, throwE)
+import Control.Monad.State.Lazy (MonadIO, MonadState, StateT (..))
 import qualified Interface.Cache.Exports as Cache
-import qualified Interface.Error.Exports as Error
 import qualified Interface.Log.Exports as Log
 import qualified Transformer.State as State
 
 -----------------------------Types---------------------------------------------
-newtype Transformer a = Transformer {getTransformer :: StateT State.State (ExceptT Error.Error IO) a}
+newtype Transformer a = Transformer {getTransformer :: StateT State.State IO a}
   deriving newtype (Functor, Applicative, Monad, MonadFail, MonadIO, MonadState State.State)
 
 -----------------------------Instances-----------------------------------------

@@ -6,7 +6,8 @@ module Logic.Request where
 import Class (IAPI, MCache, MLog)
 import Common.Types (Host (..), Path (..))
 import Control.Concurrent (threadDelay)
-import Control.Monad.Catch (SomeException)
+import Control.Exception (SomeException, throw)
+import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State.Lazy (when)
 import qualified Data.ByteString.Char8 as BC
 import qualified Data.ByteString.Lazy as L
@@ -16,9 +17,6 @@ import qualified Interface.Error.Exports as Error
 import qualified Interface.Log.Exports as Log
 import qualified Messenger.API.Class as API
 import qualified Network.HTTP.Simple as HTTP
-import Control.Monad.IO.Class
-import Control.Exception
-import Control.Concurrent.Async (AsyncCancelled)
 
 -- | Low level wrapper for request
 sendRequest :: (MLog m, MonadIO m) => HTTP.Request -> Bool -> m LC.ByteString
@@ -50,7 +48,9 @@ sendRequest request save = do
           Log.writeErrorM $ show eResponse
           Error.liftEIO $ threadDelay 3000000 -- liftEIO for correct catch async exceptions
           getResponse
-        Right response -> return response
+        Right response -> do
+          Log.writeInfoM "Response received successfully"
+          return response
 
 -- | High level wrapper for API request
 sendApiRequest :: (IAPI api, MCache m, MonadIO m, MLog m) => api -> HTTP.Query -> Bool -> m LC.ByteString
@@ -70,14 +70,16 @@ buildRequest (Host host) (Path path) query =
         $ setRequestSettings HTTP.defaultRequest
 
 parseRequest :: String -> HTTP.Query -> HTTP.Request
-parseRequest str query = request where
-  eRequest = HTTP.parseRequest str :: Either SomeException HTTP.Request;
-  initRequest = case eRequest of
-    Left err -> throw $ Error.QueryError (show err)
-    Right request -> request
-  request = HTTP.setRequestBodyURLEncoded
-      (map (\(a, Just b) -> (a, b)) query)
-      $ setRequestSettings initRequest
+parseRequest str query = request
+  where
+    eRequest = HTTP.parseRequest str :: Either SomeException HTTP.Request
+    initRequest = case eRequest of
+      Left err -> throw $ Error.QueryError (show err)
+      Right request0 -> request0
+    request =
+      HTTP.setRequestBodyURLEncoded
+        (map (\(a, Just b) -> (a, b)) query)
+        $ setRequestSettings initRequest
 
 setRequestSettings :: HTTP.Request -> HTTP.Request
 setRequestSettings initRequest =

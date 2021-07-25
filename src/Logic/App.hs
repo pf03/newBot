@@ -12,8 +12,6 @@ import qualified Logic.Logic as Logic
 import qualified Messenger.Bot.Class as Bot
 import qualified System.Console.ANSI as Color (Color (..))
 import Prelude hiding (init)
-import Control.Exception ( catch )
-import Control.Monad.IO.Class
 
 -- | Run bot application
 runApplication :: (MTrans m, IBot pointer init _update) => pointer -> m ()

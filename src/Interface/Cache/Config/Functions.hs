@@ -13,7 +13,6 @@ import qualified Interface.Error.Exports as Error
 import qualified Parse.Functions as Parse (eDecode)
 import System.IO.Error (isDoesNotExistError)
 import Control.Monad.IO.Class ( MonadIO )
-import Control.Exception
 
 readConfig :: (MonadIO m) => m Config
 readConfig = do
