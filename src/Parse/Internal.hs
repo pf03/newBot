@@ -2,7 +2,6 @@
 
 module Parse.Internal where
 
-import Class (MError)
 import Common.Types (Key (..))
 import Data.Aeson (FromJSON (parseJSON), Object, Value (Object), (.:), (.:?))
 import Data.Aeson.Types (Parser, parseEither)
@@ -13,7 +12,7 @@ import qualified Interface.Error.Exports as Error
 --All functions in Parser monad are internal
 
 -- Quitting the Parser monad
-parseE :: MError m => (Object -> Parser a) -> Object -> m a
+parseE :: Monad m => (Object -> Parser a) -> Object -> m a
 parseE f object = Error.catchEither (parseEither f object) Error.ParseError
 
 parseJSONo :: FromJSON a => Object -> Parser a

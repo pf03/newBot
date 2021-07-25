@@ -6,7 +6,7 @@
 
 module Transformer.Types where
 
-import Class (MCache, MError, MIOCache, MError, MLog, MTrans)
+import Class (MCache, MIOCache, MLog, MTrans)
 import Control.Monad.State.Lazy (MonadIO, MonadState, MonadTrans (lift), StateT (..))
 import Control.Monad.Trans.Except (ExceptT, catchE, throwE)
 import qualified Interface.Cache.Exports as Cache
@@ -24,13 +24,6 @@ instance MLog Transformer where
   setSettings colorScheme logEnable funcName = Transformer $ State.setLogSettings colorScheme logEnable funcName
   getConfig = Transformer State.getLogConfig
   writeMessage logConfig logSettings logLevel str = Transformer $ Log.writeMessageIO logConfig logSettings logLevel str
-
-instance MError Transformer where
-  throw :: Error.Error -> Transformer a
-  throw err = Transformer . lift $ throwE err
-  catch :: Transformer a -> (Error.Error -> Transformer a) -> Transformer a
-  catch ta f = Transformer . StateT $ \state -> catchE (runStateT (getTransformer ta) state) $
-    \err -> runStateT (getTransformer $ f err) state
 
 instance MCache Transformer where
   getCache = Transformer State.getCache

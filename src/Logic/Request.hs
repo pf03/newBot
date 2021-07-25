@@ -3,7 +3,7 @@
 
 module Logic.Request where
 
-import Class (IAPI, MCache, MError, MLog)
+import Class (IAPI, MCache, MLog)
 import Common.Types (Host (..), Path (..))
 import Control.Concurrent (threadDelay)
 import Control.Monad.Catch (SomeException)
@@ -16,10 +16,12 @@ import qualified Interface.Error.Exports as Error
 import qualified Interface.Log.Exports as Log
 import qualified Messenger.API.Class as API
 import qualified Network.HTTP.Simple as HTTP
-import Control.Monad.IO.Class (MonadIO)
+import Control.Monad.IO.Class
+import Control.Exception
+import Control.Concurrent.Async (AsyncCancelled)
 
 -- | Low level wrapper for request
-sendRequest :: (MLog m, MonadIO m, MError m) => HTTP.Request -> Bool -> m LC.ByteString
+sendRequest :: (MLog m, MonadIO m) => HTTP.Request -> Bool -> m LC.ByteString
 sendRequest request save = do
   response <- getResponse
   let status = HTTP.getResponseStatusCode response
@@ -34,24 +36,24 @@ sendRequest request save = do
     else do
       Log.writeErrorM "Request failed with error"
       Log.writeErrorM $ show response
-      Error.throw $ Error.QueryError "Request failed with error"
+      throw $ Error.QueryError "Request failed with error"
   where
-    getResponse :: (MLog m, MonadIO m, MError m) => m (HTTP.Response LC.ByteString)
+    getResponse :: (MLog m, MonadIO m) => m (HTTP.Response LC.ByteString)
     getResponse = do
-      err <- Error.toEither $ Error.liftEIO (HTTP.httpLBS request)
-      case err of
+      eResponse <- Error.try (HTTP.httpLBS request)
+      case eResponse of
         Left Error.Exit -> do
           -- Exit from application by user choice
-          Error.throw Error.Exit
+          throw Error.Exit
         Left _ -> do
           Log.writeErrorM "Network connection error. Timeout 3 sec..."
-          Log.writeErrorM $ show err
+          Log.writeErrorM $ show eResponse
           Error.liftEIO $ threadDelay 3000000 -- liftEIO for correct catch async exceptions
           getResponse
         Right response -> return response
 
 -- | High level wrapper for API request
-sendApiRequest :: (IAPI api, MCache m, MonadIO m, MError m, MLog m) => api -> HTTP.Query -> Bool -> m LC.ByteString
+sendApiRequest :: (IAPI api, MCache m, MonadIO m, MLog m) => api -> HTTP.Query -> Bool -> m LC.ByteString
 sendApiRequest api query save = do
   host <- Cache.getHost
   token <- Cache.getToken
@@ -67,14 +69,13 @@ buildRequest (Host host) (Path path) query =
         (map (\(a, Just b) -> (a, b)) query)
         $ setRequestSettings HTTP.defaultRequest
 
-parseRequest :: MError m => String -> HTTP.Query -> m HTTP.Request
-parseRequest str query = do
-  let eRequest = HTTP.parseRequest str :: Either SomeException HTTP.Request
-  initRequest <- case eRequest of
-    Left err -> Error.throw $ Error.QueryError (show err)
-    Right request -> return request
-  return $
-    HTTP.setRequestBodyURLEncoded
+parseRequest :: String -> HTTP.Query -> HTTP.Request
+parseRequest str query = request where
+  eRequest = HTTP.parseRequest str :: Either SomeException HTTP.Request;
+  initRequest = case eRequest of
+    Left err -> throw $ Error.QueryError (show err)
+    Right request -> request
+  request = HTTP.setRequestBodyURLEncoded
       (map (\(a, Just b) -> (a, b)) query)
       $ setRequestSettings initRequest
 

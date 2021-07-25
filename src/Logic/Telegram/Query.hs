@@ -2,7 +2,6 @@ module Logic.Telegram.Query where
 
 --(Label, TimeOut, UpdateId)
 
-import Class (MError)
 import Common.Convert ((<:>), (<:?>))
 import Common.Types (FileId (FileId), Label, TimeOut, UpdateId)
 import qualified Interface.Error.Exports as Error
@@ -10,11 +9,12 @@ import qualified Logic.Telegram.Encode as Encode
 import qualified Messenger.API.Telegram.Types as API
 import qualified Messenger.Update.Telegram.Types as Update
 import Network.HTTP.Simple (Query)
+import Control.Exception
 
 getUpdatesQuery :: Maybe UpdateId -> TimeOut -> Query
 getUpdatesQuery mOffset timeout = "timeout" <:> timeout ++ "offset" <:?> mOffset
 
-sendMessageQuery :: MError m => Update.Update -> [Label] -> m (API.API, Query)
+sendMessageQuery :: Monad m => Update.Update -> [Label] -> m (API.API, Query)
 sendMessageQuery (chatId, entity) btns = do
   api <- getAPI entity
   query <- case entity of
@@ -23,7 +23,7 @@ sendMessageQuery (chatId, entity) btns = do
         if null btns
           then "text" <:> message
           else "text" <:> message ++ "reply_markup" <:> Encode.encodeKeyboard btns
-    Update.Command _ -> Error.throw $ Error.QueryError "Unable to send command to user"
+    Update.Command _ -> throw $ Error.QueryError "Unable to send command to user"
     Update.Sticker (FileId fileId) -> return $ "sticker" <:> fileId
     Update.Animation fileId -> return $ "animation" <:> fileId
     Update.Photo fileId mCaption -> return $ "photo" <:> fileId ++ "caption" <:?> mCaption
@@ -41,9 +41,9 @@ sendMessageQuery (chatId, entity) btns = do
     Update.Other messageId -> return $ "from_chat_id" <:> chatId ++ "message_id" <:> messageId
   return (api, "chat_id" <:> chatId ++ query)
   where
-    getAPI :: MError m => Update.Entity -> m API.API
+    getAPI :: Monad m => Update.Entity -> m API.API
     getAPI Update.Message {} = return API.SendMessage
-    getAPI Update.Command {} = Error.throw $ Error.QueryError "Unable to send command to user"
+    getAPI Update.Command {} = throw $ Error.QueryError "Unable to send command to user"
     getAPI Update.Sticker {} = return API.SendSticker
     getAPI Update.Animation {} = return API.SendAnimation
     getAPI Update.Photo {} = return API.SendPhoto

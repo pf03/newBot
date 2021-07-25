@@ -1,6 +1,5 @@
 module Interface.Cache.Config.Internal where
 
-import Class (MError)
 import Common.Functions (checkUnique)
 import Control.Monad (forM_, unless, when)
 import qualified Data.Map.Internal as M
@@ -12,7 +11,7 @@ import qualified Interface.Error.Exports as Error
 import qualified Interface.Log.Exports as Log
 import Prelude hiding (log)
 
-checkMinLogLevel :: MError m => Config -> m ()
+checkMinLogLevel :: Monad m => Config -> m ()
 checkMinLogLevel config = do
   let minLevel = Log.minLevel . configLog $ config
   let minB = fromEnum (minBound :: Log.Level)
@@ -23,7 +22,7 @@ checkMinLogLevel config = do
 maxRepeatNumber :: Int
 maxRepeatNumber = 5
 
-checkRepeatNumber :: MError m => Config -> m ()
+checkRepeatNumber :: Monad m => Config -> m ()
 checkRepeatNumber config = do
   let defaultRepeatNumber0 = configDefaultRepeatNumber config
   when (defaultRepeatNumber0 < 1) $
@@ -41,12 +40,12 @@ checkRepeatNumber config = do
         "Repeat number {0} for user {1} shouldn't be more than {2}"
         [show repeatNumber, show chatId, show maxRepeatNumber]
 
-checkUniqueNames :: MError m => Config -> m ()
+checkUniqueNames :: Monad m => Config -> m ()
 checkUniqueNames config = do
   unless (checkUnique $ map appName $ configApps config) $
     Error.throwConfig "Fields apps.name in config.json must be unique" []
 
-checkExistAndSingleName :: MError m => Config -> m ()
+checkExistAndSingleName :: Monad m => Config -> m ()
 checkExistAndSingleName config = do
   let name = configName config
   let names = filter (== name) $ map appName $ configApps config

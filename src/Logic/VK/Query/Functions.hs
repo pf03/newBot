@@ -1,6 +1,6 @@
 module Logic.VK.Query.Functions where
 
-import Class (MCache, MError)
+import Class (MCache)
 import Common.Convert ((<:>))
 import Common.Types (Label, TimeOut, Token (Token))
 import qualified Interface.Cache.Exports as Cache
@@ -9,6 +9,7 @@ import qualified Logic.VK.Encode as Encode
 import qualified Logic.VK.Query.Internal as Internal
 import qualified Messenger.Update.VK.Types as Update
 import Network.HTTP.Simple (Query)
+import Control.Exception
 
 getLongPollServerQuery :: MCache m => m Query
 getLongPollServerQuery = do
@@ -27,12 +28,12 @@ longPollQuery ini timeout =
     ++ "ts" <:> Update.ts ini
     ++ "wait" <:> timeout
 
-sendMessageQuery :: (MError m, MCache m) => Update.Update -> [Label] -> m Query
+sendMessageQuery :: (MCache m) => Update.Update -> [Label] -> m Query
 sendMessageQuery (chatId, Update.Entity eMessageCommand attachments) btns = do
   token <- Cache.getToken
   version <- Cache.getAPIVersion
   case eMessageCommand of
-    Right _ -> Error.throw $ Error.QueryError "Unable to send command to user"
+    Right _ -> throw $ Error.QueryError "Unable to send command to user"
     Left message -> do
       let defaultQuery = Internal.defaultQuery token chatId version
       let messageQuery = "message" <:> message

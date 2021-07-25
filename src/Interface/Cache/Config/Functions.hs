@@ -1,6 +1,5 @@
 module Interface.Cache.Config.Functions where
 
-import Class (MError)
 import Control.Exception (IOException)
 import qualified Data.ByteString.Lazy as L
 import Interface.Cache.Config.Internal
@@ -14,8 +13,9 @@ import qualified Interface.Error.Exports as Error
 import qualified Parse.Functions as Parse (eDecode)
 import System.IO.Error (isDoesNotExistError)
 import Control.Monad.IO.Class ( MonadIO )
+import Control.Exception
 
-readConfig :: (MError m, MonadIO m) => m Config
+readConfig :: (MonadIO m) => m Config
 readConfig = do
   bs <- L.readFile pathConfig `Error.catchEIO` handler
   config <- Parse.eDecode bs
