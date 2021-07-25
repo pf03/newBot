@@ -26,17 +26,8 @@ catchEIO m h = do
 
 liftEIO :: (MonadIO m) => IO a -> m a
 liftEIO m = do
-  ea <- liftIO $ (Right <$> m) `E.catch` asyncHandler `E.catch` eHandler `E.catch` ioHandler `E.catch` otherHandler
+  ea <- try m
   liftE ea
-  where
-    asyncHandler :: AsyncCancelled -> IO (Either Error a)
-    asyncHandler _ = return $ Left Exit
-    eHandler :: E.AsyncException -> IO (Either Error a)
-    eHandler _ = return $ Left Exit
-    ioHandler :: E.IOException -> IO (Either Error a)
-    ioHandler err = return . Left . IOError . show $ err
-    otherHandler :: E.SomeException -> IO (Either Error a)
-    otherHandler err = return . Left . SomeError . show $ err
 
 throwConfig :: (Monad m) => String -> [String] -> m a
 throwConfig str args = E.throw $ ConfigError $ template str args
@@ -47,7 +38,8 @@ liftE ea = case ea of
   Right a -> return a
 
 try :: (MonadIO m) => IO a -> m (Either Error a)
-try ma = liftIO $ (Right <$> ma) `E.catch` asyncHandler `E.catch` eHandler `E.catch` ioHandler `E.catch` otherHandler where
+try ma = liftIO $ (Right <$> ma) `E.catch` asyncHandler `E.catch` eHandler `E.catch` ioHandler `E.catch` otherHandler
+  where
     asyncHandler :: AsyncCancelled -> IO (Either Error a)
     asyncHandler _ = return $ Left Exit
     eHandler :: E.AsyncException -> IO (Either Error a)

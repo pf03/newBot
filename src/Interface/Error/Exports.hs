@@ -1,4 +1,4 @@
-module Interface.Error.Exports ( module Functions, module Types) where
+module Interface.Error.Exports (module Functions, module Types) where
 
 -- import Interface.Error.Class as Class (MError (..))
 import Interface.Error.Functions as Functions
@@ -6,8 +6,8 @@ import Interface.Error.Functions as Functions
     catchEither,
     liftE,
     liftEIO,
-    try,
     throwConfig,
     -- toEither,
+    try,
   )
 import Interface.Error.Types as Types (Error (..))
