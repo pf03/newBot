@@ -14,31 +14,31 @@ import qualified System.Console.ANSI as Color (Color (..))
 import Prelude hiding (init)
 
 -- | Run bot application
-runApplication :: (MTrans m, IBot pointer init _update) => pointer -> m ()
+runApplication :: (MTrans m, IBot pointer) => pointer -> m ()
 runApplication pointer = do
   Log.setSettings Color.Blue True "application"
   init <- Bot.getInit pointer
   longPollingLoop pointer init
 
 -- | Long polling loop
-longPollingLoop :: (MTrans m, IBot pointer init update) => pointer -> init -> m ()
+longPollingLoop :: (MTrans m, IBot pointer) => pointer -> Bot.InitType pointer -> m ()
 longPollingLoop pointer init = do
   Log.setSettings Color.Cyan True "longPolling"
-  (updates, newInit) <- Bot.getUpdates init
-  handleUpdates updates
-  writeCache newInit
+  (updates, newInit) <- Bot.getUpdates pointer init
+  handleUpdates pointer updates
+  writeCache pointer newInit
   longPollingLoop pointer newInit
 
 -- | Response to all users
-handleUpdates :: (MTrans m, IBot _pointer _init update) => [update] -> m ()
-handleUpdates = mapM_ $ \update -> do
+handleUpdates :: (MTrans m, IBot pointer) => pointer -> [Bot.UpdateType pointer] -> m ()
+handleUpdates pointer = mapM_ $ \update -> do
   (newUpdate, btns, repeatNumber) <- Logic.evalAnswer update
-  replicateM_ repeatNumber $ Bot.sendMessage newUpdate btns
+  replicateM_ repeatNumber $ Bot.sendMessage pointer newUpdate btns
 
-writeCache :: (MTrans m, IBot _pointer init _update) => init -> m ()
-writeCache init = do
+writeCache :: (MTrans m, IBot pointer) => pointer -> Bot.InitType pointer -> m ()
+writeCache pointer init = do
   mUpdateId <- Cache.getMUpdateId
-  let newMUpdateId = Bot.getMUpdateId init
+  let newMUpdateId = Bot.getMUpdateId pointer init
   Cache.setMUpdateId newMUpdateId
   Log.writeInfoM $ template "Update updateId in file from {0} to {1}" [show mUpdateId, show newMUpdateId]
   Log.writeInfoM "Update config in file..."

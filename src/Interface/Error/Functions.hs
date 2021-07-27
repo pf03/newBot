@@ -4,7 +4,6 @@ import Common.Functions (template)
 import Control.Concurrent.Async (AsyncCancelled)
 import qualified Control.Exception as E
 import Control.Monad.Except (MonadIO (liftIO))
--- import Interface.Error.Class (MError (..))
 import Interface.Error.Types (Error (ConfigError, Exit, IOError, SomeError))
 
 -----------------------------MError--------------------------------------------

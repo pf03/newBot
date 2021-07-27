@@ -3,6 +3,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeFamilies          #-}
 
 module Messenger.Bot.Telegram.Types (Pointer (..)) where
 
@@ -21,16 +22,20 @@ newtype Init = Init (Maybe UpdateId)
 newtype WrapUpdate = WrapUpdate Update.Update deriving newtype (IUpdate)
 
 -----------------------------Instance------------------------------------------
-instance IBot Pointer Init WrapUpdate where
+instance IBot Pointer where
+
+  type UpdateType Pointer = WrapUpdate
+  type InitType Pointer = Init
+
   getInit :: MTrans m => Pointer -> m Init
   getInit _ = Init <$> Instances.getUpdateId
 
-  getMUpdateId :: Init -> Maybe UpdateId
-  getMUpdateId (Init mUpdateId) = mUpdateId
+  getMUpdateId :: Pointer -> Init -> Maybe UpdateId
+  getMUpdateId _ (Init mUpdateId) = mUpdateId
 
-  getUpdates :: MTrans m => Init -> m ([WrapUpdate], Init)
-  getUpdates (Init mUpdateId) = do
+  getUpdates :: MTrans m => Pointer -> Init -> m ([WrapUpdate], Init)
+  getUpdates _ (Init mUpdateId) = do
     (updates, newMUpdateId) <- Instances.getUpdates mUpdateId
     return (WrapUpdate <$> updates, Init newMUpdateId)
-  sendMessage :: MTrans m => WrapUpdate -> [Label] -> m ()
-  sendMessage (WrapUpdate update) btns = Instances.sendMessage update btns
+  sendMessage :: MTrans m => Pointer -> WrapUpdate -> [Label] -> m ()
+  sendMessage _ (WrapUpdate update) btns = Instances.sendMessage update btns

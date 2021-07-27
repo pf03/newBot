@@ -8,6 +8,7 @@ import qualified System.Console.ANSI as Color
 import qualified Transformer.State as State
 import Transformer.Types (Transformer (getTransformer))
 import Control.Exception ( throw, catch )
+
 runConfig :: IO Config.Config
 runConfig = do
   config <- catch Config.readConfig $ \err -> do

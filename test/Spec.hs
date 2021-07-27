@@ -182,7 +182,10 @@ evalCommandAnswerTuples =
     Repeat `to` ("someRepeatText", map Label ["/1", "/2", "/3", "/4", "/5"]),
     Button 5 `to` ("someButtonText", []),
     Unknown "someCommand" `to` ("someUnknownText", [])
-  ]
+  ] where
+    to :: a -> b -> (a, b)
+    to = (,)
+
 
 evalCommandAnswerCases :: [State Cache.Cache (Message, [Label])]
 evalCommandAnswerCases = map (Logic.evalCommandAnswer someChatId . fst) evalCommandAnswerTuples
@@ -190,8 +193,6 @@ evalCommandAnswerCases = map (Logic.evalCommandAnswer someChatId . fst) evalComm
 evalCommandAnswerResults :: [(Message, [Label])]
 evalCommandAnswerResults = map snd evalCommandAnswerTuples
 
-to :: a -> b -> (a, b)
-to = (,)
 
 someConfigText :: Config.ConfigText
 someConfigText =
