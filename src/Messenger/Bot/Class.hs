@@ -1,14 +1,12 @@
--- {-# LANGUAGE FlexibleInstances #-}
--- {-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE AllowAmbiguousTypes   #-}
+-- {-# LANGUAGE AllowAmbiguousTypes   #-}
 {-# LANGUAGE ConstraintKinds       #-}
 {-# LANGUAGE FlexibleContexts      #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
+-- {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies          #-}
 
 module Messenger.Bot.Class where
 
-import Common.Types (Label, UpdateId)
+import Common.Types ( Label, UpdateId )
 import Interface.MTrans (MTrans)
 import Messenger.Update.Class (IUpdate)
 
@@ -17,6 +15,7 @@ class (IUpdate (UpdateType pointer)) => IBot pointer where
   
   type UpdateType pointer
   type InitType pointer 
+  type ApiType pointer 
 
   -- Initial bot request to messenger server that returns the initialization data
   getInit :: MTrans m => pointer -> m (InitType pointer)
@@ -29,3 +28,8 @@ class (IUpdate (UpdateType pointer)) => IBot pointer where
 
   -- Send response to messenger server using received updates
   sendMessage :: MTrans m => pointer -> UpdateType pointer -> [Label] -> m ()
+
+  -- getApiName :: pointer -> ApiType pointer -> String
+
+  -- -- Get path for sending API request
+  -- getApiPath :: pointer -> Token -> ApiType pointer -> Path

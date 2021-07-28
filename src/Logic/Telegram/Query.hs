@@ -1,20 +1,18 @@
 module Logic.Telegram.Query where
 
---(Label, TimeOut, UpdateId)
-
 import Common.Convert ((<:>), (<:?>))
 import Common.Types (FileId (FileId), Label, TimeOut, UpdateId)
 import qualified Interface.Error.Exports as Error
 import qualified Logic.Telegram.Encode as Encode
-import qualified Messenger.API.Telegram.Types as API
 import qualified Messenger.Update.Telegram.Types as Update
 import Network.HTTP.Simple (Query)
 import Control.Exception
+import Messenger.Bot.Telegram.Types( API(..) )
 
 getUpdatesQuery :: Maybe UpdateId -> TimeOut -> Query
 getUpdatesQuery mOffset timeout = "timeout" <:> timeout ++ "offset" <:?> mOffset
 
-sendMessageQuery :: Monad m => Update.Update -> [Label] -> m (API.API, Query)
+sendMessageQuery :: Monad m => Update.Update -> [Label] -> m (API, Query)
 sendMessageQuery (chatId, entity) btns = do
   api <- getAPI entity
   query <- case entity of
@@ -41,16 +39,16 @@ sendMessageQuery (chatId, entity) btns = do
     Update.Other messageId -> return $ "from_chat_id" <:> chatId ++ "message_id" <:> messageId
   return (api, "chat_id" <:> chatId ++ query)
   where
-    getAPI :: Monad m => Update.Entity -> m API.API
-    getAPI Update.Message {} = return API.SendMessage
+    getAPI :: Monad m => Update.Entity -> m API
+    getAPI Update.Message {} = return SendMessage
     getAPI Update.Command {} = throw $ Error.QueryError "Unable to send command to user"
-    getAPI Update.Sticker {} = return API.SendSticker
-    getAPI Update.Animation {} = return API.SendAnimation
-    getAPI Update.Photo {} = return API.SendPhoto
-    getAPI Update.Video {} = return API.SendVideo
-    getAPI Update.Document {} = return API.SendDocument
-    getAPI Update.Poll {} = return API.SendPoll
-    getAPI Update.Contact {} = return API.SendContact
-    getAPI Update.Location {} = return API.SendLocation
-    getAPI Update.Forward {} = return API.ForwardMessage
-    getAPI Update.Other {} = return API.CopyMessage
+    getAPI Update.Sticker {} = return SendSticker
+    getAPI Update.Animation {} = return SendAnimation
+    getAPI Update.Photo {} = return SendPhoto
+    getAPI Update.Video {} = return SendVideo
+    getAPI Update.Document {} = return SendDocument
+    getAPI Update.Poll {} = return SendPoll
+    getAPI Update.Contact {} = return SendContact
+    getAPI Update.Location {} = return SendLocation
+    getAPI Update.Forward {} = return ForwardMessage
+    getAPI Update.Other {} = return CopyMessage

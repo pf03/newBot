@@ -4,8 +4,8 @@ import Class (MTrans)
 import qualified Interface.Cache.Config.Exports as Config
 import qualified Interface.Cache.Exports as Cache
 import qualified Logic.App as App
-import qualified Messenger.Bot.Telegram.Types as Telegram
-import qualified Messenger.Bot.VK.Types as VK
+import qualified Messenger.Bot.Telegram.Instances as Telegram
+import qualified Messenger.Bot.VK.Instances as VK
 import qualified Transformer.Exports as Transformer
 
 main :: IO ()

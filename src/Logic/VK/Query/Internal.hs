@@ -5,11 +5,11 @@ import Common.Functions (template)
 import Common.Types (ChatId, ItemName (ItemName), Key (Key), Message, Token (..))
 import Data.Either (rights)
 import qualified Logic.VK.Encode as Encode
-import qualified Messenger.API.VK.Types as API
 import qualified Messenger.Update.VK.Types as Update
 import Network.HTTP.Simple (Query, QueryItem)
+import qualified Messenger.Bot.VK.Types as Bot
 
-defaultQuery :: Token -> ChatId -> API.Version -> Query
+defaultQuery :: Token -> ChatId -> Bot.Version -> Query
 defaultQuery (Token token) userId version = "peer_id" <:> userId ++ "access_token" <:> token ++ "v" <:> version
 
 messageQuery :: Message -> Query

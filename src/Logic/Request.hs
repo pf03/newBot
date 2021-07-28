@@ -3,7 +3,7 @@
 
 module Logic.Request where
 
-import Class (IAPI, MCache, MLog)
+import Class
 import Common.Types (Host (..), Path (..))
 import Control.Concurrent (threadDelay)
 import Control.Exception (SomeException, throw)
@@ -12,10 +12,8 @@ import Control.Monad.State.Lazy (when)
 import qualified Data.ByteString.Char8 as BC
 import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString.Lazy.Char8 as LC
-import qualified Interface.Cache.Exports as Cache
 import qualified Interface.Error.Exports as Error
 import qualified Interface.Log.Exports as Log
-import qualified Messenger.API.Class as API
 import qualified Network.HTTP.Simple as HTTP
 
 -- | Low level wrapper for request
@@ -51,15 +49,6 @@ sendRequest request save = do
         Right response -> do
           Log.writeInfoM "Response received successfully"
           return response
-
--- | High level wrapper for API request
-sendApiRequest :: (IAPI api, MCache m, MonadIO m, MLog m) => api -> HTTP.Query -> Bool -> m LC.ByteString
-sendApiRequest api query save = do
-  host <- Cache.getHost
-  token <- Cache.getToken
-  let path = API.getPath token api
-  let request = buildRequest host path query
-  sendRequest request save
 
 buildRequest :: Host -> Path -> HTTP.Query -> HTTP.Request
 buildRequest (Host host) (Path path) query =

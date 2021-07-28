@@ -1,59 +1,36 @@
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeFamilies          #-}
+
 module Messenger.Bot.Telegram.Instances where
 
-import Class (MTrans)
-import Common.Functions (template)
+import Class (IBot, MTrans)
 import Common.Types (Label, UpdateId)
-import Control.Applicative (Alternative ((<|>)))
-import qualified Interface.Cache.Exports as Cache
-import qualified Interface.Log.Exports as Log
-import qualified Logic.Request as Request
-import qualified Logic.Telegram.Query as Query
-import qualified Messenger.API.Telegram.Types as API
-import qualified Messenger.Update.Telegram.Types as Update
-import qualified Parse.Telegram.Exports as Parse
-import qualified System.Console.ANSI as Color
+import qualified Messenger.Bot.Class as Bot
+import qualified Messenger.Bot.Telegram.Internal as Internal
+import Messenger.Bot.Telegram.Types
 
--- Initialization - get last updateId for getUpdates request
-getUpdateId :: MTrans m => m (Maybe UpdateId)
-getUpdateId = do
-  Log.setSettings Color.Blue True "getUpdateId"
-  Cache.getMUpdateId
+data Pointer = Pointer
 
-getUpdates :: MTrans m => Maybe UpdateId -> m ([Update.Update], Maybe UpdateId)
-getUpdates mUpdateId = do
-  Log.setSettings Color.Cyan True $ template "getUpdates, mUpdateId = {0}" [show mUpdateId]
-  Log.writeSending
-  let query = Query.getUpdatesQuery (fmap (+ 1) mUpdateId) 25
-  response <- Request.sendApiRequest API.GetUpdates query True
-  Log.writeReceiving
-  object <- Parse.getObject response
-  Log.writeReceivingData "object" object
-  newMUpdateId <- Parse.parseUpdateId object
-  Log.writeReceivingData "newMUpdateId" newMUpdateId
-  updates <- Parse.parseUpdates object
-  Log.writeReceivingData "update" updates
-  return (updates, newMUpdateId <|> mUpdateId)
+instance IBot Pointer where
 
--- Send response to a single user
-sendMessage :: MTrans m => Update.Update -> [Label] -> m ()
-sendMessage update btns = do
-  Log.setSettings Color.Yellow True "sendMessage"
-  Log.writeSending
-  (api, query) <- Query.sendMessageQuery update btns
-  Log.writeReceivingData "(api, query)" (api, query)
-  json <- Request.sendApiRequest api query False
-  Log.writeReceiving
-  object <- Parse.getObject json
-  Log.writeReceivingData "object" object
+  type UpdateType Pointer = WrapUpdate
+  type InitType Pointer = Init
+  type ApiType Pointer = API
 
--- Dumping messages that we cannot parse, for debugging purposes
-reset :: MTrans m => m ()
-reset = do
-  mUpdateId <- Cache.getMUpdateId
-  Log.setSettings Color.Cyan True $ template "reset, mUpdateId = {0}" [show mUpdateId]
-  Log.writeSending
-  json <- Request.sendApiRequest API.GetUpdates (Query.getUpdatesQuery mUpdateId 0) True
-  Log.writeReceiving
-  object <- Parse.getObject json
-  newMUpdateId <- Parse.parseUpdateId object
-  Log.writeReceivingData "newMUpdateId" newMUpdateId
+  getInit :: MTrans m => Pointer -> m Init
+  getInit _ = Init <$> Internal.getUpdateId
+
+  getMUpdateId :: Pointer -> Init -> Maybe UpdateId
+  getMUpdateId _ (Init mUpdateId) = mUpdateId
+
+  getUpdates :: MTrans m => Pointer -> Init -> m ([WrapUpdate], Init)
+  getUpdates _ (Init mUpdateId) = do
+    (updates, newMUpdateId) <- Internal.getUpdates mUpdateId
+    return (WrapUpdate <$> updates, Init newMUpdateId)
+
+  sendMessage :: MTrans m => Pointer -> WrapUpdate -> [Label] -> m ()
+  sendMessage _ (WrapUpdate update) btns = Internal.sendMessage update btns
