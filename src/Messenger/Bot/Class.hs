@@ -15,7 +15,6 @@ class (IUpdate (UpdateType pointer)) => IBot pointer where
   
   type UpdateType pointer
   type InitType pointer 
-  type ApiType pointer 
 
   -- Initial bot request to messenger server that returns the initialization data
   getInit :: MTrans m => pointer -> m (InitType pointer)

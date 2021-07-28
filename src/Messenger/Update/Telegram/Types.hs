@@ -45,18 +45,9 @@ instance IUpdate Update where
   setMessage (cid, Command _) message = (cid, Message message)
   setMessage update _ = update
 
-  getMessage :: Update -> Maybe Message
-  getMessage (_, Message message) = Just message
-  getMessage _ = Nothing
-
   getCommand :: Update -> Maybe Command
   getCommand (_, Command command) = Just command
   getCommand _ = Nothing
 
   getChatId :: Update -> ChatId
   getChatId = fst
-
-  hasAttachment :: Update -> Bool
-  hasAttachment (_, Message _) = False
-  hasAttachment (_, Command _) = False
-  hasAttachment (_, _) = True

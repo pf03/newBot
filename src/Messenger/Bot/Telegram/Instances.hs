@@ -20,7 +20,6 @@ instance IBot Pointer where
 
   type UpdateType Pointer = Update
   type InitType Pointer = Init
-  type ApiType Pointer = API
 
   getInit :: MTrans m => Pointer -> m Init
   getInit _ = Init <$> Internal.getUpdateId
