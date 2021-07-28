@@ -12,12 +12,13 @@ import Common.Types (Label, UpdateId)
 import qualified Messenger.Bot.Class as Bot
 import qualified Messenger.Bot.Telegram.Internal as Internal
 import Messenger.Bot.Telegram.Types
+import Messenger.Update.Telegram.Types
 
 data Pointer = Pointer
 
 instance IBot Pointer where
 
-  type UpdateType Pointer = WrapUpdate
+  type UpdateType Pointer = Update
   type InitType Pointer = Init
   type ApiType Pointer = API
 
@@ -27,10 +28,10 @@ instance IBot Pointer where
   getMUpdateId :: Pointer -> Init -> Maybe UpdateId
   getMUpdateId _ (Init mUpdateId) = mUpdateId
 
-  getUpdates :: MTrans m => Pointer -> Init -> m ([WrapUpdate], Init)
+  getUpdates :: MTrans m => Pointer -> Init -> m ([Update], Init)
   getUpdates _ (Init mUpdateId) = do
     (updates, newMUpdateId) <- Internal.getUpdates mUpdateId
-    return (WrapUpdate <$> updates, Init newMUpdateId)
+    return ( updates, Init newMUpdateId)
 
-  sendMessage :: MTrans m => Pointer -> WrapUpdate -> [Label] -> m ()
-  sendMessage _ (WrapUpdate update) btns = Internal.sendMessage update btns
+  sendMessage :: MTrans m => Pointer -> Update -> [Label] -> m ()
+  sendMessage _ update btns = Internal.sendMessage update btns

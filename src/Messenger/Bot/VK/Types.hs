@@ -1,6 +1,5 @@
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies          #-}
 
@@ -12,9 +11,6 @@ import Prelude hiding (init)
 
 
 -- New type wrappers in order to avoid orphan instances
-newtype WrapInit = WrapInit Update.Init
-
-newtype WrapUpdate = WrapUpdate Update.Update deriving newtype (IUpdate)
 
 data API = API APIGroup APIName deriving (Show)
 

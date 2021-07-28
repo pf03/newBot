@@ -12,29 +12,28 @@ import qualified Messenger.Bot.Class as Class
 import qualified Messenger.Bot.VK.Internal as Internal
 import qualified Messenger.Update.VK.Types as Update
 import Messenger.Bot.VK.Types
+import Messenger.Update.VK.Types
 import Prelude hiding (init)
 
 data Pointer = Pointer
 
 instance IBot Pointer where
 
-  type UpdateType Pointer = WrapUpdate
-  type InitType Pointer = WrapInit
+  type UpdateType Pointer = Update
+  type InitType Pointer = Init
   type ApiType Pointer = API
 
-  getInit :: MTrans m => Pointer -> m WrapInit
-  getInit _ = WrapInit <$> Internal.getInit
+  getInit :: MTrans m => Pointer -> m Init
+  getInit _ = Internal.getInit
 
-  getMUpdateId :: Pointer -> WrapInit -> Maybe UpdateId
-  getMUpdateId _ (WrapInit init) = Just $ Update.ts init
+  getMUpdateId :: Pointer -> Init -> Maybe UpdateId
+  getMUpdateId _ init = Just $ Update.ts init
 
-  getUpdates :: MTrans m => Pointer -> WrapInit -> m ([WrapUpdate], WrapInit)
-  getUpdates _ (WrapInit init) = do
-    (updates, newInit) <- Internal.getUpdates init
-    return (WrapUpdate <$> updates, WrapInit newInit)
+  getUpdates :: MTrans m => Pointer -> Init -> m ([Update], Init)
+  getUpdates _ = Internal.getUpdates
 
-  sendMessage :: MTrans m => Pointer -> WrapUpdate -> [Label] -> m ()
-  sendMessage _ (WrapUpdate update) = Internal.sendMessage update
+  sendMessage :: MTrans m => Pointer -> Update -> [Label] -> m ()
+  sendMessage _ update = Internal.sendMessage update
 
   -- getApiName :: Pointer -> API -> String
   -- getApiName _ (API apiGroup apiName) = (toLower g : gs) ++ "." ++ (toLower n : ns)
