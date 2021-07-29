@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 66a0f8336e77e9c77b0e03a001a80a2d00920bd57e811368d295427f09f6e9a3
+-- hash: c9d77baf21732ca5e117960950931ef3c0530b581f6fb45edc4f29d1a6fa2edf
 
 name:           bot
 version:        0.1.0.0
@@ -38,6 +38,7 @@ library
       Interface.Cache.Config.Types
       Interface.Cache.Exports
       Interface.Cache.Functions
+      Interface.Cache.State
       Interface.Cache.Types
       Interface.Error.Exports
       Interface.Error.Functions
@@ -77,7 +78,6 @@ library
       Transformer.Exports
       Transformer.Functions
       Transformer.Internal
-      Transformer.State
       Transformer.Types
   other-modules:
       Paths_bot

@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 module Interface.Log.Functions where
 
 import Common.Convert (Convert (convert))
@@ -8,30 +9,38 @@ import Data.Aeson (encode)
 import Data.Aeson.Types (ToJSON)
 import qualified Data.ByteString as B
 import Data.Char (toUpper)
-import Interface.Log.Class (MLog (..))
+-- import Interface.Log.Class (MLog (..))
 import qualified Interface.Log.Color as Color
 import Interface.Log.Types
-  ( ColorScheme,
-    Config (..),
-    Level (..),
-    Settings (Settings, funcName),
-  )
 import System.Console.ANSI (Color (Black, Blue, Green, Magenta, Red, Yellow))
 import Prelude hiding (error)
+import Control.Monad.State.Lazy hiding (State)
+import Transformer.Types
 
 -----------------------------MLog----------------------------------------------
-setColorScheme :: MLog m => ColorScheme -> m ()
+
+getSettings :: Transformer Settings
+getSettings = gets logSettings
+
+setSettings :: ColorScheme -> Enable -> FuncName -> Transformer ()
+setSettings colorScheme logEnable funcName = modify $ \state ->
+  state {logSettings = Settings colorScheme logEnable funcName}
+
+getConfig :: Transformer Config
+getConfig = gets configLog
+
+setColorScheme :: ColorScheme -> Transformer ()
 setColorScheme newColorScheme = do
   Settings _ logEnable funcName0 <- getSettings
   setSettings newColorScheme logEnable funcName0
 
-getConfigSettings :: MLog m => m (Config, Settings)
+getConfigSettings :: Transformer (Config, Settings)
 getConfigSettings = do
   config <- getConfig
   settings <- getSettings
   return (config, settings)
 
-resetSettings :: MLog m => m ()
+resetSettings :: Transformer ()
 resetSettings = do
   let Settings colorScheme logEnable funcName0 = defaultSettings
   setSettings colorScheme logEnable funcName0
@@ -42,7 +51,7 @@ defaultSettings = Settings Black True ""
 defaultConfig :: Config
 defaultConfig = Config {colorEnable = False, terminalEnable = True, fileEnable = False, minLevel = 0}
 
-withLogM :: (MLog m, Show a) => m a -> m a
+withLogM :: (Show a) => Transformer a -> Transformer a
 withLogM m = do
   a <- m
   writeDebugM a
@@ -50,46 +59,46 @@ withLogM m = do
 
 -- * An exception has been made for debug information - it can be of any type Show a, not just a String
 
-writeDebugM :: (MLog m, Show a) => a -> m ()
+writeDebugM :: (Show a) => a -> Transformer ()
 writeDebugM a = writeMessageM Debug (show a)
 
-writeInfoM :: MLog m => String -> m ()
+writeInfoM :: String -> Transformer ()
 writeInfoM = writeMessageM Info
 
-writeInfoColorM :: MLog m => ColorScheme -> String -> m ()
+writeInfoColorM :: ColorScheme -> String -> Transformer ()
 writeInfoColorM colorScheme str = do
   setColorScheme colorScheme
   writeInfoM str
 
-writeWarnM :: MLog m => String -> m ()
+writeWarnM :: String -> Transformer ()
 writeWarnM = writeMessageM Warn
 
-writeErrorM :: MLog m => String -> m ()
+writeErrorM :: String -> Transformer ()
 writeErrorM = writeMessageM Error
 
-writeCriticalM :: MLog m => String -> m ()
+writeCriticalM :: String -> Transformer ()
 writeCriticalM = writeMessageM Critical
 
-writeMessageM :: MLog m => Level -> String -> m ()
+writeMessageM :: Level -> String -> Transformer ()
 writeMessageM level str = do
   (config, settings) <- getConfigSettings
-  writeMessage config settings level str
+  writeMessageIO config settings level str
 
 -- Additional functions for debug
-getFuncName :: MLog m => m String
+getFuncName :: Transformer String
 getFuncName = funcName <$> getSettings
 
-writeSending :: MLog m => m ()
+writeSending :: Transformer ()
 writeSending = do
   funcName0 <- getFuncName
   writeInfoM $ template "Query {0} sent......" [funcName0]
 
-writeReceiving :: MLog m => m ()
+writeReceiving :: Transformer ()
 writeReceiving = do
   funcName0 <- getFuncName
   writeInfoM $ template "Response {0} received......" [funcName0]
 
-writeReceivingData :: (MLog m, Show a) => String -> a -> m ()
+writeReceivingData :: (Show a) => String -> a -> Transformer ()
 writeReceivingData dataName dataValue = do
   funcName0 <- getFuncName
   writeInfoM $ template "Data {1} received in {0} response......" [funcName0, dataName]

@@ -14,7 +14,7 @@ import Data.Aeson
 import Data.Char (toLower)
 import qualified Data.Map.Internal as M
 import GHC.Generics (Generic)
-import qualified Interface.Log.Exports as Log
+import qualified Interface.Log.Types as Log
 
 data App = Telegram | VK deriving (Show, Generic, Eq)
 

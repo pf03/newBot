@@ -6,13 +6,13 @@
 
 module Messenger.Bot.VK.Instances where
 
-import Class (IBot, MTrans)
 import Common.Types ( UpdateId, Label ) 
-import qualified Messenger.Bot.Class as Class
+import Messenger.Bot.Class (IBot(..))
 import qualified Messenger.Bot.VK.Internal as Internal
 import qualified Messenger.Update.VK.Types as Update
 import Messenger.Update.VK.Types
 import Prelude hiding (init)
+import Transformer.Types
 
 data Pointer = Pointer
 
@@ -21,14 +21,14 @@ instance IBot Pointer where
   type UpdateType Pointer = Update
   type InitType Pointer = Init
 
-  getInit :: MTrans m => Pointer -> m Init
+  getInit :: Pointer -> Transformer Init
   getInit _ = Internal.getInit
 
   getMUpdateId :: Pointer -> Init -> Maybe UpdateId
   getMUpdateId _ init = Just $ Update.ts init
 
-  getUpdates :: MTrans m => Pointer -> Init -> m ([Update], Init)
+  getUpdates :: Pointer -> Init -> Transformer ([Update], Init)
   getUpdates _ = Internal.getUpdates
 
-  sendMessage :: MTrans m => Pointer -> Update -> [Label] -> m ()
+  sendMessage :: Pointer -> Update -> [Label] -> Transformer ()
   sendMessage _ update = Internal.sendMessage update

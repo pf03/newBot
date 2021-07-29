@@ -1,6 +1,5 @@
 module Logic.VK.Query.Functions where
 
-import Class (MCache)
 import Common.Convert ((<:>))
 import Common.Types (Label, TimeOut, Token (Token))
 import qualified Interface.Cache.Exports as Cache
@@ -11,7 +10,7 @@ import qualified Messenger.Update.VK.Types as Update
 import Network.HTTP.Simple (Query)
 import Control.Exception
 
-getLongPollServerQuery :: MCache m => m Query
+getLongPollServerQuery :: Cache.MCache m => m Query
 getLongPollServerQuery = do
   groupId <- Cache.getGroupId
   Token token <- Cache.getToken
@@ -28,7 +27,7 @@ longPollQuery ini timeout =
     ++ "ts" <:> Update.ts ini
     ++ "wait" <:> timeout
 
-sendMessageQuery :: (MCache m) => Update.Update -> [Label] -> m Query
+sendMessageQuery :: Cache.MCache m => Update.Update -> [Label] -> m Query
 sendMessageQuery (chatId, Update.Entity eMessageCommand attachments) btns = do
   token <- Cache.getToken
   version <- Cache.getAPIVersion

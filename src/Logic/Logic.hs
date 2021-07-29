@@ -1,6 +1,6 @@
 module Logic.Logic where
 
-import Class (IUpdate, MCache)
+-- import Class (IUpdate, MCache)
 import Common.Functions (template)
 import Common.Types (ChatId, Command (..), Label (..), Message (..))
 import qualified Interface.Cache.Config.Exports as Config
@@ -24,7 +24,7 @@ toMessageCommand str =
           '/' : x : xs | x /= ' ' -> Right . Unknown . unwords $ (x : xs) : tail words0
           _ -> Left $ Message str
 
-evalAnswer :: (MCache m, IUpdate update) => update -> m (update, [Label], Int)
+evalAnswer :: (Cache.MCache m, Update.IUpdate update) => update -> m (update, [Label], Int)
 evalAnswer update = do
   let chatId = Update.getChatId update
   repeatNumber <- Cache.getRepeatNumber chatId
@@ -34,7 +34,7 @@ evalAnswer update = do
       return (Update.setMessage update message, btns, 1)
     Nothing -> return (update, [], repeatNumber)
 
-evalCommandAnswer :: (MCache m) => ChatId -> Command -> m (Message, [Label])
+evalCommandAnswer :: (Cache.MCache m) => ChatId -> Command -> m (Message, [Label])
 evalCommandAnswer chatId command = do
   Config.ConfigText helpText repeatText unknownText buttonText <- Cache.getConfigText
   repeatNumber <- Cache.getRepeatNumber chatId

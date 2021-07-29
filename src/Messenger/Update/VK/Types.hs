@@ -7,7 +7,7 @@
 
 module Messenger.Update.VK.Types where
 
-import Class (IUpdate)
+import Messenger.Update.Class (IUpdate)
 import Common.Convert (Convert)
 import Common.Types (ChatId, Command, IntId, ItemName, Key, Message, UpdateId, Url)
 import Data.Aeson (FromJSON, ToJSON)

@@ -5,8 +5,8 @@ import qualified Interface.Cache.Config.Exports as Config
 import qualified Interface.Error.Exports as Error
 import qualified Interface.Log.Exports as Log
 import qualified System.Console.ANSI as Color
-import qualified Transformer.State as State
-import Transformer.Types (Transformer (getTransformer))
+import qualified Transformer.Types as State
+import Transformer.Types (Transformer)
 import Control.Exception ( throw, catch )
 
 runConfig :: IO Config.Config
@@ -19,10 +19,10 @@ runConfig = do
   Log.writeInfo logConfig logSettings "Config read successfully..."
   return config
 
-showValue :: Show a => Config.Config -> State.State -> Transformer a -> IO ()
+showValue :: Show a => Config.Config -> State.BotState -> Transformer a -> IO ()
 showValue config state m = do
   let logConfig = Config.configLog config
-  (a, _) <- catch (runStateT (getTransformer m) state) $ \err -> do
+  (a, _) <- catch (runStateT m state) $ \err -> do
     Log.writeError logConfig logSettings "Application error: "
     Log.writeError logConfig logSettings $ show err
     throw (err :: Error.Error)

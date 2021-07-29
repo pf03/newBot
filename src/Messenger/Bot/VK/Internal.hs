@@ -1,6 +1,5 @@
 module Messenger.Bot.VK.Internal where
 
-import Class (MCache, MLog, MTrans)
 import Common.Types (Label, Path (..))
 import Control.Monad.IO.Class
 import qualified Data.ByteString.Lazy.Char8 as LC
@@ -17,9 +16,10 @@ import qualified Network.HTTP.Simple as HTTP
 import qualified Parse.VK.Exports as Parse
 import qualified System.Console.ANSI as Color
 import Prelude hiding (init)
+import Transformer.Types
 
 -- Initialization - get last updateId, server name, key for getUpdates request
-getInit :: (MTrans m) => m Update.Init
+getInit :: Transformer Update.Init
 getInit = do
   Log.setSettings Color.Blue True "getInit"
   let api = Bot.API Bot.Groups Bot.GetLongPollServer
@@ -37,7 +37,7 @@ getInit = do
     Just updateIdFromFile -> return $ Update.Init server key updateIdFromFile
 
 -- Get updates from messenger server by the long polling method
-getUpdates :: MTrans m => Update.Init -> m ([Update.Update], Update.Init)
+getUpdates :: Update.Init -> Transformer ([Update.Update], Update.Init)
 getUpdates init@(Update.Init server _ ts) = do
   Log.setSettings Color.Cyan True "getUpdates"
   let query = Query.longPollQuery init 25
@@ -55,7 +55,7 @@ getUpdates init@(Update.Init server _ ts) = do
   return (updates, newInit)
 
 -- Send response to a single user
-sendMessage :: MTrans m => Update.Update -> [Label] -> m ()
+sendMessage :: Update.Update -> [Label] -> Transformer ()
 sendMessage update btns = do
   Log.setSettings Color.Yellow True "sendMessage"
   Log.writeSending
@@ -67,7 +67,7 @@ sendMessage update btns = do
   object <- Parse.getObject json
   Log.writeReceivingData "object" object
 
-sendApiRequest :: (MCache m, MonadIO m, MLog m) => API -> HTTP.Query -> Bool -> m LC.ByteString
+sendApiRequest :: API -> HTTP.Query -> Bool -> Transformer LC.ByteString
 sendApiRequest api query save = do
   host <- Cache.getHost
   let path = getApiPath api

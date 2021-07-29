@@ -2,31 +2,25 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 module Transformer.Types where
 
-import Class (MCache, MIOCache, MLog, MTrans)
+--import Class (MCache, MIOCache, MLog, MTrans)
 import Control.Monad.State.Lazy (MonadIO, MonadState, StateT (..))
-import qualified Interface.Cache.Exports as Cache
-import qualified Interface.Log.Exports as Log
-import qualified Transformer.State as State
+import GHC.Generics (Generic)
+import qualified Interface.Cache.Types as Cache
+import qualified Interface.Log.Types as Log
+-- import qualified Transformer.State as State
+import GHC.Generics (Generic)
 
 -----------------------------Types---------------------------------------------
-newtype Transformer a = Transformer {getTransformer :: StateT State.State IO a}
-  deriving newtype (Functor, Applicative, Monad, MonadFail, MonadIO, MonadState State.State)
 
------------------------------Instances-----------------------------------------
-instance MLog Transformer where
-  getSettings = Transformer State.getLogSettings
-  setSettings colorScheme logEnable funcName = Transformer $ State.setLogSettings colorScheme logEnable funcName
-  getConfig = Transformer State.getLogConfig
-  writeMessage logConfig logSettings logLevel str = Transformer $ Log.writeMessageIO logConfig logSettings logLevel str
+data BotState = BotState
+  { cache :: Cache.Cache,
+    configLog :: Log.Config,
+    logSettings :: Log.Settings
+  }
+  deriving (Show, Generic)
 
-instance MCache Transformer where
-  getCache = Transformer State.getCache
-  setCache cache = Transformer . State.setCache $ cache
-
-instance MIOCache Transformer where
-  writeCache = State.writeCache
-
-instance MTrans Transformer
+type Transformer = StateT BotState IO

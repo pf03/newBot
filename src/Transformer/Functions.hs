@@ -7,7 +7,7 @@ import Control.Monad.State.Lazy (MonadIO (liftIO))
 import qualified Interface.Cache.Config.Exports as Config
 import qualified Interface.Error.Exports as Error
 import Transformer.Internal (runConfig, showValue)
-import Transformer.State (getStateFromConfig, getStatesFromConfig)
+import Interface.Cache.State (getStateFromConfig, getStatesFromConfig)
 import Transformer.Types (Transformer)
 
 run :: Show a => Transformer a -> IO ()

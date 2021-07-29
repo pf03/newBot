@@ -8,7 +8,7 @@ import Interface.Cache.Config.Types
     ConfigApp (appName, appRepeatNumber),
   )
 import qualified Interface.Error.Exports as Error
-import qualified Interface.Log.Exports as Log
+import qualified Interface.Log.Types as Log
 import Prelude hiding (log)
 
 checkMinLogLevel :: Monad m => Config -> m ()

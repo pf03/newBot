@@ -1,6 +1,5 @@
 module Messenger.Bot.Telegram.Internal where
 
-import Class (MCache, MLog, MTrans)
 import Common.Functions (template)
 import Common.Types ( Path(..), Token(..), UpdateId, Label )
 import Control.Applicative (Alternative ((<|>)))
@@ -16,14 +15,15 @@ import qualified Messenger.Update.Telegram.Types as Update
 import qualified Network.HTTP.Simple as HTTP
 import qualified Parse.Telegram.Exports as Parse
 import qualified System.Console.ANSI as Color
+import Transformer.Types
 
 -- Initialization - get last updateId for getUpdates request
-getUpdateId :: MTrans m => m (Maybe UpdateId)
+getUpdateId :: Transformer (Maybe UpdateId)
 getUpdateId = do
   Log.setSettings Color.Blue True "getUpdateId"
   Cache.getMUpdateId
 
-getUpdates :: MTrans m => Maybe UpdateId -> m ([Update.Update], Maybe UpdateId)
+getUpdates :: Maybe UpdateId -> Transformer ([Update.Update], Maybe UpdateId)
 getUpdates mUpdateId = do
   Log.setSettings Color.Cyan True $ template "getUpdates, mUpdateId = {0}" [show mUpdateId]
   Log.writeSending
@@ -39,7 +39,7 @@ getUpdates mUpdateId = do
   return (updates, newMUpdateId <|> mUpdateId)
 
 -- Send response to a single user
-sendMessage :: MTrans m => Update.Update -> [Label] -> m ()
+sendMessage :: Update.Update -> [Label] -> Transformer ()
 sendMessage update btns = do
   Log.setSettings Color.Yellow True "sendMessage"
   Log.writeSending
@@ -51,7 +51,7 @@ sendMessage update btns = do
   Log.writeReceivingData "object" object
 
 -- Dumping messages that we cannot parse, for debugging purposes
-reset :: MTrans m => m ()
+reset :: Transformer ()
 reset = do
   mUpdateId <- Cache.getMUpdateId
   Log.setSettings Color.Cyan True $ template "reset, mUpdateId = {0}" [show mUpdateId]
@@ -62,7 +62,7 @@ reset = do
   newMUpdateId <- Parse.parseUpdateId object
   Log.writeReceivingData "newMUpdateId" newMUpdateId
 
-sendApiRequest :: (MCache m, MonadIO m, MLog m) => API -> HTTP.Query -> Bool -> m LC.ByteString
+sendApiRequest :: API -> HTTP.Query -> Bool -> Transformer LC.ByteString
 sendApiRequest api query save = do
   host <- Cache.getHost
   token <- Cache.getToken

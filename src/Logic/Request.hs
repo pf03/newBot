@@ -15,9 +15,10 @@ import qualified Data.ByteString.Lazy.Char8 as LC
 import qualified Interface.Error.Exports as Error
 import qualified Interface.Log.Exports as Log
 import qualified Network.HTTP.Simple as HTTP
+import Transformer.Types
 
 -- | Low level wrapper for request
-sendRequest :: (MLog m, MonadIO m) => HTTP.Request -> Bool -> m LC.ByteString
+sendRequest :: HTTP.Request -> Bool -> Transformer LC.ByteString
 sendRequest request save = do
   response <- getResponse
   let status = HTTP.getResponseStatusCode response
@@ -34,7 +35,7 @@ sendRequest request save = do
       Log.writeErrorM $ show response
       throw $ Error.QueryError "Request failed with error"
   where
-    getResponse :: (MLog m, MonadIO m) => m (HTTP.Response LC.ByteString)
+    getResponse :: Transformer (HTTP.Response LC.ByteString)
     getResponse = do
       eResponse <- Error.try (HTTP.httpLBS request)
       case eResponse of

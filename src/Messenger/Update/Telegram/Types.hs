@@ -6,7 +6,7 @@
 
 module Messenger.Update.Telegram.Types where
 
-import Class (IUpdate)
+import Messenger.Update.Class (IUpdate)
 import Common.Convert (Convert)
 import Common.Types (ChatId, Command, FileId, IntId, Message, StrId)
 import Data.Aeson (FromJSON, ToJSON)

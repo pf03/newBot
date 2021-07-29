@@ -1,6 +1,6 @@
-module Interface.Cache.Exports (module Class, module Functions, module Types) where
+module Interface.Cache.Exports (module Class, module Functions, module Types, module State) where
 
-import Interface.Cache.Class as Class (MCache (..), MIOCache (..))
+import Interface.Cache.Class as Class (MCache (..))
 import Interface.Cache.Functions as Functions
   ( getAPIVersion,
     getApp,
@@ -9,18 +9,27 @@ import Interface.Cache.Functions as Functions
     getConfigText,
     getGroupId,
     getHost,
+    getMRepeatNumber,
+    getMUpdateId,
     getRepeatNumber,
     getRepeatNumbers,
     getToken,
-    getMRepeatNumber,
-    getMUpdateId,
     getsCache,
     modifyCache,
     resetCacheChanged,
     setCacheChanged,
     setConfigApp,
+    setMUpdateId,
     setRepeatNumber,
     setRepeatNumbers,
-    setMUpdateId,
+  )
+import Interface.Cache.State as State
+  ( getStateFromConfig,
+    getStatesFromConfig,
+    readState,
+    readStates,
+    saveState,
+    setStateToConfig,
+    writeCache,
   )
 import Interface.Cache.Types as Types (Cache (..))
