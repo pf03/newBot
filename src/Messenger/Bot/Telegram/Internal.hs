@@ -3,7 +3,6 @@ module Messenger.Bot.Telegram.Internal where
 import Common.Functions (template)
 import Common.Types ( Path(..), Token(..), UpdateId, Label )
 import Control.Applicative (Alternative ((<|>)))
-import Control.Monad.IO.Class
 import qualified Data.ByteString.Lazy.Char8 as LC
 import Data.Char (toLower)
 import qualified Interface.Cache.Exports as Cache

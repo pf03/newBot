@@ -6,6 +6,7 @@ module Logic.App where
 import Common.Functions (template)
 import Control.Monad (replicateM_)
 import qualified Interface.Cache.Exports as Cache
+import qualified Interface.Cache.Config.Exports as Config
 import qualified Interface.Log.Exports as Log
 import qualified Logic.Logic as Logic
 import qualified Messenger.Bot.Class as Bot
@@ -42,4 +43,4 @@ writeCache pointer init = do
   Cache.setMUpdateId newMUpdateId
   Log.writeInfoM $ template "Update updateId in file from {0} to {1}" [show mUpdateId, show newMUpdateId]
   Log.writeInfoM "Update config in file..."
-  Cache.writeCache
+  Config.writeCacheToConfigFile

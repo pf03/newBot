@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c9d77baf21732ca5e117960950931ef3c0530b581f6fb45edc4f29d1a6fa2edf
+-- hash: a6f364bc1af096f8564096832cd248371952f9ec5d670b6550a3ec317aae9d18
 
 name:           bot
 version:        0.1.0.0
@@ -35,10 +35,10 @@ library
       Interface.Cache.Config.Exports
       Interface.Cache.Config.Functions
       Interface.Cache.Config.Internal
+      Interface.Cache.Config.State
       Interface.Cache.Config.Types
       Interface.Cache.Exports
       Interface.Cache.Functions
-      Interface.Cache.State
       Interface.Cache.Types
       Interface.Error.Exports
       Interface.Error.Functions

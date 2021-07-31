@@ -1,23 +1,21 @@
-
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 
-module Interface.Cache.State where
+module Interface.Cache.Config.State where
 
-import Interface.Cache.Class ( MCache )
-import Control.Monad.State.Lazy (MonadIO, MonadState (get), gets, modify, when)
+import Control.Monad.State.Lazy (MonadIO, MonadState (get), when)
 import qualified Data.Aeson.Encode.Pretty as Aeson
 import qualified Data.ByteString.Lazy as L
-
-import qualified Interface.Cache.Config.Exports as Config
+import qualified Interface.Cache.Config.Functions as Config
+import qualified Interface.Cache.Config.Types as Config
 import qualified Interface.Cache.Functions as Cache
 import qualified Interface.Cache.Types as Cache
 import qualified Interface.Error.Exports as Error
 import qualified Interface.Log.Exports as Log
-import Transformer.Types
+import Transformer.Types ( BotState(..), Transformer )
 
-writeCache :: (MCache m, MonadState BotState m, MonadIO m) => m ()
-writeCache = do
+writeCacheToConfigFile :: Transformer ()
+writeCacheToConfigFile = do
   cacheChanged <- Cache.getCacheChanged
   when cacheChanged $ do
     state <- get
@@ -39,44 +37,44 @@ saveState state = do
 
 getStateFromConfig :: Config.Config -> BotState
 getStateFromConfig config =
-  let configApp0 =
+  let configApp =
         head $
           filter (\configApp1 -> Config.appName configApp1 == Config.configName config) (Config.configApps config)
-      cache0 =
+      cache =
         Cache.Cache
-          { Cache.cacheConfigApp = configApp0,
+          { Cache.cacheConfigApp = configApp,
             Cache.cacheConfigText = Config.configText config,
             Cache.cacheChanged = False,
             Cache.cacheDefaultRepeatNumber = Config.configDefaultRepeatNumber config
           }
    in BotState
-        { cache = cache0,
-          configLog = Config.configLog config,
-          logSettings = Log.defaultSettings
+        { stateCache = cache,
+          stateConfigLog = Config.configLog config,
+          stateLogSettings = Log.defaultSettings
         }
 
 getStatesFromConfig :: Config.Config -> [BotState]
 getStatesFromConfig config =
   let configApps = filter Config.appEnable (Config.configApps config)
-   in flip fmap configApps $ \configApp0 ->
-        let cache0 =
+   in flip fmap configApps $ \configApp ->
+        let cache =
               Cache.Cache
-                { Cache.cacheConfigApp = configApp0,
+                { Cache.cacheConfigApp = configApp,
                   Cache.cacheConfigText = Config.configText config,
                   Cache.cacheChanged = False,
                   Cache.cacheDefaultRepeatNumber = Config.configDefaultRepeatNumber config
                 }
          in BotState
-              { cache = cache0,
-                configLog = Config.configLog config,
-                logSettings = Log.defaultSettings
+              { stateCache = cache,
+                stateConfigLog = Config.configLog config,
+                stateLogSettings = Log.defaultSettings
               }
 
 setStateToConfig :: Config.Config -> BotState -> Config.Config
 setStateToConfig config state = config {Config.configApps = newConfigApps}
   where
-    configApps0 = Config.configApps config
-    cache0 = cache state
+    configApps = Config.configApps config
+    cache = stateCache state
     newConfigApps =
-      [Cache.cacheConfigApp cache0]
-        <> filter (\configApp0 -> Config.appName configApp0 /= Config.appName (Cache.cacheConfigApp cache0)) configApps0
+      [Cache.cacheConfigApp cache]
+        <> filter (\configApp -> Config.appName configApp /= Config.appName (Cache.cacheConfigApp cache)) configApps

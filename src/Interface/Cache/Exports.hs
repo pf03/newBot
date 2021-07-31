@@ -1,4 +1,4 @@
-module Interface.Cache.Exports (module Class, module Functions, module Types, module State) where
+module Interface.Cache.Exports (module Class, module Functions, module Types) where
 
 import Interface.Cache.Class as Class (MCache (..))
 import Interface.Cache.Functions as Functions
@@ -22,14 +22,5 @@ import Interface.Cache.Functions as Functions
     setMUpdateId,
     setRepeatNumber,
     setRepeatNumbers,
-  )
-import Interface.Cache.State as State
-  ( getStateFromConfig,
-    getStatesFromConfig,
-    readState,
-    readStates,
-    saveState,
-    setStateToConfig,
-    writeCache,
   )
 import Interface.Cache.Types as Types (Cache (..))

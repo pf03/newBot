@@ -2,16 +2,14 @@
 
 module Interface.Cache.Config.Types where
 
+import Common.Functions (deletePrefixOptions)
 import Common.Types (ChatId, Host, Token, UpdateId)
 import Data.Aeson
   ( FromJSON (parseJSON),
-    Options (fieldLabelModifier),
     ToJSON (toJSON),
-    defaultOptions,
     genericParseJSON,
     genericToJSON,
   )
-import Data.Char (toLower)
 import qualified Data.Map.Internal as M
 import GHC.Generics (Generic)
 import qualified Interface.Log.Types as Log
@@ -47,7 +45,7 @@ data ConfigApp = ConfigApp
     appUpdateId :: Maybe UpdateId,
     appRepeatNumber :: M.Map ChatId Int,
     appGroupId :: Int,
-    appVersion :: String --API version
+    appVersion :: String
   }
   deriving (Show, Generic)
 
@@ -70,11 +68,3 @@ instance FromJSON ConfigText where
 
 instance ToJSON ConfigText where
   toJSON = genericToJSON $ deletePrefixOptions 4
-
-deletePrefixOptions :: Int -> Options
-deletePrefixOptions n = defaultOptions {fieldLabelModifier = deletePrefix n}
-
-deletePrefix :: Int -> String -> String
-deletePrefix n str = case drop n str of
-  x : xs -> toLower x : xs
-  [] -> []

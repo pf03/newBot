@@ -2,22 +2,29 @@
 
 module Interface.Log.Types where
 
-import Data.Aeson.Types (FromJSON, ToJSON)
+import Data.Aeson
+    ( genericParseJSON,
+      genericToJSON,
+      FromJSON(parseJSON),
+      ToJSON(toJSON) )
 import GHC.Generics (Generic)
 import System.Console.ANSI (Color)
+import Common.Functions ( deletePrefixOptions )
 
 data Config = Config
-  { colorEnable :: Enable,
-    terminalEnable :: Enable,
-    fileEnable :: Enable,
+  { configColorEnable :: Enable,
+    configTerminalEnable :: Enable,
+    configFileEnable :: Enable,
     -- | Minimal log level as an integer
-    minLevel :: Int
+    configMinLevel :: Int
   }
   deriving (Show, Generic)
 
-instance FromJSON Config
+instance FromJSON Config where
+  parseJSON = genericParseJSON $ deletePrefixOptions 6
 
-instance ToJSON Config
+instance ToJSON Config where
+  toJSON = genericToJSON $ deletePrefixOptions 6
 
 data Level
   = Debug -- Debug data
@@ -34,8 +41,8 @@ type ColorScheme = Color
 type Enable = Bool
 
 data Settings = Settings
-  { colorScheme :: ColorScheme,
-    enable :: Enable,
-    funcName :: String
+  { settingsColorScheme :: ColorScheme,
+    settingsEnable :: Enable,
+    settingsFuncName :: String
   }
   deriving (Show)

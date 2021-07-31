@@ -3,11 +3,9 @@
 
 module Logic.Request where
 
-import Class
 import Common.Types (Host (..), Path (..))
 import Control.Concurrent (threadDelay)
 import Control.Exception (SomeException, throw)
-import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State.Lazy (when)
 import qualified Data.ByteString.Char8 as BC
 import qualified Data.ByteString.Lazy as L

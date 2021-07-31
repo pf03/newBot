@@ -13,7 +13,7 @@ import Prelude hiding (log)
 
 checkMinLogLevel :: Monad m => Config -> m ()
 checkMinLogLevel config = do
-  let minLevel = Log.minLevel . configLog $ config
+  let minLevel = Log.configMinLevel . configLog $ config
   let minB = fromEnum (minBound :: Log.Level)
   let maxB = fromEnum (maxBound :: Log.Level)
   when (minLevel < minB) $ Error.throwConfig "Min log level shouldn't be less than {0}" [show minB]

@@ -1,38 +1,35 @@
 {-# LANGUAGE FlexibleContexts #-}
+
 module Interface.Log.Functions where
 
 import Common.Convert (Convert (convert))
 import Common.Functions (template)
-import Control.Monad (when)
-import Control.Monad.IO.Class (MonadIO (..))
+import Control.Monad.State.Lazy (MonadIO (..), gets, modify, when)
 import Data.Aeson (encode)
 import Data.Aeson.Types (ToJSON)
 import qualified Data.ByteString as B
 import Data.Char (toUpper)
--- import Interface.Log.Class (MLog (..))
 import qualified Interface.Log.Color as Color
 import Interface.Log.Types
 import System.Console.ANSI (Color (Black, Blue, Green, Magenta, Red, Yellow))
-import Prelude hiding (error)
-import Control.Monad.State.Lazy hiding (State)
-import Transformer.Types
+import Transformer.Types (BotState (stateConfigLog, stateLogSettings), Transformer)
 
 -----------------------------MLog----------------------------------------------
 
 getSettings :: Transformer Settings
-getSettings = gets logSettings
+getSettings = gets stateLogSettings
 
 setSettings :: ColorScheme -> Enable -> FuncName -> Transformer ()
 setSettings colorScheme logEnable funcName = modify $ \state ->
-  state {logSettings = Settings colorScheme logEnable funcName}
+  state {stateLogSettings = Settings colorScheme logEnable funcName}
 
 getConfig :: Transformer Config
-getConfig = gets configLog
+getConfig = gets stateConfigLog
 
 setColorScheme :: ColorScheme -> Transformer ()
 setColorScheme newColorScheme = do
-  Settings _ logEnable funcName0 <- getSettings
-  setSettings newColorScheme logEnable funcName0
+  Settings _ logEnable funcName <- getSettings
+  setSettings newColorScheme logEnable funcName
 
 getConfigSettings :: Transformer (Config, Settings)
 getConfigSettings = do
@@ -42,14 +39,14 @@ getConfigSettings = do
 
 resetSettings :: Transformer ()
 resetSettings = do
-  let Settings colorScheme logEnable funcName0 = defaultSettings
-  setSettings colorScheme logEnable funcName0
+  let Settings colorScheme logEnable funcName = defaultSettings
+  setSettings colorScheme logEnable funcName
 
 defaultSettings :: Settings
 defaultSettings = Settings Black True ""
 
 defaultConfig :: Config
-defaultConfig = Config {colorEnable = False, terminalEnable = True, fileEnable = False, minLevel = 0}
+defaultConfig = Config {configColorEnable = False, configTerminalEnable = True, configFileEnable = False, configMinLevel = 0}
 
 withLogM :: (Show a) => Transformer a -> Transformer a
 withLogM m = do
@@ -86,7 +83,7 @@ writeMessageM level str = do
 
 -- Additional functions for debug
 getFuncName :: Transformer String
-getFuncName = funcName <$> getSettings
+getFuncName = settingsFuncName <$> getSettings
 
 writeSending :: Transformer ()
 writeSending = do
@@ -126,8 +123,8 @@ writeCritical logConfig logSettings = writeMessageIO logConfig logSettings Criti
 -- for example based on writerT, or empty return () implementation
 -- Info can be shown in different color schemes, and for other levels the color corresponds to the level
 writeMessageIO :: MonadIO m => Config -> Settings -> Level -> String -> m ()
-writeMessageIO (Config enableColor enableTerminal enableFile minLevel0) (Settings colorScheme logEnable _) level text = do
-  if level < toEnum minLevel0 || not logEnable
+writeMessageIO (Config enableColor enableTerminal enableFile minLevel) (Settings colorScheme logEnable _) level text = do
+  if level < toEnum minLevel || not logEnable
     then return ()
     else do
       when (enableColor && enableTerminal) $ do

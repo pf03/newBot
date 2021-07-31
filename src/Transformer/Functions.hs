@@ -7,7 +7,6 @@ import Control.Monad.State.Lazy (MonadIO (liftIO))
 import qualified Interface.Cache.Config.Exports as Config
 import qualified Interface.Error.Exports as Error
 import Transformer.Internal (runConfig, showValue)
-import Interface.Cache.State (getStateFromConfig, getStatesFromConfig)
 import Transformer.Types (Transformer)
 
 run :: Show a => Transformer a -> IO ()
@@ -15,13 +14,13 @@ run m = handle errorEmptyHandler $ do
   config <- runConfig
   if Config.configForks config
     then do
-      let states = getStatesFromConfig config
+      let states = Config.getStatesFromConfig config
       liftIO $
         forConcurrently_ (zip [1, 2 ..] states) $ \(i, state) -> do
           threadDelay (i * 1000000)
           showValue config state m
     else do
-      let state = getStateFromConfig config
+      let state = Config.getStateFromConfig config
       showValue config state m
   where
     errorEmptyHandler :: Error.Error -> IO ()

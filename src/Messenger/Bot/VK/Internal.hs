@@ -1,7 +1,6 @@
 module Messenger.Bot.VK.Internal where
 
 import Common.Types (Label, Path (..))
-import Control.Monad.IO.Class
 import qualified Data.ByteString.Lazy.Char8 as LC
 import Data.Char
 import Data.Maybe (fromMaybe)
