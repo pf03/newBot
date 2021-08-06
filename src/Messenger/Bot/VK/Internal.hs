@@ -59,9 +59,10 @@ sendMessage :: Update.Update -> [Label] -> Transformer ()
 sendMessage update btns = do
   Log.setSettings Color.Yellow True "sendMessage"
   Log.writeSending
-  query <- Query.sendMessageQuery update btns
+  eQuery <- Query.sendMessageQuery update btns
+  query <- either throw return eQuery
   Log.writeDebugM update
-  Log.writeReceivingData "query" query
+  Log.writeReceivingData "query" eQuery
   json <- sendApiRequest (Bot.API Bot.Messages Bot.Send) query False
   Log.writeReceiving
   object <- Parse.getObject json

@@ -6,7 +6,6 @@ import qualified Interface.Error.Exports as Error
 import qualified Logic.Telegram.Encode as Encode
 import qualified Messenger.Update.Telegram.Types as Update
 import Network.HTTP.Simple (Query)
-import Control.Exception
 import Messenger.Bot.Telegram.Types( API(..) )
 
 getUpdatesQuery :: Maybe UpdateId -> TimeOut -> Query
