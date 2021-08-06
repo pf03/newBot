@@ -13,7 +13,7 @@ import qualified Data.ByteString.Lazy.Char8 as LC
 import qualified Interface.Error.Exports as Error
 import qualified Interface.Log.Exports as Log
 import qualified Network.HTTP.Simple as HTTP
-import Transformer.Types
+import Transformer.Types ( Transformer )
 
 -- | Low level wrapper for request
 sendRequest :: HTTP.Request -> Bool -> Transformer LC.ByteString
@@ -57,17 +57,16 @@ buildRequest (Host host) (Path path) query =
         (map (\(a, Just b) -> (a, b)) query)
         $ setRequestSettings HTTP.defaultRequest
 
-parseRequest :: String -> HTTP.Query -> HTTP.Request
-parseRequest str query = request
-  where
-    eRequest = HTTP.parseRequest str :: Either SomeException HTTP.Request
-    initRequest = case eRequest of
-      Left err -> throw $ Error.QueryError (show err)
-      Right request0 -> request0
-    request =
-      HTTP.setRequestBodyURLEncoded
-        (map (\(a, Just b) -> (a, b)) query)
-        $ setRequestSettings initRequest
+parseRequest :: String -> HTTP.Query -> Either Error.Error HTTP.Request
+parseRequest str query = do
+  let eRequest = HTTP.parseRequest str :: Either SomeException HTTP.Request
+  initRequest <- case eRequest of
+    Left err -> Left $ Error.QueryError (show err)
+    Right request0 -> Right request0
+  return $
+    HTTP.setRequestBodyURLEncoded
+      (map (\(a, Just b) -> (a, b)) query)
+      $ setRequestSettings initRequest
 
 setRequestSettings :: HTTP.Request -> HTTP.Request
 setRequestSettings initRequest =

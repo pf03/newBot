@@ -12,7 +12,7 @@ import Messenger.Bot.Telegram.Types( API(..) )
 getUpdatesQuery :: Maybe UpdateId -> TimeOut -> Query
 getUpdatesQuery mOffset timeout = "timeout" <:> timeout ++ "offset" <:?> mOffset
 
-sendMessageQuery :: Monad m => Update.Update -> [Label] -> m (API, Query)
+sendMessageQuery :: Update.Update -> [Label] -> Either Error.Error (API, Query)
 sendMessageQuery (chatId, entity) btns = do
   api <- getAPI entity
   query <- case entity of
@@ -21,7 +21,7 @@ sendMessageQuery (chatId, entity) btns = do
         if null btns
           then "text" <:> message
           else "text" <:> message ++ "reply_markup" <:> Encode.encodeKeyboard btns
-    Update.Command _ -> throw $ Error.QueryError "Unable to send command to user"
+    Update.Command _ -> Left $ Error.QueryError "Unable to send command to user"
     Update.Sticker (FileId fileId) -> return $ "sticker" <:> fileId
     Update.Animation fileId -> return $ "animation" <:> fileId
     Update.Photo fileId mCaption -> return $ "photo" <:> fileId ++ "caption" <:?> mCaption
@@ -39,9 +39,9 @@ sendMessageQuery (chatId, entity) btns = do
     Update.Other messageId -> return $ "from_chat_id" <:> chatId ++ "message_id" <:> messageId
   return (api, "chat_id" <:> chatId ++ query)
   where
-    getAPI :: Monad m => Update.Entity -> m API
+    getAPI :: Update.Entity -> Either Error.Error API
     getAPI Update.Message {} = return SendMessage
-    getAPI Update.Command {} = throw $ Error.QueryError "Unable to send command to user"
+    getAPI Update.Command {} = Left $ Error.QueryError "Unable to send command to user"
     getAPI Update.Sticker {} = return SendSticker
     getAPI Update.Animation {} = return SendAnimation
     getAPI Update.Photo {} = return SendPhoto

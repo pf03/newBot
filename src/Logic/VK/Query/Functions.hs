@@ -2,13 +2,13 @@ module Logic.VK.Query.Functions where
 
 import Common.Convert ((<:>))
 import Common.Types (Label, TimeOut, Token (Token))
+import Control.Exception (throw)
 import qualified Interface.Cache.Exports as Cache
 import qualified Interface.Error.Exports as Error
 import qualified Logic.VK.Encode as Encode
 import qualified Logic.VK.Query.Internal as Internal
 import qualified Messenger.Update.VK.Types as Update
 import Network.HTTP.Simple (Query)
-import Control.Exception
 
 getLongPollServerQuery :: Cache.MCache m => m Query
 getLongPollServerQuery = do

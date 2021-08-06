@@ -1,8 +1,9 @@
 module Messenger.Bot.Telegram.Internal where
 
 import Common.Functions (template)
-import Common.Types ( Path(..), Token(..), UpdateId, Label )
+import Common.Types (Label, Path (..), Token (..), UpdateId)
 import Control.Applicative (Alternative ((<|>)))
+import Control.Exception (throw)
 import qualified Data.ByteString.Lazy.Char8 as LC
 import Data.Char (toLower)
 import qualified Interface.Cache.Exports as Cache
@@ -14,7 +15,7 @@ import qualified Messenger.Update.Telegram.Types as Update
 import qualified Network.HTTP.Simple as HTTP
 import qualified Parse.Telegram.Exports as Parse
 import qualified System.Console.ANSI as Color
-import Transformer.Types
+import Transformer.Types (Transformer)
 
 -- Initialization - get last updateId for getUpdates request
 getUpdateId :: Transformer (Maybe UpdateId)
@@ -42,7 +43,7 @@ sendMessage :: Update.Update -> [Label] -> Transformer ()
 sendMessage update btns = do
   Log.setSettings Color.Yellow True "sendMessage"
   Log.writeSending
-  (api, query) <- Query.sendMessageQuery update btns
+  (api, query) <- either throw return (Query.sendMessageQuery update btns)
   Log.writeReceivingData "(api, query)" (api, query)
   json <- sendApiRequest api query False
   Log.writeReceiving

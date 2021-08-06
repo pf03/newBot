@@ -1,6 +1,7 @@
 module Messenger.Bot.VK.Internal where
 
 import Common.Types (Label, Path (..))
+import Control.Exception (throw)
 import qualified Data.ByteString.Lazy.Char8 as LC
 import Data.Char
 import Data.Maybe (fromMaybe)
@@ -14,8 +15,8 @@ import qualified Messenger.Update.VK.Types as Update
 import qualified Network.HTTP.Simple as HTTP
 import qualified Parse.VK.Exports as Parse
 import qualified System.Console.ANSI as Color
+import Transformer.Types (Transformer)
 import Prelude hiding (init)
-import Transformer.Types
 
 -- Initialization - get last updateId, server name, key for getUpdates request
 getInit :: Transformer Update.Init
@@ -40,7 +41,7 @@ getUpdates :: Update.Init -> Transformer ([Update.Update], Update.Init)
 getUpdates init@(Update.Init server _ ts) = do
   Log.setSettings Color.Cyan True "getUpdates"
   let query = Query.longPollQuery init 25
-  let request = Request.parseRequest server query
+  request <- either throw return (Request.parseRequest server query)
   Log.writeSending
   json <- Request.sendRequest request True -- long polling
   Log.writeReceiving
