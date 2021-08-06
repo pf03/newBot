@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a6f364bc1af096f8564096832cd248371952f9ec5d670b6550a3ec317aae9d18
+-- hash: 21586b8b1dd6349983ef8badf81c6f70c99f0073791905e1632866beab83e93c
 
 name:           bot
 version:        0.1.0.0
@@ -27,7 +27,6 @@ source-repository head
 
 library
   exposed-modules:
-      Class
       Common.Convert
       Common.Functions
       Common.Types

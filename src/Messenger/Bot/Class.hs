@@ -1,17 +1,13 @@
--- {-# LANGUAGE AllowAmbiguousTypes   #-}
 {-# LANGUAGE ConstraintKinds       #-}
 {-# LANGUAGE FlexibleContexts      #-}
--- {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies          #-}
 
 module Messenger.Bot.Class where
 
 import Common.Types ( Label, UpdateId )
--- import Interface.MTrans (MTrans)
 import Messenger.Update.Class (IUpdate)
 import Transformer.Types ( Transformer )
 
--- a = pointer
 class (IUpdate (UpdateType pointer)) => IBot pointer where
   
   type UpdateType pointer
