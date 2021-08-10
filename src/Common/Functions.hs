@@ -3,28 +3,37 @@
 
 module Common.Functions where
 
+import Data.Aeson (Options (fieldLabelModifier), defaultOptions)
+import Data.Char (toLower)
+import Data.List (sort)
 import Data.List.Split (splitOn)
-import Data.Aeson ( defaultOptions, Options(fieldLabelModifier) )
-import Data.Char ( toLower )
 
 -- | Substitution in a template
 -- Using: template "Hello {0}, {1}, {0}, {1}," ["Petya", "Vasya"]
 template :: String -> [String] -> String
-template str args = foldl f str $ zip ts args
+template str args = foldl replaceOneWildCard str $ zip wildCards args
   where
-    ts = map (\n -> ('{' : show n) ++ "}") [0 :: Int, 1 ..]
-    f :: String -> (String, String) -> String
-    f acc (t, arg) = replace t arg acc
-    replace :: String -> String -> String -> String
-    replace t0 s str0 =
-      let strs = splitOn t0 str0
-       in concat $ init $ foldr (\part acc0 -> part : s : acc0) [] strs
+    wildCards = map (\n -> ('{' : show n) ++ "}") [0 :: Int, 1 ..]
+    replaceOneWildCard :: String -> (String, String) -> String
+    replaceOneWildCard acc (wildCard, arg) =
+      let strs = splitOn wildCard acc
+       in concat $ safeInit $ foldr (\part acc0 -> part : arg : acc0) [] strs
+
+safeInit :: [a] -> [a]
+safeInit [] = []
+safeInit a = init a
+
+safeTail :: [a] -> [a]
+safeTail [] = []
+safeTail a = tail a
 
 -- Check for unique values in list
-checkUnique :: Eq a => [a] -> Bool
-checkUnique l = let newList = filter (== True) ((==) <$> l <*> l) in length newList == length l
+checkUnique :: (Eq a, Ord a) => [a] -> Bool
+checkUnique list = and $ zipWith (/=) sortedList (safeTail sortedList)
+  where
+    sortedList = sort list
 
--- For JSON correct parsing 
+-- For JSON correct parsing
 deletePrefixOptions :: Int -> Options
 deletePrefixOptions n = defaultOptions {fieldLabelModifier = deletePrefix n}
 
