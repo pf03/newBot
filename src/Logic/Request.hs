@@ -5,7 +5,8 @@ module Logic.Request where
 
 import Common.Types (Host (..), Path (..))
 import Control.Concurrent (threadDelay)
-import Control.Exception (SomeException, throw)
+import Control.Exception (SomeException, throwIO)
+import Control.Monad.IO.Class (MonadIO (liftIO))
 import Control.Monad.State.Lazy (when)
 import qualified Data.ByteString.Char8 as BC
 import qualified Data.ByteString.Lazy as L
@@ -13,7 +14,7 @@ import qualified Data.ByteString.Lazy.Char8 as LC
 import qualified Interface.Error.Exports as Error
 import qualified Interface.Log.Exports as Log
 import qualified Network.HTTP.Simple as HTTP
-import Transformer.Types ( Transformer )
+import Transformer.Types (Transformer)
 
 -- | Low level wrapper for request
 sendRequest :: HTTP.Request -> Bool -> Transformer LC.ByteString
@@ -31,7 +32,7 @@ sendRequest request save = do
     else do
       Log.writeErrorM "Request failed with error"
       Log.writeErrorM $ show response
-      throw $ Error.QueryError "Request failed with error"
+      liftIO $ throwIO $ Error.QueryError "Request failed with error"
   where
     getResponse :: Transformer (HTTP.Response LC.ByteString)
     getResponse = do
@@ -39,7 +40,7 @@ sendRequest request save = do
       case eResponse of
         Left Error.Exit -> do
           -- Exit from application by user choice
-          throw Error.Exit
+          liftIO $ throwIO Error.Exit
         Left _ -> do
           Log.writeErrorM "Network connection error. Timeout 3 sec..."
           Log.writeErrorM $ show eResponse

@@ -1,15 +1,16 @@
 module Messenger.Bot.VK.Internal where
 
 import Common.Types (Label, Path (..))
-import Control.Exception (throw)
+import Control.Exception (throwIO)
+import Control.Monad.IO.Class (MonadIO (liftIO))
 import qualified Data.ByteString.Lazy.Char8 as LC
-import Data.Char
+import Data.Char (toLower)
 import Data.Maybe (fromMaybe)
 import qualified Interface.Cache.Exports as Cache
 import qualified Interface.Log.Exports as Log
 import qualified Logic.Request as Request
 import qualified Logic.VK.Query.Functions as Query
-import Messenger.Bot.VK.Types
+import Messenger.Bot.VK.Types (API (..))
 import qualified Messenger.Bot.VK.Types as Bot
 import qualified Messenger.Update.VK.Types as Update
 import qualified Network.HTTP.Simple as HTTP
@@ -41,7 +42,7 @@ getUpdates :: Update.Init -> Transformer ([Update.Update], Update.Init)
 getUpdates init@(Update.Init server _ ts) = do
   Log.setSettings Color.Cyan True "getUpdates"
   let query = Query.longPollQuery init 25
-  request <- either throw return (Request.parseRequest server query)
+  request <- either (liftIO . throwIO) return (Request.parseRequest server query)
   Log.writeSending
   json <- Request.sendRequest request True -- long polling
   Log.writeReceiving
@@ -60,7 +61,7 @@ sendMessage update btns = do
   Log.setSettings Color.Yellow True "sendMessage"
   Log.writeSending
   eQuery <- Query.sendMessageQuery update btns
-  query <- either throw return eQuery
+  query <- either (liftIO . throwIO) return eQuery
   Log.writeDebugM update
   Log.writeReceivingData "query" eQuery
   json <- sendApiRequest (Bot.API Bot.Messages Bot.Send) query False

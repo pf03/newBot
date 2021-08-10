@@ -1,8 +1,8 @@
 module Logic.Logic where
 
--- import Class (IUpdate, MCache)
 import Common.Functions (template)
 import Common.Types (ChatId, Command (..), Label (..), Message (..))
+import Data.Maybe (listToMaybe)
 import qualified Interface.Cache.Config.Exports as Config
 import qualified Interface.Cache.Exports as Cache
 import qualified Messenger.Update.Class as Update
@@ -11,18 +11,13 @@ toMessageCommand :: String -> Either Message Command
 toMessageCommand str =
   let words0 = words str
       length0 = length words0
-   in case length0 of
-        0 -> Left $ Message str
-        1 -> case head words0 of
-          "/help" -> Right Help
-          "/repeat" -> Right Repeat
-          "/start" -> Right Start
-          ['/', n] | n `elem` ("12345" :: String) -> Right $ Button $ read [n]
-          '/' : x : xs | x /= ' ' -> Right . Unknown . unwords $ (x : xs) : tail words0
-          _ -> Left $ Message str
-        _ -> case head words0 of
-          '/' : x : xs | x /= ' ' -> Right . Unknown . unwords $ (x : xs) : tail words0
-          _ -> Left $ Message str
+   in case listToMaybe words0 of
+        Just "/help" | length0 == 1 -> Right Help
+        Just "/repeat" | length0 == 1 -> Right Repeat
+        Just "/start" | length0 == 1 -> Right Start
+        Just ['/', n] | length0 == 1 && n `elem` ("12345" :: String) -> Right $ Button $ read [n]
+        Just ('/' : x : xs) | length0 >= 1 && x /= ' ' -> Right . Unknown . unwords $ (x : xs) : tail words0
+        _ -> Left $ Message str
 
 evalAnswer :: (Cache.MCache m, Update.IUpdate update) => update -> m (update, [Label], Int)
 evalAnswer update = do

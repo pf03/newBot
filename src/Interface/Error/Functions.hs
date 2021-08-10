@@ -6,8 +6,6 @@ import qualified Control.Exception as E
 import Control.Monad.Except (MonadIO (liftIO))
 import Interface.Error.Types (Error (ConfigError, Exit, IOError, SomeError))
 
------------------------------MError--------------------------------------------
-
 catchEither :: Monad m => Either b a -> (b -> Error) -> m a
 catchEither eba handler = case eba of
   Left b -> E.throw $ handler b
@@ -18,7 +16,6 @@ catchEIO m h = do
   ea <- liftIO $ (Right <$> m) `E.catch` handler
   liftE ea
   where
-    --handler :: Exception e => (e -> IO (EE a))
     handler err = return . Left . h $ err
 
 -- * The same as previous, but errors are handled automatically, without user handlers
@@ -28,8 +25,8 @@ liftEIO m = do
   ea <- try m
   liftE ea
 
-throwConfig :: (Monad m) => String -> [String] -> m a
-throwConfig str args = E.throw $ ConfigError $ template str args
+throwConfig :: (MonadIO m) => String -> [String] -> m a
+throwConfig str args = liftIO $ E.throwIO $ ConfigError $ template str args
 
 liftE :: Monad m => Either Error a -> m a
 liftE ea = case ea of
