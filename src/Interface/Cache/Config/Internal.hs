@@ -10,7 +10,8 @@ import Interface.Cache.Config.Types
   )
 import qualified Interface.Error.Exports as Error
 import qualified Interface.Log.Types as Log
-import Prelude hiding (log)
+import Control.Exception (throwIO)
+import Control.Monad.IO.Class (MonadIO (liftIO))
 
 checkMinLogLevel :: MonadIO m => Config -> m ()
 checkMinLogLevel config = do
@@ -47,8 +48,12 @@ checkUniqueNames config = do
     Error.throwConfig "Fields apps.name in config.json must be unique" []
 
 checkExistAndSingleName :: MonadIO m => Config -> m ()
-checkExistAndSingleName config = do
+checkExistAndSingleName config = either (liftIO . throwIO) (return . const ()) (getConfigAppByName config)
+
+getConfigAppByName :: Config -> Either Error.Error ConfigApp
+getConfigAppByName config = do
   let name = configName config
-  let names = filter (== name) $ map appName $ configApps config
-  when (length names /= 1) $
-    Error.throwConfig "Field `name` in config.json must exist and be single in list `apps.name`" []
+  let configAppsByName = filter (\configApp1 -> appName configApp1 == name) (configApps config)
+  when (null configAppsByName) $ Left $ Error.ConfigError "Field `name` in config.json must exist in list `apps.name`"
+  when (length configAppsByName > 1) $ Left $ Error.ConfigError "Field `name` in config.json must be single in list `apps.name`"
+  return $ head configAppsByName

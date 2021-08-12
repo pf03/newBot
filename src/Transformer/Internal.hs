@@ -30,5 +30,11 @@ showValue config state m = do
   Log.writeInfo logConfig logSettings $ show a
   return ()
 
+logAndThrow :: Config.Config -> Error.Error -> IO a
+logAndThrow config err = do
+  let logConfig = Config.configLog config
+  Log.writeError logConfig logSettings $ show err
+  throwIO (err :: Error.Error)
+
 logSettings :: Log.Settings
 logSettings = Log.Settings Color.Cyan True "run"

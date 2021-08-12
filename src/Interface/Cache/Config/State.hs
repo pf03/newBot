@@ -8,11 +8,14 @@ import qualified Data.Aeson.Encode.Pretty as Aeson
 import qualified Data.ByteString.Lazy as L
 import qualified Interface.Cache.Config.Functions as Config
 import qualified Interface.Cache.Config.Types as Config
+import qualified Interface.Cache.Config.Internal as Config
 import qualified Interface.Cache.Functions as Cache
 import qualified Interface.Cache.Types as Cache
 import qualified Interface.Error.Exports as Error
 import qualified Interface.Log.Exports as Log
-import Transformer.Types ( BotState(..), Transformer )
+import Transformer.Types (BotState (..), Transformer)
+import Control.Exception (throwIO)
+import Control.Monad.IO.Class (MonadIO (liftIO))
 
 writeCacheToConfigFile :: Transformer ()
 writeCacheToConfigFile = do
@@ -27,7 +30,9 @@ readStates :: (MonadIO m) => m [BotState]
 readStates = getStatesFromConfig <$> Config.readConfig
 
 readState :: (MonadIO m) => m BotState
-readState = getStateFromConfig <$> Config.readConfig
+readState = do
+  config <- Config.readConfig
+  either (liftIO . throwIO) return (getStateFromConfig config) 
 
 saveState :: (MonadIO m) => BotState -> m ()
 saveState state = do
@@ -35,12 +40,19 @@ saveState state = do
   let newConfig = setStateToConfig config state
   Error.liftEIO $ L.writeFile Config.pathConfig (Aeson.encodePretty newConfig)
 
-getStateFromConfig :: Config.Config -> BotState
+getStateFromConfig :: Config.Config -> Either Error.Error BotState
 getStateFromConfig config =
-  let configApp =
-        head $
-          filter (\configApp1 -> Config.appName configApp1 == Config.configName config) (Config.configApps config)
-      cache =
+  let eConfigApp = Config.getConfigAppByName config
+   in fmap (buildState config) eConfigApp
+
+getStatesFromConfig :: Config.Config -> [BotState]
+getStatesFromConfig config =
+  let configApps = filter Config.appEnable (Config.configApps config)
+   in fmap (buildState config) configApps
+
+buildState :: Config.Config -> Config.ConfigApp -> BotState
+buildState config configApp =
+  let cache =
         Cache.Cache
           { Cache.cacheConfigApp = configApp,
             Cache.cacheConfigText = Config.configText config,
@@ -52,23 +64,6 @@ getStateFromConfig config =
           stateConfigLog = Config.configLog config,
           stateLogSettings = Log.defaultSettings
         }
-
-getStatesFromConfig :: Config.Config -> [BotState]
-getStatesFromConfig config =
-  let configApps = filter Config.appEnable (Config.configApps config)
-   in flip fmap configApps $ \configApp ->
-        let cache =
-              Cache.Cache
-                { Cache.cacheConfigApp = configApp,
-                  Cache.cacheConfigText = Config.configText config,
-                  Cache.cacheChanged = False,
-                  Cache.cacheDefaultRepeatNumber = Config.configDefaultRepeatNumber config
-                }
-         in BotState
-              { stateCache = cache,
-                stateConfigLog = Config.configLog config,
-                stateLogSettings = Log.defaultSettings
-              }
 
 setStateToConfig :: Config.Config -> BotState -> Config.Config
 setStateToConfig config state = config {Config.configApps = newConfigApps}

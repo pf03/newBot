@@ -2,11 +2,11 @@ module Transformer.Functions where
 
 import Control.Concurrent (threadDelay)
 import Control.Concurrent.Async (forConcurrently_)
-import Control.Exception
+import Control.Exception (handle)
 import Control.Monad.State.Lazy (MonadIO (liftIO))
 import qualified Interface.Cache.Config.Exports as Config
 import qualified Interface.Error.Exports as Error
-import Transformer.Internal (runConfig, showValue)
+import Transformer.Internal (logAndThrow, runConfig, showValue)
 import Transformer.Types (Transformer)
 
 run :: Show a => Transformer a -> IO ()
@@ -20,7 +20,7 @@ run m = handle errorEmptyHandler $ do
           threadDelay (i * 1000000)
           showValue config state m
     else do
-      let state = Config.getStateFromConfig config
+      state <- either (logAndThrow config) return (Config.getStateFromConfig config)
       showValue config state m
   where
     errorEmptyHandler :: Error.Error -> IO ()
