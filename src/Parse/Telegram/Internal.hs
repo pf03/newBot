@@ -38,9 +38,7 @@ parseUpdate object = do
       chat <- message .: "chat"
       chatId <- chat .: "id"
       mForward <- parseForward message
-      case mForward of
-        Just forward -> return . Just $ (chatId, forward)
-        Nothing -> parseMessage chatId message
+      maybe (parseMessage chatId message) (\forward -> return . Just $ (chatId, forward)) mForward
 
 parseMessage :: ChatId -> Object -> Parser (Maybe Update.Update)
 parseMessage chatId object = do
@@ -57,9 +55,7 @@ parseMessage chatId object = do
       mContact <- parseContact object
       mLocation <- parseLocation object
       let mEntity = mSticker <|> mAnimation <|> mPhoto <|> mVideo <|> mDocument <|> mPoll <|> mContact <|> mLocation <|> mOther
-      case mEntity of
-        Nothing -> fail "Unknown entity type"
-        Just entity -> return . Just $ (chatId, entity)
+      maybe (fail "Unknown entity type") (\entity -> return . Just $ (chatId, entity)) mEntity
     Just text -> do
       let messageOrCommand = Logic.toMessageCommand text
       case messageOrCommand of
