@@ -19,7 +19,6 @@ catchEIO m h = do
     handler err = return . Left . h $ err
 
 -- * The same as previous, but errors are handled automatically, without user handlers
-
 liftEIO :: (MonadIO m) => IO a -> m a
 liftEIO m = do
   ea <- try m
@@ -28,13 +27,13 @@ liftEIO m = do
 throwConfig :: (MonadIO m) => String -> [String] -> m a
 throwConfig str args = liftIO $ E.throwIO $ ConfigError $ template str args
 
-liftE :: Monad m => Either Error a -> m a
+liftE :: MonadIO m => Either Error a -> m a
 liftE ea = case ea of
-  Left err -> E.throw err
+  Left err -> liftIO $ E.throwIO err
   Right a -> return a
 
 try :: (MonadIO m) => IO a -> m (Either Error a)
-try ma = liftIO $ (Right <$> ma) `E.catch` asyncHandler `E.catch` eHandler `E.catch` ioHandler `E.catch` otherHandler
+try ma = liftIO $ (Right <$> ma) `E.catches` [E.Handler asyncHandler, E.Handler eHandler, E.Handler ioHandler, E.Handler otherHandler]
   where
     asyncHandler :: AsyncCancelled -> IO (Either Error a)
     asyncHandler _ = return $ Left Exit
