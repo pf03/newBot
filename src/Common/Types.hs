@@ -12,6 +12,8 @@ newtype Label = Label String deriving newtype (Show, FromJSON, ToJSON, Eq)
 
 data Command = Help | Repeat | Start | Unknown String | Button Int deriving (Show, Eq)
 
+data MessageOrCommand = MessageEntity Message | CommandEntity Command deriving (Show, Eq)
+
 newtype UpdateId = UpdateId Int deriving newtype (Show, FromJSON, ToJSON, Convert, Num, Read, Ord, Eq)
 
 newtype ChatId = ChatId Int deriving newtype (Show, FromJSON, ToJSON, ToJSONKey, FromJSONKey, Convert, Ord, Eq, Num)

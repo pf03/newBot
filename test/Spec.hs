@@ -1,4 +1,10 @@
-import Common.Types (ChatId, Command (..), Label (..), Message (..))
+import Common.Types
+  ( ChatId,
+    Command (..),
+    Label (..),
+    Message (..),
+    MessageOrCommand (..),
+  )
 import Control.Monad.State.Lazy (State)
 import qualified Data.Map.Internal as M
 import qualified Interface.Cache.Config.Exports as Config
@@ -23,13 +29,13 @@ testToMessageCommand :: Spec
 testToMessageCommand = do
   describe "Logic.toMessageCommand" $ do
     it "returns message" $ do
-      map Logic.toMessageCommand messages `eachShouldBe` map (Left . Message) messages
+      map Logic.toMessageCommand messages `eachShouldBe` map (MessageEntity . Message) messages
     it "returns help command" $ do
-      helpCases `allShouldBe` Right Help
+      helpCases `allShouldBe` CommandEntity Help
     it "returns start command" $ do
-      startCases `allShouldBe` Right Start
+      startCases `allShouldBe` CommandEntity Start
     it "returns repeat command" $ do
-      repeatCases `allShouldBe` Right Repeat
+      repeatCases `allShouldBe` CommandEntity Repeat
     it "returns button command" $ do
       buttonCases `eachShouldBe` buttonResults
     it "returns unknown command" $ do
@@ -57,25 +63,25 @@ messages =
     "/ vasya"
   ]
 
-helpCases :: [Either Message Command]
+helpCases :: [MessageOrCommand]
 helpCases =
   map
     Logic.toMessageCommand
     ["/help", " /help", "/help ", "         /help   "]
 
-startCases :: [Either Message Command]
+startCases :: [MessageOrCommand]
 startCases =
   map
     Logic.toMessageCommand
     ["/start", " /start", "/start ", "         /start   "]
 
-repeatCases :: [Either Message Command]
+repeatCases :: [MessageOrCommand]
 repeatCases =
   map
     Logic.toMessageCommand
     ["/repeat", " /repeat", "/repeat ", "         /repeat   "]
 
-buttonCases :: [Either Message Command]
+buttonCases :: [MessageOrCommand]
 buttonCases =
   map
     Logic.toMessageCommand
@@ -96,10 +102,10 @@ buttonCases =
       " /5 "
     ]
 
-buttonResults :: [Either Message Command]
-buttonResults = map (Right . Button) $ concat $ replicate 3 [1 .. 5]
+buttonResults :: [MessageOrCommand]
+buttonResults = map (CommandEntity . Button) $ concat $ replicate 3 [1 .. 5]
 
-unknownCases :: [Either Message Command]
+unknownCases :: [MessageOrCommand]
 unknownCases =
   map
     Logic.toMessageCommand
@@ -132,10 +138,10 @@ unknownCases =
       "/6    /repeat"
     ]
 
-unknownResults :: [Either Message Command]
+unknownResults :: [MessageOrCommand]
 unknownResults =
   map
-    (Right . Unknown)
+    (CommandEntity . Unknown)
     [ "unk",
       "unk",
       "unk",
@@ -182,17 +188,16 @@ evalCommandAnswerTuples =
     Repeat `to` ("someRepeatText", map Label ["/1", "/2", "/3", "/4", "/5"]),
     Button 5 `to` ("someButtonText", []),
     Unknown "someCommand" `to` ("someUnknownText", [])
-  ] where
+  ]
+  where
     to :: a -> b -> (a, b)
     to = (,)
-
 
 evalCommandAnswerCases :: [State Cache.Cache (Message, [Label])]
 evalCommandAnswerCases = map (Logic.evalCommandAnswer someChatId . fst) evalCommandAnswerTuples
 
 evalCommandAnswerResults :: [(Message, [Label])]
 evalCommandAnswerResults = map snd evalCommandAnswerTuples
-
 
 someConfigText :: Config.ConfigText
 someConfigText =

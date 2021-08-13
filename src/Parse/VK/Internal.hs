@@ -37,10 +37,10 @@ parseUpdate object = do
       object1 <- object .: "object"
       userId <- object1 .: "user_id"
       body <- object1 .: "body"
-      let eMessageCommand = Logic.toMessageCommand body
+      let messageOrCommand = Logic.toMessageCommand body
       mAttachments <- mWithArrayItem "attachments" parseAttachment object1
       let attachments = fromMaybe [] mAttachments
-      return $ Just (ChatId userId, Update.Entity eMessageCommand attachments)
+      return $ Just (ChatId userId, Update.Entity messageOrCommand attachments)
     _ -> return Nothing
 
 parseAttachment :: Object -> Parser Update.Attachment

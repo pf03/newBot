@@ -1,7 +1,12 @@
 module Logic.VK.Query.Functions where
 
 import Common.Convert ((<:>))
-import Common.Types (Label, TimeOut, Token (Token))
+import Common.Types
+  ( Label,
+    MessageOrCommand (CommandEntity, MessageEntity),
+    TimeOut,
+    Token (Token),
+  )
 import qualified Interface.Cache.Exports as Cache
 import qualified Interface.Error.Exports as Error
 import qualified Logic.VK.Encode as Encode
@@ -27,12 +32,12 @@ longPollQuery ini timeout =
     ++ "wait" <:> timeout
 
 sendMessageQuery :: Cache.MCache m => Update.Update -> [Label] -> m (Either Error.Error Query)
-sendMessageQuery (chatId, Update.Entity eMessageCommand attachments) btns = do
+sendMessageQuery (chatId, Update.Entity messageOrCommand attachments) btns = do
   token <- Cache.getToken
   version <- Cache.getAPIVersion
-  case eMessageCommand of
-    Right _ -> return $ Left $ Error.QueryError "Unable to send command to user"
-    Left message -> do
+  case messageOrCommand of
+    CommandEntity _ -> return $ Left $ Error.QueryError "Unable to send command to user"
+    MessageEntity message -> do
       let defaultQuery = Internal.defaultQuery token chatId version
       let messageQuery = "message" <:> message
       let buttonsQuery = if null btns then [] else "keyboard" <:> Encode.encodeKeyboard btns

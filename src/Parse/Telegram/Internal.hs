@@ -1,6 +1,10 @@
 module Parse.Telegram.Internal where
 
-import Common.Types (ChatId, UpdateId)
+import Common.Types
+  ( ChatId,
+    MessageOrCommand (CommandEntity, MessageEntity),
+    UpdateId,
+  )
 import Control.Applicative (Alternative ((<|>)))
 import Data.Aeson (Object, (.:), (.:?))
 import Data.Aeson.Types (Parser)
@@ -43,7 +47,7 @@ parseMessage chatId object = do
   mText <- object .:? "text"
   case mText of
     Nothing -> do
-      mOther <- parseOther object -- for universal response, always Just
+      mOther <- parseOther object
       mSticker <- parseSticker object
       mAnimation <- parseAnimation object
       mPhoto <- parsePhoto object
@@ -52,16 +56,15 @@ parseMessage chatId object = do
       mPoll <- parsePoll object
       mContact <- parseContact object
       mLocation <- parseLocation object
-      -- The priority of "mother" is determined by its position in the line. If "mother" will be first, other cases will never work
       let mEntity = mSticker <|> mAnimation <|> mPhoto <|> mVideo <|> mDocument <|> mPoll <|> mContact <|> mLocation <|> mOther
       case mEntity of
         Nothing -> fail "Unknown entity type"
         Just entity -> return . Just $ (chatId, entity)
     Just text -> do
-      let eMessageCommand = Logic.toMessageCommand text
-      case eMessageCommand of
-        Left message -> return . Just $ (chatId, Update.Message message)
-        Right command -> return . Just $ (chatId, Update.Command command)
+      let messageOrCommand = Logic.toMessageCommand text
+      case messageOrCommand of
+        MessageEntity message -> return . Just $ (chatId, Update.Message message)
+        CommandEntity command -> return . Just $ (chatId, Update.Command command)
 
 parseForward :: OMessageItem -> Parser (Maybe Update.Entity)
 parseForward object = do
@@ -73,7 +76,6 @@ parseForward object = do
       messageId <- object .: "message_id"
       return $ Just $ Update.Forward forwardFromId messageId
 
--- always Just
 parseOther :: OMessageItem -> Parser (Maybe Update.Entity)
 parseOther object = do
   messageId <- object .: "message_id"

@@ -13,7 +13,6 @@ data Config = Config
   { configColorEnable :: Enable,
     configTerminalEnable :: Enable,
     configFileEnable :: Enable,
-    -- | Minimal log level as an integer
     configMinLevel :: Int
   }
   deriving (Show, Generic)
@@ -25,11 +24,11 @@ instance ToJSON Config where
   toJSON = genericToJSON $ deletePrefixOptions 6
 
 data Level
-  = Debug -- Debug data
-  | Info -- Information about app work
-  | Warn -- Warnings
-  | Error -- Non-critical error, that can be given to the user in one form or another
-  | Critical -- Critical error leading to application termination
+  = Debug
+  | Info 
+  | Warn
+  | Error
+  | Critical
   deriving (Eq, Enum, Ord, Show, Bounded)
 
 type FuncName = String
