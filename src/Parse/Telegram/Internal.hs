@@ -1,6 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
-
 module Parse.Telegram.Internal where
 
 import Common.Types (ChatId, UpdateId)

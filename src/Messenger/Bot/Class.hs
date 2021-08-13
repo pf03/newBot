@@ -1,7 +1,3 @@
-{-# LANGUAGE ConstraintKinds #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE TypeFamilies #-}
-
 module Messenger.Bot.Class where
 
 import Common.Types (Label, UpdateId)

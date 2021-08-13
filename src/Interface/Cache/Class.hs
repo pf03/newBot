@@ -1,5 +1,3 @@
-{-# LANGUAGE FlexibleInstances #-}
-
 module Interface.Cache.Class where
 
 import Control.Monad.Trans.State.Lazy (State, get, gets, modify, put)

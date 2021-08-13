@@ -1,5 +1,3 @@
-{-# LANGUAGE DeriveGeneric #-}
-
 module Interface.Log.Types where
 
 import Data.Aeson

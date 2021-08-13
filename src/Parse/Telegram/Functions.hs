@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Parse.Telegram.Functions where
 
 import Common.Types (UpdateId)

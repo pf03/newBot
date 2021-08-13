@@ -1,7 +1,4 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE UndecidableInstances #-}
-
-module Common.Functions where
+ module Common.Functions where
 
 import Data.Aeson (Options (fieldLabelModifier), defaultOptions)
 import Data.Char (toLower)

@@ -4,7 +4,6 @@ import Common.Types (Label, Url)
 import Data.Aeson (KeyValue ((.=)), Value (Array), encode, object)
 import qualified Data.ByteString.Lazy.Char8 as LC
 import GHC.Exts (IsList (fromList))
-import Messenger.Update.VK.Types (GroupId, OwnerId)
 
 encodeKeyboard :: [Label] -> LC.ByteString
 encodeKeyboard strs =

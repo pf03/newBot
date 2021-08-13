@@ -1,5 +1,3 @@
-{-# LANGUAGE FlexibleInstances #-}
-
 module Parse.Internal where
 
 import Common.Types (Key (..))

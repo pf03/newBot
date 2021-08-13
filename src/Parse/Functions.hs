@@ -1,5 +1,3 @@
-{-# LANGUAGE FlexibleInstances #-}
-
 module Parse.Functions where
 
 import Data.Aeson (FromJSON, Object, Value, eitherDecode)

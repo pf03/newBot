@@ -1,5 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-
 module Interface.Log.Functions where
 
 import Common.Convert (Convert (convert))
@@ -13,8 +11,6 @@ import qualified Interface.Log.Color as Color
 import Interface.Log.Types
 import System.Console.ANSI (Color (Black, Blue, Green, Magenta, Red, Yellow))
 import Transformer.Types (BotState (stateConfigLog, stateLogSettings), Transformer)
-
------------------------------MLog----------------------------------------------
 
 getSettings :: Transformer Settings
 getSettings = gets stateLogSettings
@@ -117,10 +113,6 @@ writeError logConfig logSettings = writeMessageIO logConfig logSettings Error
 writeCritical :: MonadIO m => Config -> Settings -> String -> m ()
 writeCritical logConfig logSettings = writeMessageIO logConfig logSettings Critical
 
------------------------------Default implementation----------------------------
--- The default implementation of the MLog type class for the IO monad.
--- In pure code, for example for testing, you can replace this implementation with another one,
--- for example based on writerT, or empty return () implementation
 -- Info can be shown in different color schemes, and for other levels the color corresponds to the level
 writeMessageIO :: MonadIO m => Config -> Settings -> Level -> String -> m ()
 writeMessageIO (Config enableColor enableTerminal enableFile minLevel) (Settings colorScheme logEnable _) level text = do

@@ -1,6 +1,3 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE OverloadedStrings #-}
-
 module Logic.Request where
 
 import Common.Types (Host (..), Path (..))

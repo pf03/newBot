@@ -1,6 +1,3 @@
-{-# LANGUAGE BlockArguments #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-
 module Logic.App where
 
 import Common.Functions (template)

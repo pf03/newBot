@@ -1,6 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE FlexibleInstances #-}
-
 module Interface.Cache.Config.State where
 
 import Control.Monad.State.Lazy (MonadIO, MonadState (get), when)

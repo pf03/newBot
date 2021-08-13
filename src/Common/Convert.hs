@@ -1,6 +1,3 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE UndecidableInstances #-}
-
 module Common.Convert where
 
 import Data.Aeson (Object, Value, encode)

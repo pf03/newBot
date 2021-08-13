@@ -1,5 +1,3 @@
-{-# LANGUAGE DeriveGeneric #-}
-
 module Transformer.Types where
 
 import Control.Monad.State.Lazy ( StateT ) 

@@ -1,9 +1,3 @@
-{-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE InstanceSigs #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-
 module Messenger.Update.Telegram.Types where
 
 import Messenger.Update.Class (IUpdate)

@@ -1,6 +1,3 @@
-{-# LANGUAGE InstanceSigs #-}
-{-# LANGUAGE TypeFamilies #-}
-
 module Messenger.Bot.Telegram.Instances where
 
 import Common.Types (Label, UpdateId)

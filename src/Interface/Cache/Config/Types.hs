@@ -1,5 +1,3 @@
-{-# LANGUAGE DeriveGeneric #-}
-
 module Interface.Cache.Config.Types where
 
 import Common.Functions (deletePrefixOptions)

@@ -1,6 +1,3 @@
-{-# LANGUAGE InstanceSigs #-}
-{-# LANGUAGE TypeFamilies          #-}
-
 module Messenger.Bot.VK.Instances where
 
 import Common.Types ( UpdateId, Label ) 
