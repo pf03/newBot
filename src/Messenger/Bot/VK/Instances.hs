@@ -1,7 +1,4 @@
-{-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE InstanceSigs #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies          #-}
 
 module Messenger.Bot.VK.Instances where
@@ -10,9 +7,9 @@ import Common.Types ( UpdateId, Label )
 import Messenger.Bot.Class (IBot(..))
 import qualified Messenger.Bot.VK.Internal as Internal
 import qualified Messenger.Update.VK.Types as Update
-import Messenger.Update.VK.Types
+import Messenger.Update.VK.Types ( Init, Update )
 import Prelude hiding (init)
-import Transformer.Types
+import Transformer.Types ( Transformer )
 
 data Pointer = Pointer
 

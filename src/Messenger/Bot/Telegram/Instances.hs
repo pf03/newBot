@@ -1,22 +1,18 @@
-{-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE InstanceSigs #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeFamilies          #-}
+{-# LANGUAGE TypeFamilies #-}
 
 module Messenger.Bot.Telegram.Instances where
 
 import Common.Types (Label, UpdateId)
-import Messenger.Bot.Class
+import Messenger.Bot.Class (IBot (..))
 import qualified Messenger.Bot.Telegram.Internal as Internal
-import Messenger.Bot.Telegram.Types
-import Messenger.Update.Telegram.Types
-import Transformer.Types
+import Messenger.Bot.Telegram.Types (Init (..))
+import Messenger.Update.Telegram.Types (Update)
+import Transformer.Types (Transformer)
 
 data Pointer = Pointer
 
 instance IBot Pointer where
-
   type UpdateType Pointer = Update
   type InitType Pointer = Init
 
@@ -29,7 +25,7 @@ instance IBot Pointer where
   getUpdates :: Pointer -> Init -> Transformer ([Update], Init)
   getUpdates _ (Init mUpdateId) = do
     (updates, newMUpdateId) <- Internal.getUpdates mUpdateId
-    return ( updates, Init newMUpdateId)
+    return (updates, Init newMUpdateId)
 
   sendMessage :: Pointer -> Update -> [Label] -> Transformer ()
   sendMessage _ update btns = Internal.sendMessage update btns

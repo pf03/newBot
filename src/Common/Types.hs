@@ -1,7 +1,5 @@
 {-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE UndecidableInstances #-}
 
 module Common.Types where
 
@@ -25,9 +23,13 @@ newtype Key = Key String deriving newtype (Show, FromJSON, ToJSON, IsString)
 
 newtype UserId = UserId Int deriving newtype (Show, FromJSON, ToJSON, Convert)
 
-newtype IntId = IntId Int deriving newtype (Show, FromJSON, ToJSON, Convert)
+newtype WallId = WallId Int deriving newtype (Show, FromJSON, ToJSON, Convert)
 
-newtype StrId = StrId String deriving newtype (Show, FromJSON, ToJSON, Convert)
+newtype ItemId = ItemId Int deriving newtype (Show, FromJSON, ToJSON, Convert)
+
+newtype EntityId = EntityId Int deriving newtype (Show, FromJSON, ToJSON, Convert)
+
+newtype PollId = PollId String deriving newtype (Show, FromJSON, ToJSON, Convert)
 
 newtype FileId = FileId String deriving newtype (Show, FromJSON, ToJSON, Convert)
 

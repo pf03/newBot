@@ -8,7 +8,7 @@ module Messenger.Update.Telegram.Types where
 
 import Messenger.Update.Class (IUpdate)
 import Common.Convert (Convert)
-import Common.Types (ChatId, Command, FileId, IntId, Message, StrId)
+import Common.Types (ChatId, Command, FileId, EntityId, Message, PollId)
 import Data.Aeson (FromJSON, ToJSON)
 import qualified Messenger.Update.Class as Class
 
@@ -26,7 +26,7 @@ data Entity
   | Photo FileId (Maybe Caption)
   | Video FileId (Maybe Caption)
   | Document FileId (Maybe Caption)
-  | Poll {pollId :: StrId, question :: String, options :: [String]}
+  | Poll {pollId :: PollId, question :: String, options :: [String]}
   | Contact
       { phoneNumber :: String,
         firstName :: String,
@@ -34,8 +34,8 @@ data Entity
         mVCard :: Maybe String
       }
   | Location Float Float
-  | Forward ChatId IntId
-  | Other IntId
+  | Forward ChatId ChatId
+  | Other EntityId
   deriving (Show)
 
 --------------------------instance App.Update----------------------------------

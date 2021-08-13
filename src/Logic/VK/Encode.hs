@@ -1,6 +1,6 @@
 module Logic.VK.Encode where
 
-import Common.Types (IntId, Label, Url) --( IntId, Label )
+import Common.Types (Label, Url)
 import Data.Aeson (KeyValue ((.=)), Value (Array), encode, object)
 import qualified Data.ByteString.Lazy.Char8 as LC
 import GHC.Exts (IsList (fromList))
@@ -31,14 +31,4 @@ encodeContentUrl str =
     object
       [ "type" .= ("url" :: String),
         "url" .= str
-      ]
-
-encodeContentMessage :: OwnerId -> GroupId -> IntId -> LC.ByteString
-encodeContentMessage ownerId peerId messageId =
-  encode $
-    object
-      [ "type" .= ("message" :: String),
-        "owner_id" .= ownerId,
-        "peer_id" .= peerId,
-        "conversation_message_id" .= messageId
       ]

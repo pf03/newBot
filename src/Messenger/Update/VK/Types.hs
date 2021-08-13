@@ -9,7 +9,7 @@ module Messenger.Update.VK.Types where
 
 import Messenger.Update.Class (IUpdate)
 import Common.Convert (Convert)
-import Common.Types (ChatId, Command, IntId, ItemName, Key, Message, UpdateId, Url)
+import Common.Types (ChatId, Command, WallId, ItemId, ItemName, Key, Message, UpdateId, Url)
 import Data.Aeson (FromJSON, ToJSON)
 import GHC.Generics (Generic)
 import qualified Messenger.Update.Class as Class
@@ -21,9 +21,9 @@ data Entity = Entity {body :: Either Message Command, attachments :: [Attachment
 
 data Attachment
   = Sticker StickerId
-  | Audio OwnerId IntId
-  | Wall OwnerId IntId -- parser differs from Audio
-  | Item ItemName OwnerId IntId Key -- photo, video, doc
+  | Audio OwnerId OwnerId
+  | Wall OwnerId WallId -- parser differs from Audio
+  | Item ItemName OwnerId ItemId Key -- photo, video, doc
   | Link Url
   deriving (Show)
 
