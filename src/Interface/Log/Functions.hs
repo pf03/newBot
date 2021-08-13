@@ -2,13 +2,22 @@ module Interface.Log.Functions where
 
 import Common.Convert (Convert (convert))
 import Common.Functions (template)
+import Control.Exception (IOException)
 import Control.Monad.State.Lazy (MonadIO (..), gets, modify, when)
 import Data.Aeson (encode)
 import Data.Aeson.Types (ToJSON)
 import qualified Data.ByteString as B
 import Data.Char (toUpper)
+import qualified Interface.Error.Exports as Error
 import qualified Interface.Log.Color as Color
 import Interface.Log.Types
+  ( ColorScheme,
+    Config (..),
+    Enable,
+    FuncName,
+    Level (..),
+    Settings (Settings, settingsFuncName),
+  )
 import System.Console.ANSI (Color (Black, Blue, Green, Magenta, Red, Yellow))
 import Transformer.Types (BotState (stateConfigLog, stateLogSettings), Transformer)
 
@@ -33,22 +42,11 @@ getConfigSettings = do
   settings <- getSettings
   return (config, settings)
 
-resetSettings :: Transformer ()
-resetSettings = do
-  let Settings colorScheme logEnable funcName = defaultSettings
-  setSettings colorScheme logEnable funcName
-
 defaultSettings :: Settings
 defaultSettings = Settings Black True ""
 
 defaultConfig :: Config
 defaultConfig = Config {configColorEnable = False, configTerminalEnable = True, configFileEnable = False, configMinLevel = 0}
-
-withLogM :: (Show a) => Transformer a -> Transformer a
-withLogM m = do
-  a <- m
-  writeDebugM a
-  return a
 
 -- * An exception has been made for debug information - it can be of any type Show a, not just a String
 
@@ -139,5 +137,8 @@ writeMessageIO (Config enableColor enableTerminal enableFile minLevel) (Settings
 
     writeToFile :: (MonadIO m, ToJSON a) => a -> m ()
     writeToFile str = do
-      liftIO $ B.appendFile "log.txt" $ convert . encode $ str
-      liftIO $ B.appendFile "log.txt" $ convert ("\n" :: String)
+      let message = convert (encode str) <> convert ("\n" :: String)
+      B.appendFile "log.txt" message `Error.catchEIO` handler
+      where
+        handler :: IOException -> Error.Error
+        handler _ = Error.IOError "Error writing the log to the log.txt file"
