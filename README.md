@@ -11,7 +11,7 @@
 * `config-example.json`
 3. Rename the `config-example.json` file to `config.json` and edit it
 Be sure to edit the following fields:
-`apps.token`
+* `apps.token`
 * `apps.groupId` for VK
 
 The fields `apps.repeatNumber` and `apps.updateId` can be left as they are, they will be filled in while the bot is running.
@@ -22,7 +22,6 @@ in the community settings. The rest of the checkboxes shouldn't be checked.
 ![vk bot settings](https://raw.githubusercontent.com/pf03/newBot/main/vk_bot_settings.png)
 
 5. To test pure functions run `stack test`
-6. To exit the bot, type q+Enter
 ***
 
 ## CONFIG
@@ -58,6 +57,34 @@ Purpose of `config.json` fields:
   * `host` - API host.
 ***
 
+## FUNCTIONAL
+The main function of an echo bot is to send the same message to the user in response to a message a specified number of times. The bot also supports some commands (see the list below). Two messengers are supported - Telegram, VK.  
+
+Message types for the Telegram messenger:
+* text;
+* sticker;
+* gif;
+* photo;
+* video;
+* doc;
+* poll;
+* contact;
+* location;
+* forward;
+* other message types should also be supported, but this is not guaranteed  
+
+Message types for the VK messenger:
+* text
+* sticker;
+* photo;
+* video;
+* doc;
+* audio;
+* wall;
+* link  
+If a message with an attachment is not sent by the community owner, then such attachments will be ignored (the `access_key` for such attachments must be obtained separately using the `getHistoryAttachment` method, which is not implemented in this bot)
+***
+
 ## COMMANDS
 
 * `/help` - info about bot commands;
@@ -65,20 +92,3 @@ Purpose of `config.json` fields:
 * `/repeat` - send keyboard to edit repeat number for current user;
 * `Buttons /1 ... /5` - edit repeat number for current user;
 ***
-
-## MODULES
-
-The bot operation logic is divided into the following layers (presented in the corresponding folders in the ‘src’) from low to high:
-1. `Common`       - common functions;
-2. `Interface`    - classes of types that implement abstract access of higher layers to interfaces:
-  * `MError`  - error handling,
-  * `MLog`    - logging,
-  * `MCache`  - working with changing data in pure code,
-  * `Messenger` - common interface for different messengers;
-3. `Logic`    - the main logic of the program;
-4. `VK`       - implementation of the messenger interface for API VK;
-5. `Telegram` - implementation of the messenger interface for API Telegram;
-6. `T`        - one of the possible implementations of the monadic interface - transformer T;
-7. `App`      - application layer functions that have access to both the interface and its implementation.
-
-Lower layers should not import modules from higher layers.
