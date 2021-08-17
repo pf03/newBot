@@ -11,10 +11,10 @@ import qualified Data.ByteString.Lazy.Char8 as LC
 import qualified Interface.Error.Exports as Error
 import qualified Interface.Log.Exports as Log
 import qualified Network.HTTP.Simple as HTTP
-import Transformer.Types (Transformer)
+import Transformer.Types (BotStateIO)
 
 -- | Low level wrapper for request
-sendRequest :: HTTP.Request -> Bool -> Transformer LC.ByteString
+sendRequest :: HTTP.Request -> Bool -> BotStateIO LC.ByteString
 sendRequest request save = do
   response <- getResponse
   let status = HTTP.getResponseStatusCode response
@@ -31,7 +31,7 @@ sendRequest request save = do
       Log.writeErrorM $ show response
       liftIO $ throwIO $ Error.QueryError "Request failed with error"
   where
-    getResponse :: Transformer (HTTP.Response LC.ByteString)
+    getResponse :: BotStateIO (HTTP.Response LC.ByteString)
     getResponse = do
       eResponse <- Error.try (HTTP.httpLBS request)
       case eResponse of

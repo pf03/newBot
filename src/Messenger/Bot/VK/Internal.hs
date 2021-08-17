@@ -16,11 +16,11 @@ import qualified Messenger.Update.VK.Types as Update
 import qualified Network.HTTP.Simple as HTTP
 import qualified Parse.VK.Exports as Parse
 import qualified System.Console.ANSI as Color
-import Transformer.Types (Transformer)
+import Transformer.Types (BotStateIO)
 import Prelude hiding (init)
 
 -- Initialization - get last updateId, server name, key for getUpdates request
-getInit :: Transformer Update.Init
+getInit :: BotStateIO Update.Init
 getInit = do
   Log.setSettings Color.Blue True "getInit"
   let api = Bot.API Bot.Groups Bot.GetLongPollServer
@@ -38,7 +38,7 @@ getInit = do
     Just updateIdFromFile -> return $ Update.Init server key updateIdFromFile
 
 -- Get updates from messenger server by the long polling method
-getUpdates :: Update.Init -> Transformer ([Update.Update], Update.Init)
+getUpdates :: Update.Init -> BotStateIO ([Update.Update], Update.Init)
 getUpdates init@(Update.Init server _ ts) = do
   Log.setSettings Color.Cyan True "getUpdates"
   let query = Query.longPollQuery init 25
@@ -56,7 +56,7 @@ getUpdates init@(Update.Init server _ ts) = do
   return (updates, newInit)
 
 -- Send response to a single user
-sendMessage :: Update.Update -> [Label] -> Transformer ()
+sendMessage :: Update.Update -> [Label] -> BotStateIO ()
 sendMessage update btns = do
   Log.setSettings Color.Yellow True "sendMessage"
   Log.writeSending
@@ -69,7 +69,7 @@ sendMessage update btns = do
   object <- Parse.getObject json
   Log.writeReceivingData "object" object
 
-sendApiRequest :: API -> HTTP.Query -> Bool -> Transformer LC.ByteString
+sendApiRequest :: API -> HTTP.Query -> Bool -> BotStateIO LC.ByteString
 sendApiRequest api query save = do
   host <- Cache.getHost
   let path = getApiPath api

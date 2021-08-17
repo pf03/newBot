@@ -12,6 +12,6 @@ instance MCache (State Cache) where
   getCache = get
   setCache = put
 
-instance MCache State.Transformer where
+instance MCache State.BotStateIO where
   getCache = gets State.stateCache
   setCache cache = modify $ \state -> state {State.stateCache = cache}

@@ -19,24 +19,24 @@ import Interface.Log.Types
     Settings (Settings, settingsFuncName),
   )
 import System.Console.ANSI (Color (Black, Blue, Green, Magenta, Red, Yellow))
-import Transformer.Types (BotState (stateConfigLog, stateLogSettings), Transformer)
+import Transformer.Types (BotState (stateConfigLog, stateLogSettings), BotStateIO)
 
-getSettings :: Transformer Settings
+getSettings :: BotStateIO Settings
 getSettings = gets stateLogSettings
 
-setSettings :: ColorScheme -> Enable -> FuncName -> Transformer ()
+setSettings :: ColorScheme -> Enable -> FuncName -> BotStateIO ()
 setSettings colorScheme logEnable funcName = modify $ \state ->
   state {stateLogSettings = Settings colorScheme logEnable funcName}
 
-getConfig :: Transformer Config
+getConfig :: BotStateIO Config
 getConfig = gets stateConfigLog
 
-setColorScheme :: ColorScheme -> Transformer ()
+setColorScheme :: ColorScheme -> BotStateIO ()
 setColorScheme newColorScheme = do
   Settings _ logEnable funcName <- getSettings
   setSettings newColorScheme logEnable funcName
 
-getConfigSettings :: Transformer (Config, Settings)
+getConfigSettings :: BotStateIO (Config, Settings)
 getConfigSettings = do
   config <- getConfig
   settings <- getSettings
@@ -50,46 +50,46 @@ defaultConfig = Config {configColorEnable = False, configTerminalEnable = True, 
 
 -- * An exception has been made for debug information - it can be of any type Show a, not just a String
 
-writeDebugM :: (Show a) => a -> Transformer ()
+writeDebugM :: (Show a) => a -> BotStateIO ()
 writeDebugM a = writeMessageM Debug (show a)
 
-writeInfoM :: String -> Transformer ()
+writeInfoM :: String -> BotStateIO ()
 writeInfoM = writeMessageM Info
 
-writeInfoColorM :: ColorScheme -> String -> Transformer ()
+writeInfoColorM :: ColorScheme -> String -> BotStateIO ()
 writeInfoColorM colorScheme str = do
   setColorScheme colorScheme
   writeInfoM str
 
-writeWarnM :: String -> Transformer ()
+writeWarnM :: String -> BotStateIO ()
 writeWarnM = writeMessageM Warn
 
-writeErrorM :: String -> Transformer ()
+writeErrorM :: String -> BotStateIO ()
 writeErrorM = writeMessageM Error
 
-writeCriticalM :: String -> Transformer ()
+writeCriticalM :: String -> BotStateIO ()
 writeCriticalM = writeMessageM Critical
 
-writeMessageM :: Level -> String -> Transformer ()
+writeMessageM :: Level -> String -> BotStateIO ()
 writeMessageM level str = do
   (config, settings) <- getConfigSettings
   writeMessageIO config settings level str
 
 -- Additional functions for debug
-getFuncName :: Transformer String
+getFuncName :: BotStateIO String
 getFuncName = settingsFuncName <$> getSettings
 
-writeSending :: Transformer ()
+writeSending :: BotStateIO ()
 writeSending = do
   funcName0 <- getFuncName
   writeInfoM $ template "Query {0} sent......" [funcName0]
 
-writeReceiving :: Transformer ()
+writeReceiving :: BotStateIO ()
 writeReceiving = do
   funcName0 <- getFuncName
   writeInfoM $ template "Response {0} received......" [funcName0]
 
-writeReceivingData :: (Show a) => String -> a -> Transformer ()
+writeReceivingData :: (Show a) => String -> a -> BotStateIO ()
 writeReceivingData dataName dataValue = do
   funcName0 <- getFuncName
   writeInfoM $ template "Data {1} received in {0} response......" [funcName0, dataName]
