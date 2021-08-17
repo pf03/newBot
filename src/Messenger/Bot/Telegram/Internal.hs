@@ -16,15 +16,15 @@ import qualified Messenger.Update.Telegram.Types as Update
 import qualified Network.HTTP.Simple as HTTP
 import qualified Parse.Telegram.Exports as Parse
 import qualified System.Console.ANSI as Color
-import Transformer.Types (Transformer)
+import Transformer.Types (BotStateIO)
 
 -- Initialization - get last updateId for getUpdates request
-getUpdateId :: Transformer (Maybe UpdateId)
+getUpdateId :: BotStateIO (Maybe UpdateId)
 getUpdateId = do
   Log.setSettings Color.Blue True "getUpdateId"
   Cache.getMUpdateId
 
-getUpdates :: Maybe UpdateId -> Transformer ([Update.Update], Maybe UpdateId)
+getUpdates :: Maybe UpdateId -> BotStateIO ([Update.Update], Maybe UpdateId)
 getUpdates mUpdateId = do
   Log.setSettings Color.Cyan True $ template "getUpdates, mUpdateId = {0}" [show mUpdateId]
   Log.writeSending
@@ -39,7 +39,7 @@ getUpdates mUpdateId = do
   Log.writeReceivingData "update" updates
   return (updates, newMUpdateId <|> mUpdateId)
 
-sendMessage :: Update.Update -> [Label] -> Transformer ()
+sendMessage :: Update.Update -> [Label] -> BotStateIO ()
 sendMessage update btns = do
   Log.setSettings Color.Yellow True "sendMessage"
   Log.writeSending
@@ -51,7 +51,7 @@ sendMessage update btns = do
   Log.writeReceivingData "object" object
 
 -- Dumping messages that we cannot parse, for debugging purposes
-reset :: Transformer ()
+reset :: BotStateIO ()
 reset = do
   mUpdateId <- Cache.getMUpdateId
   Log.setSettings Color.Cyan True $ template "reset, mUpdateId = {0}" [show mUpdateId]
@@ -62,7 +62,7 @@ reset = do
   newMUpdateId <- Parse.parseUpdateId object
   Log.writeReceivingData "newMUpdateId" newMUpdateId
 
-sendApiRequest :: API -> HTTP.Query -> Bool -> Transformer LC.ByteString
+sendApiRequest :: API -> HTTP.Query -> Bool -> BotStateIO LC.ByteString
 sendApiRequest api query save = do
   host <- Cache.getHost
   token <- Cache.getToken

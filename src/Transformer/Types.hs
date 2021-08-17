@@ -12,4 +12,4 @@ data BotState = BotState
   }
   deriving (Show, Generic)
 
-type Transformer = StateT BotState IO
+type BotStateIO = StateT BotState IO

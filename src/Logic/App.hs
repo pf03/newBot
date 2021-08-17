@@ -8,16 +8,16 @@ import qualified Interface.Log.Exports as Log
 import qualified Logic.Logic as Logic
 import qualified Messenger.Bot.Class as Bot
 import qualified System.Console.ANSI as Color (Color (..))
-import Transformer.Types (Transformer)
+import Transformer.Types (BotStateIO)
 import Prelude hiding (init)
 
-runApplication :: (Bot.IBot pointer) => pointer -> Transformer ()
+runApplication :: (Bot.IBot pointer) => pointer -> BotStateIO ()
 runApplication pointer = do
   Log.setSettings Color.Blue True "application"
   init <- Bot.getInit pointer
   longPollingLoop pointer init
 
-longPollingLoop :: (Bot.IBot pointer) => pointer -> Bot.InitType pointer -> Transformer ()
+longPollingLoop :: (Bot.IBot pointer) => pointer -> Bot.InitType pointer -> BotStateIO ()
 longPollingLoop pointer init = do
   Log.setSettings Color.Cyan True "longPolling"
   (updates, newInit) <- Bot.getUpdates pointer init
@@ -25,12 +25,12 @@ longPollingLoop pointer init = do
   writeCache pointer newInit
   longPollingLoop pointer newInit
 
-handleUpdates :: (Bot.IBot pointer) => pointer -> [Bot.UpdateType pointer] -> Transformer ()
+handleUpdates :: (Bot.IBot pointer) => pointer -> [Bot.UpdateType pointer] -> BotStateIO ()
 handleUpdates pointer = mapM_ $ \update -> do
   (newUpdate, btns, repeatNumber) <- Logic.evalAnswer update
   replicateM_ repeatNumber $ Bot.sendMessage pointer newUpdate btns
 
-writeCache :: (Bot.IBot pointer) => pointer -> Bot.InitType pointer -> Transformer ()
+writeCache :: (Bot.IBot pointer) => pointer -> Bot.InitType pointer -> BotStateIO ()
 writeCache pointer init = do
   mUpdateId <- Cache.getMUpdateId
   let newMUpdateId = Bot.getMUpdateId pointer init

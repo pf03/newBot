@@ -6,7 +6,7 @@ import qualified Interface.Error.Exports as Error
 import qualified Interface.Log.Exports as Log
 import qualified System.Console.ANSI as Color
 import qualified Transformer.Types as State
-import Transformer.Types (Transformer)
+import Transformer.Types (BotStateIO)
 import Control.Exception ( catch, throwIO )
 
 runConfig :: IO Config.Config
@@ -19,7 +19,7 @@ runConfig = do
   Log.writeInfo logConfig logSettings "Config read successfully..."
   return config
 
-showValue :: Show a => Config.Config -> State.BotState -> Transformer a -> IO ()
+showValue :: Show a => Config.Config -> State.BotState -> BotStateIO a -> IO ()
 showValue config state m = do
   let logConfig = Config.configLog config
   (a, _) <- catch (runStateT m state) $ \err -> do

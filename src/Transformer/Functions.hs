@@ -7,9 +7,9 @@ import Control.Monad.State.Lazy (MonadIO (liftIO))
 import qualified Interface.Cache.Config.Exports as Config
 import qualified Interface.Error.Exports as Error
 import Transformer.Internal (logAndThrow, runConfig, showValue)
-import Transformer.Types (Transformer)
+import Transformer.Types (BotStateIO)
 
-run :: Show a => Transformer a -> IO ()
+run :: Show a => BotStateIO a -> IO ()
 run m = handle errorEmptyHandler $ do
   config <- runConfig
   if Config.configForks config

@@ -1,20 +1,20 @@
 module Interface.Cache.Config.State where
 
-import Control.Monad.State.Lazy (MonadIO, MonadState (get), when)
+import Control.Exception (throwIO)
+import Control.Monad.IO.Class (MonadIO (liftIO))
+import Control.Monad.State.Lazy (MonadState (get), when)
 import qualified Data.Aeson.Encode.Pretty as Aeson
 import qualified Data.ByteString.Lazy as L
 import qualified Interface.Cache.Config.Functions as Config
-import qualified Interface.Cache.Config.Types as Config
 import qualified Interface.Cache.Config.Internal as Config
+import qualified Interface.Cache.Config.Types as Config
 import qualified Interface.Cache.Functions as Cache
 import qualified Interface.Cache.Types as Cache
 import qualified Interface.Error.Exports as Error
 import qualified Interface.Log.Exports as Log
-import Transformer.Types (BotState (..), Transformer)
-import Control.Exception (throwIO)
-import Control.Monad.IO.Class (MonadIO (liftIO))
+import Transformer.Types (BotState (..), BotStateIO)
 
-writeCacheToConfigFile :: Transformer ()
+writeCacheToConfigFile :: BotStateIO ()
 writeCacheToConfigFile = do
   cacheChanged <- Cache.getCacheChanged
   when cacheChanged $ do
@@ -29,7 +29,7 @@ readStates = getStatesFromConfig <$> Config.readConfig
 readState :: (MonadIO m) => m BotState
 readState = do
   config <- Config.readConfig
-  either (liftIO . throwIO) return (getStateFromConfig config) 
+  either (liftIO . throwIO) return (getStateFromConfig config)
 
 saveState :: (MonadIO m) => BotState -> m ()
 saveState state = do
