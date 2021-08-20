@@ -15,18 +15,17 @@ import Messenger.Bot.Telegram.Types (API (GetUpdates))
 import qualified Messenger.Update.Telegram.Types as Update
 import qualified Network.HTTP.Simple as HTTP
 import qualified Parse.Telegram.Exports as Parse
-import qualified System.Console.ANSI as Color
 import Transformer.Types (BotStateIO)
 
 -- Initialization - get last updateId for getUpdates request
 getUpdateId :: BotStateIO (Maybe UpdateId)
 getUpdateId = do
-  Log.setSettings Color.Blue True "getUpdateId"
+  Log.setSettings Log.BlueScheme True "getUpdateId"
   Cache.getMUpdateId
 
 getUpdates :: Maybe UpdateId -> BotStateIO ([Update.Update], Maybe UpdateId)
 getUpdates mUpdateId = do
-  Log.setSettings Color.Cyan True $ template "getUpdates, mUpdateId = {0}" [show mUpdateId]
+  Log.setSettings Log.CyanScheme True $ template "getUpdates, mUpdateId = {0}" [show mUpdateId]
   Log.writeSending
   let query = Query.getUpdatesQuery (fmap (+ 1) mUpdateId) 25
   response <- sendApiRequest GetUpdates query True
@@ -41,7 +40,7 @@ getUpdates mUpdateId = do
 
 sendMessage :: Update.Update -> [Label] -> BotStateIO ()
 sendMessage update btns = do
-  Log.setSettings Color.Yellow True "sendMessage"
+  Log.setSettings Log.YellowScheme True "sendMessage"
   Log.writeSending
   (api, query) <- either (liftIO . throwIO) return (Query.sendMessageQuery update btns)
   Log.writeReceivingData "(api, query)" (api, query)
@@ -54,7 +53,7 @@ sendMessage update btns = do
 reset :: BotStateIO ()
 reset = do
   mUpdateId <- Cache.getMUpdateId
-  Log.setSettings Color.Cyan True $ template "reset, mUpdateId = {0}" [show mUpdateId]
+  Log.setSettings Log.CyanScheme True $ template "reset, mUpdateId = {0}" [show mUpdateId]
   Log.writeSending
   json <- sendApiRequest GetUpdates (Query.getUpdatesQuery mUpdateId 0) True
   Log.writeReceiving

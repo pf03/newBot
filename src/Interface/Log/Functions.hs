@@ -11,30 +11,28 @@ import Data.Char (toUpper)
 import qualified Interface.Error.Exports as Error
 import qualified Interface.Log.Color as Color
 import Interface.Log.Types
-  ( ColorScheme,
+  ( ColorScheme (..),
     Config (..),
-    Enable,
-    FuncName,
     Level (..),
     Settings (Settings, settingsFuncName),
   )
-import System.Console.ANSI (Color (Black, Blue, Green, Magenta, Red, Yellow))
+import System.Console.ANSI (Color (Blue, Green, Magenta, Red, Yellow))
 import Transformer.Types (BotState (stateConfigLog, stateLogSettings), BotStateIO)
 
 getSettings :: BotStateIO Settings
 getSettings = gets stateLogSettings
 
-setSettings :: ColorScheme -> Enable -> FuncName -> BotStateIO ()
-setSettings colorScheme logEnable funcName = modify $ \state ->
-  state {stateLogSettings = Settings colorScheme logEnable funcName}
+setSettings :: ColorScheme -> Bool -> String -> BotStateIO ()
+setSettings colorScheme logEnabled funcName = modify $ \state ->
+  state {stateLogSettings = Settings colorScheme logEnabled funcName}
 
 getConfig :: BotStateIO Config
 getConfig = gets stateConfigLog
 
 setColorScheme :: ColorScheme -> BotStateIO ()
 setColorScheme newColorScheme = do
-  Settings _ logEnable funcName <- getSettings
-  setSettings newColorScheme logEnable funcName
+  Settings _ logEnabled funcName <- getSettings
+  setSettings newColorScheme logEnabled funcName
 
 getConfigSettings :: BotStateIO (Config, Settings)
 getConfigSettings = do
@@ -43,10 +41,10 @@ getConfigSettings = do
   return (config, settings)
 
 defaultSettings :: Settings
-defaultSettings = Settings Black True ""
+defaultSettings = Settings BlackScheme True ""
 
 defaultConfig :: Config
-defaultConfig = Config {configColorEnable = False, configTerminalEnable = True, configFileEnable = False, configMinLevel = 0}
+defaultConfig = Config {configColorEnabled = False, configTerminalEnabled = True, configFileEnabled = False, configMinLevel = 0}
 
 -- * An exception has been made for debug information - it can be of any type Show a, not just a String
 
@@ -113,17 +111,17 @@ writeCritical logConfig logSettings = writeMessageIO logConfig logSettings Criti
 
 -- Info can be shown in different color schemes, and for other levels the color corresponds to the level
 writeMessageIO :: MonadIO m => Config -> Settings -> Level -> String -> m ()
-writeMessageIO (Config enableColor enableTerminal enableFile minLevel) (Settings colorScheme logEnable _) level text = do
-  if level < toEnum minLevel || not logEnable
+writeMessageIO (Config colorEnabled terminalEnabled fileEnabled minLevel) (Settings colorScheme logEnabled _) level text = do
+  if level < toEnum minLevel || not logEnabled
     then return ()
     else do
-      when (enableColor && enableTerminal) $ do
+      when (colorEnabled && terminalEnabled) $ do
         if level == Info
-          then Color.setSchemeT colorScheme
-          else Color.setColorT $ getColor level
-      when enableTerminal $ (liftIO . putStrLn) writeLogText
-      when enableFile $ writeToFile writeLogText
-      when (enableColor && enableTerminal) Color.resetColorSchemeT
+          then Color.setScheme colorScheme
+          else Color.setColor $ getColor level
+      when terminalEnabled $ (liftIO . putStrLn) writeLogText
+      when fileEnabled $ writeToFile writeLogText
+      when (colorEnabled && terminalEnabled) Color.resetColorScheme
   where
     writeLogText :: String
     writeLogText = map toUpper (show level) <> " " <> text

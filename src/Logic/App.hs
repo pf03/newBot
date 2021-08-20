@@ -7,19 +7,18 @@ import qualified Interface.Cache.Exports as Cache
 import qualified Interface.Log.Exports as Log
 import qualified Logic.Logic as Logic
 import qualified Messenger.Bot.Class as Bot
-import qualified System.Console.ANSI as Color (Color (..))
 import Transformer.Types (BotStateIO)
 import Prelude hiding (init)
 
 runApplication :: (Bot.IBot pointer) => pointer -> BotStateIO ()
 runApplication pointer = do
-  Log.setSettings Color.Blue True "application"
+  Log.setSettings Log.BlueScheme True "application"
   init <- Bot.getInit pointer
   longPollingLoop pointer init
 
 longPollingLoop :: (Bot.IBot pointer) => pointer -> Bot.InitType pointer -> BotStateIO ()
 longPollingLoop pointer init = do
-  Log.setSettings Color.Cyan True "longPolling"
+  Log.setSettings Log.CyanScheme True "longPolling"
   (updates, newInit) <- Bot.getUpdates pointer init
   handleUpdates pointer updates
   writeCache pointer newInit

@@ -15,14 +15,13 @@ import qualified Messenger.Bot.VK.Types as Bot
 import qualified Messenger.Update.VK.Types as Update
 import qualified Network.HTTP.Simple as HTTP
 import qualified Parse.VK.Exports as Parse
-import qualified System.Console.ANSI as Color
 import Transformer.Types (BotStateIO)
 import Prelude hiding (init)
 
 -- Initialization - get last updateId, server name, key for getUpdates request
 getInit :: BotStateIO Update.Init
 getInit = do
-  Log.setSettings Color.Blue True "getInit"
+  Log.setSettings Log.BlueScheme True "getInit"
   let api = Bot.API Bot.Groups Bot.GetLongPollServer
   Log.writeSending
   query <- Query.getLongPollServerQuery
@@ -40,7 +39,7 @@ getInit = do
 -- Get updates from messenger server by the long polling method
 getUpdates :: Update.Init -> BotStateIO ([Update.Update], Update.Init)
 getUpdates init@(Update.Init server _ ts) = do
-  Log.setSettings Color.Cyan True "getUpdates"
+  Log.setSettings Log.CyanScheme True "getUpdates"
   let query = Query.longPollQuery init 25
   request <- either (liftIO . throwIO) return (Request.parseRequest server query)
   Log.writeSending
@@ -58,7 +57,7 @@ getUpdates init@(Update.Init server _ ts) = do
 -- Send response to a single user
 sendMessage :: Update.Update -> [Label] -> BotStateIO ()
 sendMessage update btns = do
-  Log.setSettings Color.Yellow True "sendMessage"
+  Log.setSettings Log.YellowScheme True "sendMessage"
   Log.writeSending
   eQuery <- Query.sendMessageQuery update btns
   query <- either (liftIO . throwIO) return eQuery

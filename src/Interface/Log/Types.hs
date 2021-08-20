@@ -1,18 +1,18 @@
 module Interface.Log.Types where
 
+import Common.Functions (deletePrefixOptions)
 import Data.Aeson
-    ( genericParseJSON,
-      genericToJSON,
-      FromJSON(parseJSON),
-      ToJSON(toJSON) )
+  ( FromJSON (parseJSON),
+    ToJSON (toJSON),
+    genericParseJSON,
+    genericToJSON,
+  )
 import GHC.Generics (Generic)
-import System.Console.ANSI (Color)
-import Common.Functions ( deletePrefixOptions )
 
 data Config = Config
-  { configColorEnable :: Enable,
-    configTerminalEnable :: Enable,
-    configFileEnable :: Enable,
+  { configColorEnabled :: Bool,
+    configTerminalEnabled :: Bool,
+    configFileEnabled :: Bool,
     configMinLevel :: Int
   }
   deriving (Show, Generic)
@@ -25,21 +25,23 @@ instance ToJSON Config where
 
 data Level
   = Debug
-  | Info 
+  | Info
   | Warn
   | Error
   | Critical
   deriving (Eq, Enum, Ord, Show, Bounded)
 
-type FuncName = String
-
-type ColorScheme = Color
-
-type Enable = Bool
+data ColorScheme
+  = BlueScheme
+  | CyanScheme
+  | GreenScheme
+  | YellowScheme
+  | BlackScheme
+  deriving (Show)
 
 data Settings = Settings
   { settingsColorScheme :: ColorScheme,
-    settingsEnable :: Enable,
+    settingsLogEnabled :: Bool,
     settingsFuncName :: String
   }
   deriving (Show)

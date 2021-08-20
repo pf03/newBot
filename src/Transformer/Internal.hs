@@ -4,7 +4,6 @@ import Control.Monad.State.Lazy (StateT (runStateT))
 import qualified Interface.Cache.Config.Exports as Config
 import qualified Interface.Error.Exports as Error
 import qualified Interface.Log.Exports as Log
-import qualified System.Console.ANSI as Color
 import qualified Transformer.Types as State
 import Transformer.Types (BotStateIO)
 import Control.Exception ( catch, throwIO )
@@ -37,4 +36,4 @@ logAndThrow config err = do
   throwIO (err :: Error.Error)
 
 logSettings :: Log.Settings
-logSettings = Log.Settings Color.Cyan True "run"
+logSettings = Log.Settings Log.CyanScheme True "run"
