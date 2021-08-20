@@ -12,16 +12,18 @@ import Prelude hiding (init)
 
 runApplication :: (Bot.IBot pointer) => pointer -> BotStateIO ()
 runApplication pointer = do
-  Log.setSettings Log.BlueScheme True "application"
-  init <- Bot.getInit pointer
+  init <- Log.withCustomSettings Log.BlueScheme True "getInit" $ do
+    Bot.getInit pointer
   longPollingLoop pointer init
 
 longPollingLoop :: (Bot.IBot pointer) => pointer -> Bot.InitType pointer -> BotStateIO ()
 longPollingLoop pointer init = do
-  Log.setSettings Log.CyanScheme True "longPolling"
-  (updates, newInit) <- Bot.getUpdates pointer init
-  handleUpdates pointer updates
-  writeCache pointer newInit
+  (updates, newInit) <- Log.withCustomSettings Log.CyanScheme True "getUpdates" $
+    Bot.getUpdates pointer init
+  Log.withCustomSettings Log.YellowScheme True "handleUpdates" $ do
+    handleUpdates pointer updates
+  Log.withCustomSettings Log.GreenScheme True "writeCache" $ do
+    writeCache pointer newInit
   longPollingLoop pointer newInit
 
 handleUpdates :: (Bot.IBot pointer) => pointer -> [Bot.UpdateType pointer] -> BotStateIO ()

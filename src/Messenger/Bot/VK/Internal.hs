@@ -20,53 +20,53 @@ import Prelude hiding (init)
 
 -- Initialization - get last updateId, server name, key for getUpdates request
 getInit :: BotStateIO Update.Init
-getInit = do
-  Log.setSettings Log.BlueScheme True "getInit"
-  let api = Bot.API Bot.Groups Bot.GetLongPollServer
-  Log.writeSending
-  query <- Query.getLongPollServerQuery
-  json <- sendApiRequest api query False
-  Log.writeReceiving
-  object <- Parse.getObject json
-  Log.writeReceivingData "object" object
-  init@(Update.Init server key _) <- Parse.parseInit object
-  Log.writeReceivingData "init" init
-  mUpdateIdFromFile <- Cache.getMUpdateId
-  case mUpdateIdFromFile of
-    Nothing -> return init
-    Just updateIdFromFile -> return $ Update.Init server key updateIdFromFile
+getInit = 
+  Log.withCustomSettings Log.BlueScheme True "getInit" $ do
+    let api = Bot.API Bot.Groups Bot.GetLongPollServer
+    Log.writeSending
+    query <- Query.getLongPollServerQuery
+    json <- sendApiRequest api query False
+    Log.writeReceiving
+    object <- Parse.getObject json
+    Log.writeReceivingData "object" object
+    init@(Update.Init server key _) <- Parse.parseInit object
+    Log.writeReceivingData "init" init
+    mUpdateIdFromFile <- Cache.getMUpdateId
+    case mUpdateIdFromFile of
+      Nothing -> return init
+      Just updateIdFromFile -> return $ Update.Init server key updateIdFromFile
 
 -- Get updates from messenger server by the long polling method
 getUpdates :: Update.Init -> BotStateIO ([Update.Update], Update.Init)
-getUpdates init@(Update.Init server _ ts) = do
-  Log.setSettings Log.CyanScheme True "getUpdates"
-  let query = Query.longPollQuery init 25
-  request <- either (liftIO . throwIO) return (Request.parseRequest server query)
-  Log.writeSending
-  json <- Request.sendRequest request True -- long polling
-  Log.writeReceiving
-  object <- Parse.getObject json
-  Log.writeReceivingData "object" object
-  mUpdateId <- Parse.parseUpdateId object
-  let newInit = init {Update.ts = fromMaybe ts mUpdateId}
-  Log.writeReceivingData "mUpdateId" mUpdateId
-  updates <- Parse.parseUpdates object
-  Log.writeReceivingData "updates" updates
-  return (updates, newInit)
+getUpdates init@(Update.Init server _ ts) = 
+  Log.withCustomSettings Log.CyanScheme True "getUpdates" $ do
+    let query = Query.longPollQuery init 25
+    request <- either (liftIO . throwIO) return (Request.parseRequest server query)
+    Log.writeSending
+    json <- Request.sendRequest request True -- long polling
+    Log.writeReceiving
+    object <- Parse.getObject json
+    Log.writeReceivingData "object" object
+    mUpdateId <- Parse.parseUpdateId object
+    let newInit = init {Update.ts = fromMaybe ts mUpdateId}
+    Log.writeReceivingData "mUpdateId" mUpdateId
+    updates <- Parse.parseUpdates object
+    Log.writeReceivingData "updates" updates
+    return (updates, newInit)
 
 -- Send response to a single user
 sendMessage :: Update.Update -> [Label] -> BotStateIO ()
-sendMessage update btns = do
-  Log.setSettings Log.YellowScheme True "sendMessage"
-  Log.writeSending
-  eQuery <- Query.sendMessageQuery update btns
-  query <- either (liftIO . throwIO) return eQuery
-  Log.writeDebugM update
-  Log.writeReceivingData "query" eQuery
-  json <- sendApiRequest (Bot.API Bot.Messages Bot.Send) query False
-  Log.writeReceiving
-  object <- Parse.getObject json
-  Log.writeReceivingData "object" object
+sendMessage update btns =
+  Log.withCustomSettings Log.YellowScheme True "sendMessage" $ do
+    Log.writeSending
+    eQuery <- Query.sendMessageQuery update btns
+    query <- either (liftIO . throwIO) return eQuery
+    Log.writeDebugM update
+    Log.writeReceivingData "query" eQuery
+    json <- sendApiRequest (Bot.API Bot.Messages Bot.Send) query False
+    Log.writeReceiving
+    object <- Parse.getObject json
+    Log.writeReceivingData "object" object
 
 sendApiRequest :: API -> HTTP.Query -> Bool -> BotStateIO LC.ByteString
 sendApiRequest api query save = do

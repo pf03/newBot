@@ -22,17 +22,21 @@ import Transformer.Types (BotState (stateConfigLog, stateLogSettings), BotStateI
 getSettings :: BotStateIO Settings
 getSettings = gets stateLogSettings
 
-setSettings :: ColorScheme -> Bool -> String -> BotStateIO ()
-setSettings colorScheme logEnabled funcName = modify $ \state ->
-  state {stateLogSettings = Settings colorScheme logEnabled funcName}
+withCustomSettings :: ColorScheme -> Bool -> String -> BotStateIO a -> BotStateIO a
+withCustomSettings colorScheme logEnabled funcName action = do
+  initialSettings <- gets stateLogSettings
+  modify $ \state -> state {stateLogSettings = Settings colorScheme logEnabled funcName}
+  result <- action
+  modify $ \state -> state {stateLogSettings = initialSettings}
+  return result
+
+withCustomColorScheme :: ColorScheme -> BotStateIO a -> BotStateIO a
+withCustomColorScheme newColorScheme action = do
+  Settings _ logEnabled funcName <- getSettings
+  withCustomSettings newColorScheme logEnabled funcName action
 
 getConfig :: BotStateIO Config
 getConfig = gets stateConfigLog
-
-setColorScheme :: ColorScheme -> BotStateIO ()
-setColorScheme newColorScheme = do
-  Settings _ logEnabled funcName <- getSettings
-  setSettings newColorScheme logEnabled funcName
 
 getConfigSettings :: BotStateIO (Config, Settings)
 getConfigSettings = do
@@ -56,8 +60,7 @@ writeInfoM = writeMessageM Info
 
 writeInfoColorM :: ColorScheme -> String -> BotStateIO ()
 writeInfoColorM colorScheme str = do
-  setColorScheme colorScheme
-  writeInfoM str
+  withCustomColorScheme colorScheme $ writeInfoM str
 
 writeWarnM :: String -> BotStateIO ()
 writeWarnM = writeMessageM Warn

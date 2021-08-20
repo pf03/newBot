@@ -19,47 +19,45 @@ import Transformer.Types (BotStateIO)
 
 -- Initialization - get last updateId for getUpdates request
 getUpdateId :: BotStateIO (Maybe UpdateId)
-getUpdateId = do
-  Log.setSettings Log.BlueScheme True "getUpdateId"
-  Cache.getMUpdateId
+getUpdateId = Cache.getMUpdateId
 
 getUpdates :: Maybe UpdateId -> BotStateIO ([Update.Update], Maybe UpdateId)
-getUpdates mUpdateId = do
-  Log.setSettings Log.CyanScheme True $ template "getUpdates, mUpdateId = {0}" [show mUpdateId]
-  Log.writeSending
-  let query = Query.getUpdatesQuery (fmap (+ 1) mUpdateId) 25
-  response <- sendApiRequest GetUpdates query True
-  Log.writeReceiving
-  object <- Parse.getObject response
-  Log.writeReceivingData "object" object
-  newMUpdateId <- Parse.parseUpdateId object
-  Log.writeReceivingData "newMUpdateId" newMUpdateId
-  updates <- Parse.parseUpdates object
-  Log.writeReceivingData "update" updates
-  return (updates, newMUpdateId <|> mUpdateId)
+getUpdates mUpdateId =
+  Log.withCustomSettings Log.CyanScheme True (template "getUpdates, mUpdateId = {0}" [show mUpdateId]) $ do
+    Log.writeSending
+    let query = Query.getUpdatesQuery (fmap (+ 1) mUpdateId) 25
+    response <- sendApiRequest GetUpdates query True
+    Log.writeReceiving
+    object <- Parse.getObject response
+    Log.writeReceivingData "object" object
+    newMUpdateId <- Parse.parseUpdateId object
+    Log.writeReceivingData "newMUpdateId" newMUpdateId
+    updates <- Parse.parseUpdates object
+    Log.writeReceivingData "update" updates
+    return (updates, newMUpdateId <|> mUpdateId)
 
 sendMessage :: Update.Update -> [Label] -> BotStateIO ()
 sendMessage update btns = do
-  Log.setSettings Log.YellowScheme True "sendMessage"
-  Log.writeSending
-  (api, query) <- either (liftIO . throwIO) return (Query.sendMessageQuery update btns)
-  Log.writeReceivingData "(api, query)" (api, query)
-  json <- sendApiRequest api query False
-  Log.writeReceiving
-  object <- Parse.getObject json
-  Log.writeReceivingData "object" object
+  Log.withCustomSettings Log.YellowScheme True "sendMessage" $ do
+    Log.writeSending
+    (api, query) <- either (liftIO . throwIO) return (Query.sendMessageQuery update btns)
+    Log.writeReceivingData "(api, query)" (api, query)
+    json <- sendApiRequest api query False
+    Log.writeReceiving
+    object <- Parse.getObject json
+    Log.writeReceivingData "object" object
 
 -- Dumping messages that we cannot parse, for debugging purposes
 reset :: BotStateIO ()
 reset = do
   mUpdateId <- Cache.getMUpdateId
-  Log.setSettings Log.CyanScheme True $ template "reset, mUpdateId = {0}" [show mUpdateId]
-  Log.writeSending
-  json <- sendApiRequest GetUpdates (Query.getUpdatesQuery mUpdateId 0) True
-  Log.writeReceiving
-  object <- Parse.getObject json
-  newMUpdateId <- Parse.parseUpdateId object
-  Log.writeReceivingData "newMUpdateId" newMUpdateId
+  Log.withCustomSettings Log.CyanScheme True (template "reset, mUpdateId = {0}" [show mUpdateId]) $ do
+    Log.writeSending
+    json <- sendApiRequest GetUpdates (Query.getUpdatesQuery mUpdateId 0) True
+    Log.writeReceiving
+    object <- Parse.getObject json
+    newMUpdateId <- Parse.parseUpdateId object
+    Log.writeReceivingData "newMUpdateId" newMUpdateId
 
 sendApiRequest :: API -> HTTP.Query -> Bool -> BotStateIO LC.ByteString
 sendApiRequest api query save = do
