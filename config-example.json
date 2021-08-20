@@ -32,9 +32,9 @@
     "forks":true,
     "defaultRepeatNumber": 3,
     "log": {
-        "colorEnable": true,
-        "fileEnable": false,
-        "minLevel": 0,
-        "terminalEnable": true
+        "terminalEnabled": true,
+        "colorEnabled": true,
+        "fileEnabled": false,
+        "minLevel": 0
     }
 } 
